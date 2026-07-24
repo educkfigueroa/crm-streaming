@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const SESSION_COOKIE = "crm_session";
-const PIN = process.env.AUTH_PIN;
+const PIN = (process.env.AUTH_PIN ?? "111872").trim();
 
 export async function signIn(prevState: unknown, formData: FormData) {
   const pin = formData.get("pin") as string;
