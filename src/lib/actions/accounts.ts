@@ -3,6 +3,12 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Account, AccountInput } from "@/types";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUUID(value: string): boolean {
+  return UUID_REGEX.test(value.trim());
+}
+
 export async function getAccounts(): Promise<Account[]> {
   const supabase = await createClient();
 
@@ -56,6 +62,10 @@ export async function createAccount(
     return { error: "La plataforma es requerida" };
   }
 
+  if (correo && isUUID(correo)) {
+    return { error: "El correo no puede ser un ID" };
+  }
+
   const { error } = await supabase.from("accounts").insert({
     plataforma,
     correo,
@@ -95,6 +105,10 @@ export async function updateAccount(
 
   if (!plataforma) {
     return { error: "La plataforma es requerida" };
+  }
+
+  if (correo && isUUID(correo)) {
+    return { error: "El correo no puede ser un ID" };
   }
 
   const { error } = await supabase

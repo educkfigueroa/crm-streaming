@@ -3,6 +3,12 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Client } from "@/types";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUUID(value: string): boolean {
+  return UUID_REGEX.test(value.trim());
+}
+
 export async function getClients(): Promise<Client[]> {
   const supabase = await createClient();
 
@@ -51,6 +57,10 @@ export async function createClientAction(
     return { error: "El nombre completo es requerido" };
   }
 
+  if (isUUID(nombreCompleto)) {
+    return { error: "El nombre no puede ser un ID" };
+  }
+
   const { error } = await supabase.from("clients").insert({
     nombre_completo: nombreCompleto,
     alias,
@@ -80,6 +90,10 @@ export async function updateClient(
 
   if (!nombreCompleto) {
     return { error: "El nombre completo es requerido" };
+  }
+
+  if (isUUID(nombreCompleto)) {
+    return { error: "El nombre no puede ser un ID" };
   }
 
   const { error } = await supabase
