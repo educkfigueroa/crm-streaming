@@ -101,6 +101,16 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
     return account.contraseña || "";
   };
 
+  const truncarCorreo = (correo: string) => {
+    if (!correo) return "";
+    return correo.length > 5 ? correo.slice(0, 5) + "..." : correo;
+  };
+
+  const mascararContrasena = (pass: string) => {
+    if (!pass) return "";
+    return "•••••";
+  };
+
   const getVencimientoColor = (fecha: string | null) => {
     if (!fecha) return "text-muted-foreground";
     const today = new Date();
@@ -189,8 +199,8 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground text-sm truncate max-w-[180px]">
-                        {correo || "-"}
+                      <span className="text-muted-foreground text-sm font-mono" title={correo || undefined}>
+                        {correo ? truncarCorreo(correo) : "-"}
                       </span>
                       {correo && (
                         <Button
@@ -210,8 +220,8 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground text-sm truncate max-w-[140px]">
-                        {contrasena || "-"}
+                      <span className="text-muted-foreground text-sm font-mono" title={contrasena || undefined}>
+                        {contrasena ? mascararContrasena(contrasena) : "-"}
                       </span>
                       {contrasena && (
                         <Button
@@ -338,7 +348,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
               {correo && (
                 <div className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-foreground text-sm truncate">{correo}</span>
+                  <span className="text-muted-foreground text-sm font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -357,7 +367,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
               {contrasena && (
                 <div className="flex items-center gap-2">
                   <KeyRound className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-foreground text-sm truncate">{contrasena}</span>
+                  <span className="text-muted-foreground text-sm font-mono truncate" title={contrasena}>{mascararContrasena(contrasena)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
