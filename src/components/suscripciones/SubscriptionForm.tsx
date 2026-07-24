@@ -144,9 +144,10 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   useEffect(() => {
     if (!isEditing && clienteId && clientes.length > 0) {
       const selectedClient = clientes.find((c) => c.id === clienteId);
-      if (selectedClient?.alias) {
+      if (selectedClient) {
+        const autoName = selectedClient.alias || selectedClient.nombre_completo;
         setProfiles((prev) =>
-          prev.map((p) => ({ ...p, nombrePerfil: selectedClient.alias! }))
+          prev.map((p) => ({ ...p, nombrePerfil: autoName }))
         );
       }
     }
