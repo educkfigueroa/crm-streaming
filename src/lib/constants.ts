@@ -61,3 +61,20 @@ export const ESTADOS_SUSCRIPCION = [
   { value: "Vencido", label: "Vencido", color: "red" },
   { value: "Suspendido", label: "Suspendido", color: "gray" },
 ] as const;
+
+export const PLATAFORMA_URLS: Record<string, string> = {
+  netflix: "https://netflix.com",
+  disney: "https://disneyplus.com",
+  hbo_standard: "https://max.com",
+  hbo_platinum: "https://max.com",
+  amazon: "https://primevideo.com",
+  paramount: "https://paramountplus.com",
+  vix: "https://vix.com",
+  crunchyroll: "https://crunchyroll.com",
+  spotify: "https://spotify.com",
+  apple_music: "https://music.apple.com",
+};
+
+export function getPlataformaUrl(plataforma: string): string | null {
+  return PLATAFORMA_URLS[plataforma] ?? null;
+}

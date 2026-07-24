@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Edit, Copy, Check } from "lucide-react";
+import { Trash2, Edit, Copy, Check, ExternalLink, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getPlataformaByValue, getPlatformColorClasses, MONEDA, isIptv } from "@/lib/constants";
+import { getPlataformaByValue, getPlatformColorClasses, MONEDA, isIptv, getPlataformaUrl } from "@/lib/constants";
 import { AccountForm } from "./AccountForm";
 import { deleteAccount } from "@/lib/actions/accounts";
 import type { Account, Subscription } from "@/types";
@@ -90,6 +90,17 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
     return account.correo || "Sin correo";
   };
 
+  const getCorreo = (account: Account) => {
+    if (isIptv(account.plataforma)) {
+      return account.usuario_xtream || "";
+    }
+    return account.correo || "";
+  };
+
+  const getContrasena = (account: Account) => {
+    return account.contraseña || "";
+  };
+
   const getVencimientoColor = (fecha: string | null) => {
     if (!fecha) return "text-muted-foreground";
     const today = new Date();
@@ -151,7 +162,8 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
               <TableHead className="text-muted-foreground font-medium">Plataforma</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Credenciales</TableHead>
+              <TableHead className="text-muted-foreground font-medium">Correo</TableHead>
+              <TableHead className="text-muted-foreground font-medium">Contraseña</TableHead>
               <TableHead className="text-muted-foreground font-medium">Perfiles</TableHead>
               <TableHead className="text-muted-foreground font-medium">Costo</TableHead>
               <TableHead className="text-muted-foreground font-medium">Vence</TableHead>
@@ -161,8 +173,11 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
           <TableBody>
             {accounts.map((account) => {
               const plataforma = getPlataformaByValue(account.plataforma);
-              const credenciales = getCredenciales(account);
-              const copyId = `copy-${account.id}`;
+              const correo = getCorreo(account);
+              const contrasena = getContrasena(account);
+              const plataformaUrl = getPlataformaUrl(account.plataforma);
+              const copyCorreoId = `copy-correo-${account.id}`;
+              const copyPassId = `copy-pass-${account.id}`;
               const profiles = getAccountProfiles(account.id, account.total_perfiles);
 
               return (
@@ -174,21 +189,44 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground text-sm truncate max-w-[200px]">
-                        {credenciales}
+                      <span className="text-foreground text-sm truncate max-w-[180px]">
+                        {correo || "-"}
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                        onClick={() => handleCopy(credenciales, copyId)}
-                      >
-                        {copiedId === copyId ? (
-                          <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                      </Button>
+                      {correo && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleCopy(correo, copyCorreoId)}
+                        >
+                          {copiedId === copyCorreoId ? (
+                            <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="text-foreground text-sm truncate max-w-[140px]">
+                        {contrasena || "-"}
+                      </span>
+                      {contrasena && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleCopy(contrasena, copyPassId)}
+                        >
+                          {copiedId === copyPassId ? (
+                            <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -229,6 +267,17 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      {plataformaUrl && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                          title="Abrir plataforma"
+                          onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -258,8 +307,11 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
       <div className="md:hidden space-y-3">
         {accounts.map((account) => {
           const plataforma = getPlataformaByValue(account.plataforma);
-          const credenciales = getCredenciales(account);
-          const copyId = `copy-mobile-${account.id}`;
+          const correo = getCorreo(account);
+          const contrasena = getContrasena(account);
+          const plataformaUrl = getPlataformaUrl(account.plataforma);
+          const copyCorreoId = `copy-correo-mobile-${account.id}`;
+          const copyPassId = `copy-pass-mobile-${account.id}`;
           const profiles = getAccountProfiles(account.id, account.total_perfiles);
 
           return (
@@ -269,25 +321,57 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                   <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium`}>
                     {plataforma?.label || account.plataforma}
                   </Badge>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-foreground text-sm truncate max-w-[140px]">
-                      {credenciales}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                      onClick={() => handleCopy(credenciales, copyId)}
-                    >
-                      {copiedId === copyId ? (
-                        <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
                 </div>
+                {plataformaUrl && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                    title="Abrir plataforma"
+                    onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                )}
               </div>
+
+              {correo && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-foreground text-sm truncate">{correo}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
+                    onClick={() => handleCopy(correo, copyCorreoId)}
+                  >
+                    {copiedId === copyCorreoId ? (
+                      <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {contrasena && (
+                <div className="flex items-center gap-2">
+                  <KeyRound className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-foreground text-sm truncate">{contrasena}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground shrink-0"
+                    onClick={() => handleCopy(contrasena, copyPassId)}
+                  >
+                    {copiedId === copyPassId ? (
+                      <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
