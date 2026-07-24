@@ -54,9 +54,9 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 
   if (clients.length === 0) {
     return (
-      <div className="rounded-2xl p-12 text-center bg-card border border-border">
+      <div className="rounded-xl p-10 text-center bg-card border border-border">
         <p className="text-muted-foreground">No hay clientes registrados.</p>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="text-sm text-muted-foreground mt-1">
           Agrega un nuevo cliente para comenzar.
         </p>
       </div>
@@ -66,168 +66,156 @@ export function ClientsTable({ clients }: ClientsTableProps) {
   return (
     <>
       {/* Mobile card layout */}
-      <div className="md:hidden space-y-3">
+      <div className="md:hidden space-y-2">
         {clients.map((client) => (
           <div
             key={`card-${client.id}`}
-            className="rounded-2xl p-4 bg-card border border-border space-y-2"
+            className="rounded-xl p-3 bg-card border border-border space-y-1"
           >
-            <button
-              onClick={() => viewSubscriptions(client.id)}
-              className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left w-full"
-            >
-              {client.nombre_completo}
-            </button>
+            <div className="flex items-center justify-between gap-2">
+              <button
+                onClick={() => viewSubscriptions(client.id)}
+                className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left truncate text-sm"
+              >
+                {client.nombre_completo}
+              </button>
+              <div className="flex items-center gap-0.5 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
+                  title="Ver suscripciones"
+                  onClick={() => viewSubscriptions(client.id)}
+                >
+                  <FileText className="h-3 w-3" />
+                </Button>
+                {client.whatsapp && (
+                  <a
+                    href={getWhatsAppLink(client.whatsapp)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
+                  >
+                    <Phone className="h-3 w-3" />
+                  </a>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
+                  onClick={() => handleEdit(client)}
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
+                  onClick={() => handleDelete(client.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
             {client.alias && (
-              <p className="text-xs text-muted-foreground">Alias: {client.alias}</p>
+              <p className="text-xs text-muted-foreground">{client.alias}</p>
             )}
-
             {client.whatsapp && (
               <a
                 href={getWhatsAppLink(client.whatsapp)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors"
+                className="inline-flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10">
-                  <Phone className="h-3 w-3" />
-                </div>
-                <span className="text-sm">{client.whatsapp}</span>
+                <span className="text-xs">{client.whatsapp}</span>
               </a>
             )}
-
-            {client.notas && (
-              <p className="text-muted-foreground text-sm line-clamp-2">
-                {client.notas}
-              </p>
-            )}
-
-            <div className="flex items-center gap-1 pt-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
-                title="Ver suscripciones"
-                onClick={() => viewSubscriptions(client.id)}
-              >
-                <FileText className="h-4 w-4" />
-              </Button>
-              {client.whatsapp && (
-                <a
-                  href={getWhatsAppLink(client.whatsapp)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center h-8 w-8 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
-                >
-                  <Phone className="h-4 w-4" />
-                </a>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
-                onClick={() => handleEdit(client)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
-                onClick={() => handleDelete(client.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         ))}
       </div>
 
       {/* Desktop table layout */}
-      <div className="hidden md:block rounded-2xl overflow-hidden bg-card border border-border">
+      <div className="hidden md:block rounded-xl overflow-hidden bg-card border border-border">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium">Nombre</TableHead>
-              <TableHead className="text-muted-foreground font-medium">WhatsApp</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Notas</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Nombre</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">WhatsApp</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Notas</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-2">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients.map((client) => (
               <TableRow key={client.id} className="border-b border-border hover:bg-accent/30 transition-colors">
-                <TableCell>
+                <TableCell className="py-2">
                   <div>
                     <button
                       onClick={() => viewSubscriptions(client.id)}
-                      className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left"
+                      className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left text-sm"
                     >
                       {client.nombre_completo}
                     </button>
                     {client.alias && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{client.alias}</p>
+                      <p className="text-xs text-muted-foreground mt-0">{client.alias}</p>
                     )}
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-2">
                   {client.whatsapp ? (
                     <a
                       href={getWhatsAppLink(client.whatsapp)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors"
+                      className="inline-flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors"
                     >
-                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10">
-                        <Phone className="h-3 w-3" />
-                      </div>
-                      <span className="text-sm">{client.whatsapp}</span>
+                      <span className="text-xs">{client.whatsapp}</span>
                     </a>
                   ) : (
-                    <span className="text-muted-foreground">-</span>
+                    <span className="text-muted-foreground text-sm">-</span>
                   )}
                 </TableCell>
-                <TableCell>
-                  <span className="text-muted-foreground text-sm line-clamp-1 max-w-[200px]">
+                <TableCell className="py-2">
+                  <span className="text-muted-foreground text-xs line-clamp-1 max-w-[180px]">
                     {client.notas || "-"}
                   </span>
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
+                <TableCell className="text-right py-2">
+                  <div className="flex items-center justify-end gap-0.5">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
                       title="Ver suscripciones"
                       onClick={() => viewSubscriptions(client.id)}
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileText className="h-3.5 w-3.5" />
                     </Button>
                     {client.whatsapp && (
                       <a
                         href={getWhatsAppLink(client.whatsapp)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center h-8 w-8 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                        className="inline-flex items-center justify-center h-7 w-7 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
                       >
-                        <Phone className="h-4 w-4" />
+                        <Phone className="h-3.5 w-3.5" />
                       </a>
                     )}
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
                       onClick={() => handleEdit(client)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
                       onClick={() => handleDelete(client.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </TableCell>

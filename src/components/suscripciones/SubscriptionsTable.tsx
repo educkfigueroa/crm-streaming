@@ -108,9 +108,9 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
 
   if (subscriptions.length === 0) {
     return (
-      <div className="rounded-2xl p-12 text-center bg-card border border-border">
+      <div className="rounded-xl p-10 text-center bg-card border border-border">
         <p className="text-muted-foreground">No hay suscripciones registradas.</p>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="text-sm text-muted-foreground mt-1">
           Crea una nueva suscripción para asignar un perfil.
         </p>
       </div>
@@ -120,17 +120,17 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
   return (
     <>
       {/* Desktop table layout (md+) */}
-      <div className="hidden md:block rounded-2xl overflow-hidden bg-card border border-border">
+      <div className="hidden md:block rounded-xl overflow-hidden bg-card border border-border">
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium">Perfil</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Cliente</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Cuenta</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Vencimiento</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Precio</TableHead>
-              <TableHead className="text-muted-foreground font-medium">Estado</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Perfil</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Cliente</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Cuenta</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Vencimiento</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Precio</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-2">Estado</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-2">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -146,35 +146,35 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   key={sub.id}
                   className="border-b border-border hover:bg-accent/30 transition-colors"
                 >
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div>
-                      <span className="font-medium text-foreground">
+                      <span className="font-medium text-foreground text-sm">
                         {sub.nombre_perfil}
                       </span>
                       {sub.pin_perfil && (
-                        <div className="flex items-center gap-1 mt-1">
+                        <div className="flex items-center gap-1 mt-0">
                           <span className="text-xs text-muted-foreground">PIN:</span>
                           <span className="text-xs text-muted-foreground">
                             {sub.pin_perfil}
                           </span>
                           <CopyButton
                             text={sub.pin_perfil}
-                            className="h-4 w-4"
+                            className="h-3.5 w-3.5"
                           />
                         </div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-foreground">
+                  <TableCell className="py-2">
+                    <span className="text-foreground text-sm">
                       {(sub.clients as { nombre_completo?: string })
                         ?.nombre_completo ?? "Sin cliente"}
                     </span>
                     {phone && (
-                      <p className="text-xs text-muted-foreground mt-1">{phone}</p>
+                      <p className="text-xs text-muted-foreground mt-0">{phone}</p>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div>
                       <Badge
                         variant="secondary"
@@ -184,14 +184,14 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                           sub.accounts?.plataforma ||
                           "N/A"}
                       </Badge>
-                      <p className="text-xs text-muted-foreground mt-1 truncate max-w-[150px]">
+                      <p className="text-xs text-muted-foreground mt-0 truncate max-w-[120px]">
                         {sub.accounts?.correo ||
                           sub.accounts?.usuario_xtream ||
                           ""}
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div>
                       <span
                         className={`text-sm font-medium ${
@@ -219,27 +219,27 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground font-medium">
+                  <TableCell className="text-foreground font-medium text-sm py-2">
                     {sub.precio_cobrado
                       ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}`
                       : "-"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Badge
                       variant="outline"
-                      className={getStatusColor(sub.estado)}
+                      className={`${getStatusColor(sub.estado)} text-xs`}
                     >
                       {sub.estado}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
+                  <TableCell className="text-right py-2">
+                    <div className="flex items-center justify-end gap-0.5">
                       {phone && (
                         <>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                            className="h-7 w-7 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
                             title="Enviar credenciales"
                             onClick={() =>
                               openWhatsApp(
@@ -248,21 +248,21 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                               )
                             }
                           >
-                            <Send className="h-4 w-4" />
+                            <Send className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all duration-200"
+                            className="h-7 w-7 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all duration-200"
                             title="Actualizar contraseña"
                             onClick={() => handlePasswordUpdate(sub, phone)}
                           >
-                            <Key className="h-4 w-4" />
+                            <Key className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                            className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
                             title="Recordar renovación"
                             onClick={() =>
                               openWhatsApp(
@@ -271,12 +271,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                               )
                             }
                           >
-                            <Bell className="h-4 w-4" />
+                            <Bell className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
+                            className="h-7 w-7 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
                             title="Aviso vencimiento"
                             onClick={() =>
                               openWhatsApp(
@@ -285,34 +285,34 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                               )
                             }
                           >
-                            <AlertTriangle className="h-4 w-4" />
+                            <AlertTriangle className="h-3.5 w-3.5" />
                           </Button>
                         </>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
+                        className="h-7 w-7 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
                         title="Renovar suscripción"
                         onClick={() => handleRenew(sub.id)}
                       >
-                        <RotateCw className="h-4 w-4" />
+                        <RotateCw className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
                         onClick={() => handleEdit(sub)}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                        className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
                         onClick={() => handleDelete(sub.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </TableCell>
@@ -324,7 +324,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
       </div>
 
       {/* Mobile card layout (below md) */}
-      <div className="md:hidden space-y-3">
+      <div className="md:hidden space-y-2">
         {subscriptions.map((sub) => {
           const plataforma = sub.accounts
             ? getPlataformaByValue(sub.accounts.plataforma)
@@ -335,56 +335,43 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
           return (
             <div
               key={sub.id}
-              className="rounded-2xl p-4 bg-card border border-border space-y-3"
+              className="rounded-xl p-3 bg-card border border-border space-y-2"
             >
-              {/* Profile name + status badge */}
               <div className="flex items-center justify-between gap-2">
-                <span className="font-medium text-foreground truncate">
+                <span className="font-medium text-foreground text-sm truncate">
                   {sub.nombre_perfil}
                 </span>
                 <Badge
                   variant="outline"
-                  className={`shrink-0 ${getStatusColor(sub.estado)}`}
+                  className={`shrink-0 text-xs ${getStatusColor(sub.estado)}`}
                 >
                   {sub.estado}
                 </Badge>
               </div>
 
-              {/* Client name + phone */}
-              <div>
-                <span className="text-sm text-foreground">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground truncate">
                   {(sub.clients as { nombre_completo?: string })
                     ?.nombre_completo ?? "Sin cliente"}
                 </span>
                 {phone && (
-                  <p className="text-xs text-muted-foreground">{phone}</p>
+                  <span className="text-xs text-muted-foreground shrink-0">{phone}</span>
                 )}
               </div>
 
-              {/* Platform badge + credentials */}
-              <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between">
                 <Badge
                   variant="secondary"
-                  className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs w-fit`}
+                  className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}
                 >
                   {plataforma?.label ||
                     sub.accounts?.plataforma ||
                     "N/A"}
                 </Badge>
-                {(sub.accounts?.correo || sub.accounts?.usuario_xtream) && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {sub.accounts?.correo ||
-                      sub.accounts?.usuario_xtream ||
-                      ""}
-                  </p>
-                )}
-              </div>
 
-              {/* Expiry date + price */}
-              <div className="flex items-center justify-between gap-2">
-                <div>
+                <div className="flex items-center gap-2">
                   <span
-                    className={`text-sm font-medium ${
+                    className={`text-xs font-medium ${
                       days <= 0
                         ? "text-red-500 dark:text-red-400"
                         : days <= 5
@@ -392,30 +379,16 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                           : "text-foreground"
                     }`}
                   >
-                    {new Date(sub.fecha_vencimiento).toLocaleDateString(
-                      "es-PE"
-                    )}
+                    {new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE")}
                   </span>
-                  <span
-                    className={`ml-2 text-xs ${
-                      days <= 0
-                        ? "text-red-500 dark:text-red-400"
-                        : days <= 5
-                          ? "text-amber-500 dark:text-amber-400"
-                          : "text-muted-foreground"
-                    }`}
-                  >
-                    {days <= 0 ? "Vencido" : `${days} días`}
+                  <span className="text-xs text-foreground font-medium">
+                    {sub.precio_cobrado
+                      ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}`
+                      : "-"}
                   </span>
                 </div>
-                <span className="text-sm text-foreground font-medium">
-                  {sub.precio_cobrado
-                    ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}`
-                    : "-"}
-                </span>
               </div>
 
-              {/* PIN */}
               {sub.pin_perfil && (
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-muted-foreground">PIN:</span>
@@ -424,19 +397,18 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   </span>
                   <CopyButton
                     text={sub.pin_perfil}
-                    className="h-4 w-4"
+                    className="h-3.5 w-3.5"
                   />
                 </div>
               )}
 
-              {/* Action buttons */}
-              <div className="flex flex-wrap items-center gap-1 pt-1">
+              <div className="flex items-center justify-end gap-0.5 pt-0">
                 {phone && (
                   <>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
                       title="Enviar credenciales"
                       onClick={() =>
                         openWhatsApp(
@@ -445,21 +417,21 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )
                       }
                     >
-                      <Send className="h-4 w-4" />
+                      <Send className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all duration-200"
                       title="Actualizar contraseña"
                       onClick={() => handlePasswordUpdate(sub, phone)}
                     >
-                      <Key className="h-4 w-4" />
+                      <Key className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
                       title="Recordar renovación"
                       onClick={() =>
                         openWhatsApp(
@@ -468,12 +440,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )
                       }
                     >
-                      <Bell className="h-4 w-4" />
+                      <Bell className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
+                      className="h-7 w-7 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
                       title="Aviso vencimiento"
                       onClick={() =>
                         openWhatsApp(
@@ -482,34 +454,34 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )
                       }
                     >
-                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTriangle className="h-3.5 w-3.5" />
                     </Button>
                   </>
                 )}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
+                  className="h-7 w-7 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
                   title="Renovar suscripción"
                   onClick={() => handleRenew(sub.id)}
                 >
-                  <RotateCw className="h-4 w-4" />
+                  <RotateCw className="h-3.5 w-3.5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
                   onClick={() => handleEdit(sub)}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3.5 w-3.5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                  className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
                   onClick={() => handleDelete(sub.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
