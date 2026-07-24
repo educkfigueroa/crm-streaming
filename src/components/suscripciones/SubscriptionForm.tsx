@@ -84,7 +84,6 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
             fd.set("fecha_inicio", fechaInicio);
             fd.set("fecha_vencimiento", fechaVencimiento);
             fd.set("precio_cobrado", profiles[0]?.precio || "");
-            fd.set("estado", estado);
             return createSubscription(prev, fd);
           }
 
@@ -98,7 +97,6 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
               fd.set("fecha_inicio", fechaInicio);
               fd.set("fecha_vencimiento", fechaVencimiento);
               fd.set("precio_cobrado", profile.precio);
-              fd.set("estado", estado);
               return createSubscription(prev, fd);
             })
           );
@@ -663,7 +661,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
           <div className="rounded-xl p-5 space-y-4 bg-accent/30 border border-border">
             <div className="flex items-center gap-2 text-blue-500 dark:text-blue-400">
               <Calendar className="h-4 w-4" />
-              <span className="text-sm font-medium">Fechas y estado</span>
+              <span className="text-sm font-medium">Fechas{isEditing && " y estado"}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -708,26 +706,28 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label className="text-muted-foreground text-sm font-medium">Estado *</Label>
-                <Select
-                  value={estado}
-                  onValueChange={(value) => setEstado(value ?? "Activo")}
-                  required
-                >
-                  <SelectTrigger className="h-11 rounded-xl bg-background border-border">
-                    <SelectValue className="text-foreground" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl bg-popover border-border">
-                    {ESTADOS_SUSCRIPCION.map((est) => (
-                      <SelectItem key={est.value} value={est.value} className="rounded-lg text-muted-foreground">
-                        {est.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <input type="hidden" name="estado" value={estado} />
-              </div>
+              {isEditing && (
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-sm font-medium">Estado *</Label>
+                  <Select
+                    value={estado}
+                    onValueChange={(value) => setEstado(value ?? "Activo")}
+                    required
+                  >
+                    <SelectTrigger className="h-11 rounded-xl bg-background border-border">
+                      <SelectValue className="text-foreground" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl bg-popover border-border">
+                      {ESTADOS_SUSCRIPCION.map((est) => (
+                        <SelectItem key={est.value} value={est.value} className="rounded-lg text-muted-foreground">
+                          {est.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <input type="hidden" name="estado" value={estado} />
+                </div>
+              )}
             </div>
           </div>
 

@@ -9,6 +9,17 @@ function addOneMonth(dateStr: string): string {
   return date.toISOString().split("T")[0];
 }
 
+function calcularEstado(fechaVencimiento: string): string {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const vencimiento = new Date(fechaVencimiento);
+  vencimiento.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 0) return "Vencido";
+  if (diffDays <= 7) return "Por Vencer";
+  return "Activo";
+}
+
 export async function getSubscriptions(): Promise<SubscriptionWithDetails[]> {
   const supabase = await createClient();
 
@@ -63,9 +74,9 @@ export async function createSubscription(
   const fechaInicio = formData.get("fecha_inicio") as string || new Date().toISOString().split("T")[0];
   const fechaVencimiento = formData.get("fecha_vencimiento") as string || addOneMonth(fechaInicio);
   const precioCobrado = parseFloat(formData.get("precio_cobrado") as string) || null;
-  const estado = formData.get("estado") as string;
+  const estado = calcularEstado(fechaVencimiento);
 
-  if (!clienteId || !cuentaId || !nombrePerfil || !estado) {
+  if (!clienteId || !cuentaId || !nombrePerfil) {
     return { error: "Todos los campos obligatorios deben ser completados" };
   }
 
