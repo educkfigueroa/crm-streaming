@@ -61,6 +61,12 @@ export async function getSubscription(id: string): Promise<SubscriptionWithDetai
   return data as unknown as SubscriptionWithDetails;
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUUID(value: string): boolean {
+  return UUID_REGEX.test(value.trim());
+}
+
 export async function createSubscription(
   prevState: unknown,
   formData: FormData
@@ -78,6 +84,10 @@ export async function createSubscription(
 
   if (!clienteId || !cuentaId || !nombrePerfil) {
     return { error: "Todos los campos obligatorios deben ser completados" };
+  }
+
+  if (isUUID(nombrePerfil)) {
+    return { error: "El nombre del perfil no puede ser un ID" };
   }
 
   const { error } = await supabase.from("subscriptions").insert({
@@ -117,6 +127,10 @@ export async function updateSubscription(
 
   if (!clienteId || !cuentaId || !nombrePerfil || !estado) {
     return { error: "Todos los campos obligatorios deben ser completados" };
+  }
+
+  if (isUUID(nombrePerfil)) {
+    return { error: "El nombre del perfil no puede ser un ID" };
   }
 
   const { error } = await supabase
