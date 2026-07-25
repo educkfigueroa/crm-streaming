@@ -30,18 +30,26 @@ export async function POST(request: Request) {
   try {
     const { messages } = await request.json();
 
+    console.log("[chat] Received", messages.length, "messages");
+
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     if (!apiKey) {
+      console.error("[chat] GOOGLE_GENERATIVE_AI_API_KEY is missing");
       return new Response(
         JSON.stringify({ error: "GOOGLE_GENERATIVE_AI_API_KEY no configurada" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
+    console.log("[chat] API key starts with:", apiKey.substring(0, 6) + "...");
+
+    const modelMessages = uiMessagesToModelMessages(messages);
+    console.log("[chat] Converted messages:", JSON.stringify(modelMessages.map(m => ({ role: m.role, contentLen: m.content.length }))));
+
     const result = streamText({
       model: google("gemini-3.5-flash"),
       system: SYSTEM_PROMPT,
-      messages: uiMessagesToModelMessages(messages),
+      messages: modelMessages,
       tools: {
         getDashboardStats: {
           description:
