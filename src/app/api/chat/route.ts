@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { streamText, type UIMessage } from "ai";
 import { z } from "zod";
 import { SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
 import {
@@ -14,6 +14,17 @@ import {
   renewSubscriptionAction,
   generateWhatsAppMessageAction,
 } from "@/lib/ai/tools";
+
+function uiMessagesToModelMessages(messages: UIMessage[]) {
+  return messages.map((msg) => {
+    const text =
+      msg.parts
+        ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+        .map((p) => p.text)
+        .join("") || "";
+    return { role: msg.role, content: text };
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +41,7 @@ export async function POST(request: Request) {
     const result = streamText({
       model: google("gemini-3.5-flash"),
       system: SYSTEM_PROMPT,
-      messages,
+      messages: uiMessagesToModelMessages(messages),
       tools: {
         getDashboardStats: {
           description:
