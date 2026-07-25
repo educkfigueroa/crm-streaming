@@ -1,4 +1,4 @@
-import { getPlataformaByValue } from "./constants";
+import { getPlataformaByValue, isIptv } from "./constants";
 import type { SubscriptionWithDetails } from "@/types";
 
 function getPlatformName(sub: SubscriptionWithDetails): string {
@@ -14,12 +14,21 @@ function getClientName(sub: SubscriptionWithDetails): string {
   return (sub.clients as { nombre_completo?: string })?.nombre_completo || "";
 }
 
+function isIptvSub(sub: SubscriptionWithDetails): boolean {
+  return isIptv(sub.accounts?.plataforma || "");
+}
+
 function getCredential(sub: SubscriptionWithDetails): string {
-  return sub.accounts?.correo || sub.accounts?.usuario_xtream || "";
+  if (isIptvSub(sub)) return sub.accounts?.usuario_xtream || "";
+  return sub.accounts?.correo || "";
 }
 
 function getPassword(sub: SubscriptionWithDetails): string {
   return sub.accounts?.contraseña || "";
+}
+
+function getServerUrl(sub: SubscriptionWithDetails): string {
+  return sub.accounts?.url_server || sub.accounts?.servidor_xtream || "";
 }
 
 export function generateWelcomeMessage(sub: SubscriptionWithDetails): string {
@@ -28,19 +37,30 @@ export function generateWelcomeMessage(sub: SubscriptionWithDetails): string {
   const password = getPassword(sub);
   const fecha = new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE");
 
+  if (isIptvSub(sub)) {
+    const serverUrl = getServerUrl(sub);
+    let message = `Tus datos de acceso a ${platform} son:\n\n`;
+    if (serverUrl) {
+      message += `📺 Servidor: ${serverUrl}\n`;
+    }
+    message += `📧 Usuario: ${credential}\n`;
+    if (password) {
+      message += `🔑 Contraseña: ${password}\n`;
+    }
+    message += `\n📅 Vence: ${fecha}`;
+    return message;
+  }
+
   let message = `Tus datos de acceso a ${platform} son:\n\n`;
   message += `📧 Usuario: ${credential}\n`;
   if (password) {
     message += `🔑 Contraseña: ${password}\n`;
   }
   message += `👤 Perfil: ${sub.nombre_perfil}\n`;
-
   if (sub.pin_perfil) {
     message += `🔒 PIN: ${sub.pin_perfil}\n`;
   }
-
   message += `\n📅 Vence: ${fecha}`;
-
   return message;
 }
 
@@ -51,6 +71,17 @@ export function generatePasswordUpdateMessage(
   const credential = getCredential(sub);
   const password = getPassword(sub);
 
+  if (isIptvSub(sub)) {
+    const serverUrl = getServerUrl(sub);
+    let message = `Se actualizó la contraseña de tu cuenta de ${platform}.\n\n`;
+    if (serverUrl) {
+      message += `📺 Servidor: ${serverUrl}\n`;
+    }
+    message += `📧 Usuario: ${credential}\n`;
+    message += `🔑 Contraseña: ${password}\n`;
+    return message;
+  }
+
   let message = `Se actualizó la contraseña de tu cuenta de ${platform}.\n\n`;
   message += `📧 Usuario: ${credential}\n`;
   message += `🔑 Contraseña: ${password}\n`;
@@ -58,7 +89,6 @@ export function generatePasswordUpdateMessage(
   if (sub.pin_perfil) {
     message += `🔒 PIN: ${sub.pin_perfil}\n`;
   }
-
   return message;
 }
 

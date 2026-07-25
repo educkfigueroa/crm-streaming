@@ -146,13 +146,13 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Plataforma</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Correo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Contraseña</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Perfiles</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Costo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Vence</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right py-1.5 text-xs">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Plataforma</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Correo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Contraseña</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Perfiles</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Costo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Vence</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-1 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -167,12 +167,12 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
 
               return (
                 <TableRow key={account.id} className="border-b border-border hover:bg-accent/30 transition-colors">
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
                       {plataforma?.label || account.plataforma}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <div className="flex items-center gap-1.5">
                       <span className="text-muted-foreground text-xs font-mono" title={correo || undefined}>
                         {correo ? truncarCorreo(correo) : "-"}
@@ -184,7 +184,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <div className="flex items-center gap-1.5">
                       <span className="text-muted-foreground text-xs font-mono">
                         {contrasena ? mascararContrasena(contrasena) : "-"}
@@ -196,7 +196,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <div className="flex items-center gap-1">
                       {profiles.map((profile, i) => (
                         <div key={i} title={profile.tooltip} className={`h-3 w-3 rounded-full hover:scale-150 cursor-default transition-all ${profile.status === "free" ? "bg-muted border border-border" : getStatusColor(profile.status)}`} />
@@ -204,15 +204,15 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                       <span className="text-muted-foreground text-xs ml-0.5">{profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground text-sm py-1.5">
+                  <TableCell className="text-foreground text-sm py-1">
                     {account.precio_costo ? `${MONEDA} ${account.precio_costo.toFixed(2)}` : "-"}
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <span className={`font-medium text-sm ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
                       {account.fecha_vencimiento_proveedor ? new Date(account.fecha_vencimiento_proveedor).toLocaleDateString("es-PE") : "-"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right py-1.5">
+                  <TableCell className="text-right py-1">
                     <div className="flex items-center justify-end gap-0.5">
                       {plataformaUrl && (
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200" title="Abrir plataforma" onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}>
@@ -246,7 +246,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
           const profiles = getAccountProfiles(account.id, account.total_perfiles);
 
           return (
-            <div key={account.id} className="rounded-xl p-3 bg-card border border-border space-y-2">
+            <div key={account.id} className="rounded-xl p-2.5 bg-card border border-border space-y-1.5">
               <div className="flex items-center justify-between">
                 <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
                   {plataforma?.label || account.plataforma}

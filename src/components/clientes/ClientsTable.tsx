@@ -70,7 +70,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
         {clients.map((client) => (
           <div
             key={`card-${client.id}`}
-            className="rounded-xl p-3 bg-card border border-border space-y-1"
+            className="rounded-xl p-2.5 bg-card border border-border space-y-1"
           >
             <div className="flex items-center justify-between gap-2">
               <button
@@ -139,15 +139,15 @@ export function ClientsTable({ clients }: ClientsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Nombre</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">WhatsApp</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right py-1.5 text-xs">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Nombre</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">WhatsApp</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-1 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients.map((client) => (
               <TableRow key={client.id} className="border-b border-border hover:bg-accent/30 transition-colors">
-                <TableCell className="py-1.5">
+                <TableCell className="py-1">
                   <div>
                     <button
                       onClick={() => viewSubscriptions(client.id)}
@@ -160,7 +160,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="py-1.5">
+                <TableCell className="py-1">
                   {client.whatsapp ? (
                     <a
                       href={getWhatsAppLink(client.whatsapp)}
@@ -174,7 +174,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                     <span className="text-muted-foreground text-xs">-</span>
                   )}
                 </TableCell>
-                <TableCell className="text-right py-1.5">
+                <TableCell className="text-right py-1">
                   <div className="flex items-center justify-end gap-0.5">
                     <Button
                       variant="ghost"

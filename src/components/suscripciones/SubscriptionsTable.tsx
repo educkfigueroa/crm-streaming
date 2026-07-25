@@ -126,14 +126,14 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Perfil</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Cliente</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Correo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Contraseña</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Vence</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Precio</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Estado</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right py-1.5 text-xs">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Perfil</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Cliente</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Correo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Contraseña</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Vence</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Precio</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1 text-xs">Estado</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-1 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -152,7 +152,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   key={sub.id}
                   className="border-b border-border hover:bg-accent/30 transition-colors"
                 >
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <div className="flex items-center gap-1.5">
                       <Badge
                         variant="secondary"
@@ -181,16 +181,13 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <span className="text-foreground text-xs">
                       {(sub.clients as { nombre_completo?: string })
                         ?.nombre_completo ?? "Sin cliente"}
                     </span>
-                    {phone && (
-                      <p className="text-[10px] text-muted-foreground mt-0">{phone}</p>
-                    )}
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     {correo ? (
                       <Button
                         variant="ghost"
@@ -209,7 +206,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       <span className="text-muted-foreground text-[10px]">-</span>
                     )}
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     {contraseña ? (
                       <Button
                         variant="ghost"
@@ -228,7 +225,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       <span className="text-muted-foreground text-[10px]">-</span>
                     )}
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <div>
                       <span
                         className={`text-xs font-medium ${
@@ -256,12 +253,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground font-medium text-xs py-1.5">
+                  <TableCell className="text-foreground font-medium text-xs py-1">
                     {sub.precio_cobrado
                       ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}`
                       : "-"}
                   </TableCell>
-                  <TableCell className="py-1.5">
+                  <TableCell className="py-1">
                     <Badge
                       variant="outline"
                       className={`${getStatusColor(sub.estado)} text-[10px]`}
@@ -269,7 +266,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       {sub.estado}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right py-1.5">
+                  <TableCell className="text-right py-1">
                     <div className="flex items-center justify-end gap-0.5">
                       {phone && (
                         <>
@@ -346,7 +343,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
       </div>
 
       {/* Mobile card layout (below md) */}
-      <div className="md:hidden space-y-1.5">
+      <div className="md:hidden space-y-1">
         {subscriptions.map((sub) => {
           const plataforma = sub.accounts
             ? getPlataformaByValue(sub.accounts.plataforma)
@@ -360,7 +357,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
           return (
             <div
               key={sub.id}
-              className="rounded-xl p-2.5 bg-card border border-border space-y-1.5"
+              className="rounded-xl p-2 bg-card border border-border space-y-1"
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -389,9 +386,6 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   {(sub.clients as { nombre_completo?: string })
                     ?.nombre_completo ?? "Sin cliente"}
                 </span>
-                {phone && (
-                  <span className="text-[10px] text-muted-foreground shrink-0">{phone}</span>
-                )}
               </div>
 
               <div className="flex items-center justify-between">
