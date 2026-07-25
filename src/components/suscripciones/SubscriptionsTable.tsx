@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle } from "lucide-react";
+import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle, Copy, Check, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { CopyButton } from "@/components/shared/CopyButton";
-import { MONEDA, getPlataformaByValue, getPlatformColorClasses } from "@/lib/constants";
+import { MONEDA, getPlataformaByValue, getPlatformColorClasses, isIptv } from "@/lib/constants";
 import {
   generateWelcomeMessage,
   generatePasswordUpdateMessage,
@@ -56,10 +56,37 @@ function getDaysUntilExpiry(fechaVencimiento: string): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
+function getCredenciales(sub: SubscriptionWithDetails): { correo: string; contraseña: string } {
+  const account = sub.accounts;
+  if (!account) return { correo: "", contraseña: "" };
+  const correo = isIptv(account.plataforma)
+    ? account.usuario_xtream || ""
+    : account.correo || "";
+  const contraseña = account.contraseña || "";
+  return { correo, contraseña };
+}
+
+function truncarCorreo(correo: string) {
+  if (!correo) return "";
+  return correo.length > 5 ? correo.slice(0, 5) + "..." : correo;
+}
+
+function mascararContrasena(pass: string) {
+  if (!pass) return "";
+  return "•••••";
+}
+
 export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
   const [editingSubscription, setEditingSubscription] =
     useState<SubscriptionWithDetails | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = async (text: string, id: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta suscripción?")) {
@@ -124,13 +151,15 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium py-2">Perfil</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Cliente</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Cuenta</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Vencimiento</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Precio</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Estado</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right py-2">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Perfil</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Cliente</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Cuenta</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Correo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Contraseña</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Vence</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Precio</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Estado</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-1.5 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -140,61 +169,99 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                 : null;
               const days = getDaysUntilExpiry(sub.fecha_vencimiento);
               const phone = getWhatsAppPhone(sub);
+              const { correo, contraseña } = getCredenciales(sub);
+              const copyCorreoId = `sub-correo-${sub.id}`;
+              const copyPassId = `sub-pass-${sub.id}`;
 
               return (
                 <TableRow
                   key={sub.id}
                   className="border-b border-border hover:bg-accent/30 transition-colors"
                 >
-                  <TableCell className="py-2">
+                  <TableCell className="py-1.5">
                     <div>
-                      <span className="font-medium text-foreground text-sm">
+                      <span className="font-medium text-foreground text-xs">
                         {sub.nombre_perfil}
                       </span>
                       {sub.pin_perfil && (
                         <div className="flex items-center gap-1 mt-0">
-                          <span className="text-xs text-muted-foreground">PIN:</span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground">PIN:</span>
+                          <span className="text-[10px] text-muted-foreground">
                             {sub.pin_perfil}
                           </span>
                           <CopyButton
                             text={sub.pin_perfil}
-                            className="h-3.5 w-3.5"
+                            className="h-3 w-3"
                           />
                         </div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2">
-                    <span className="text-foreground text-sm">
+                  <TableCell className="py-1.5">
+                    <span className="text-foreground text-xs">
                       {(sub.clients as { nombre_completo?: string })
                         ?.nombre_completo ?? "Sin cliente"}
                     </span>
                     {phone && (
-                      <p className="text-xs text-muted-foreground mt-0">{phone}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0">{phone}</p>
                     )}
                   </TableCell>
-                  <TableCell className="py-2">
-                    <div>
-                      <Badge
-                        variant="secondary"
-                        className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}
-                      >
-                        {plataforma?.label ||
-                          sub.accounts?.plataforma ||
-                          "N/A"}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground mt-0 truncate max-w-[120px]">
-                        {sub.accounts?.correo ||
-                          sub.accounts?.usuario_xtream ||
-                          ""}
-                      </p>
+                  <TableCell className="py-1.5">
+                    <Badge
+                      variant="secondary"
+                      className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px]`}
+                    >
+                      {plataforma?.label ||
+                        sub.accounts?.plataforma ||
+                        "N/A"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground text-[10px] font-mono" title={correo || undefined}>
+                        {correo ? truncarCorreo(correo) : "-"}
+                      </span>
+                      {correo && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleCopy(correo, copyCorreoId)}
+                        >
+                          {copiedId === copyCorreoId ? (
+                            <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5" />
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2">
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground text-[10px] font-mono" title={contraseña || undefined}>
+                        {contraseña ? mascararContrasena(contraseña) : "-"}
+                      </span>
+                      {contraseña && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleCopy(contraseña, copyPassId)}
+                        >
+                          {copiedId === copyPassId ? (
+                            <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-1.5">
                     <div>
                       <span
-                        className={`text-sm font-medium ${
+                        className={`text-xs font-medium ${
                           days <= 0
                             ? "text-red-500 dark:text-red-400"
                             : days <= 5
@@ -207,7 +274,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )}
                       </span>
                       <p
-                        className={`text-xs ${
+                        className={`text-[10px] ${
                           days <= 0
                             ? "text-red-500 dark:text-red-400"
                             : days <= 5
@@ -219,27 +286,27 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground font-medium text-sm py-2">
+                  <TableCell className="text-foreground font-medium text-xs py-1.5">
                     {sub.precio_cobrado
                       ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}`
                       : "-"}
                   </TableCell>
-                  <TableCell className="py-2">
+                  <TableCell className="py-1.5">
                     <Badge
                       variant="outline"
-                      className={`${getStatusColor(sub.estado)} text-xs`}
+                      className={`${getStatusColor(sub.estado)} text-[10px]`}
                     >
                       {sub.estado}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right py-2">
+                  <TableCell className="text-right py-1.5">
                     <div className="flex items-center justify-end gap-0.5">
                       {phone && (
                         <>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                            className="h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
                             title="Enviar credenciales"
                             onClick={() =>
                               openWhatsApp(
@@ -248,21 +315,21 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                               )
                             }
                           >
-                            <Send className="h-3.5 w-3.5" />
+                            <Send className="h-3 w-3" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all duration-200"
+                            className="h-6 w-6 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
                             title="Actualizar contraseña"
                             onClick={() => handlePasswordUpdate(sub, phone)}
                           >
-                            <Key className="h-3.5 w-3.5" />
+                            <Key className="h-3 w-3" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                            className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
                             title="Recordar renovación"
                             onClick={() =>
                               openWhatsApp(
@@ -271,12 +338,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                               )
                             }
                           >
-                            <Bell className="h-3.5 w-3.5" />
+                            <Bell className="h-3 w-3" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
+                            className="h-6 w-6 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
                             title="Aviso vencimiento"
                             onClick={() =>
                               openWhatsApp(
@@ -285,34 +352,34 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                               )
                             }
                           >
-                            <AlertTriangle className="h-3.5 w-3.5" />
+                            <AlertTriangle className="h-3 w-3" />
                           </Button>
                         </>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
+                        className="h-6 w-6 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-md transition-all duration-200"
                         title="Renovar suscripción"
                         onClick={() => handleRenew(sub.id)}
                       >
-                        <RotateCw className="h-3.5 w-3.5" />
+                        <RotateCw className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
                         onClick={() => handleEdit(sub)}
                       >
-                        <Edit className="h-3.5 w-3.5" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                        className="h-6 w-6 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
                         onClick={() => handleDelete(sub.id)}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>
@@ -324,54 +391,57 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
       </div>
 
       {/* Mobile card layout (below md) */}
-      <div className="md:hidden space-y-2">
+      <div className="md:hidden space-y-1.5">
         {subscriptions.map((sub) => {
           const plataforma = sub.accounts
             ? getPlataformaByValue(sub.accounts.plataforma)
             : null;
           const days = getDaysUntilExpiry(sub.fecha_vencimiento);
           const phone = getWhatsAppPhone(sub);
+          const { correo, contraseña } = getCredenciales(sub);
+          const copyCorreoId = `sub-correo-m-${sub.id}`;
+          const copyPassId = `sub-pass-m-${sub.id}`;
 
           return (
             <div
               key={sub.id}
-              className="rounded-xl p-3 bg-card border border-border space-y-2"
+              className="rounded-xl p-2.5 bg-card border border-border space-y-1.5"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-medium text-foreground text-sm truncate">
+                <span className="font-medium text-foreground text-xs truncate">
                   {sub.nombre_perfil}
                 </span>
                 <Badge
                   variant="outline"
-                  className={`shrink-0 text-xs ${getStatusColor(sub.estado)}`}
+                  className={`shrink-0 text-[10px] ${getStatusColor(sub.estado)}`}
                 >
                   {sub.estado}
                 </Badge>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground truncate">
+                <span className="text-[10px] text-foreground truncate">
                   {(sub.clients as { nombre_completo?: string })
                     ?.nombre_completo ?? "Sin cliente"}
                 </span>
                 {phone && (
-                  <span className="text-xs text-muted-foreground shrink-0">{phone}</span>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{phone}</span>
                 )}
               </div>
 
               <div className="flex items-center justify-between">
                 <Badge
                   variant="secondary"
-                  className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}
+                  className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px]`}
                 >
                   {plataforma?.label ||
                     sub.accounts?.plataforma ||
                     "N/A"}
                 </Badge>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <span
-                    className={`text-xs font-medium ${
+                    className={`text-[10px] font-medium ${
                       days <= 0
                         ? "text-red-500 dark:text-red-400"
                         : days <= 5
@@ -381,7 +451,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   >
                     {new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE")}
                   </span>
-                  <span className="text-xs text-foreground font-medium">
+                  <span className="text-[10px] text-foreground font-medium">
                     {sub.precio_cobrado
                       ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}`
                       : "-"}
@@ -389,15 +459,53 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                 </div>
               </div>
 
+              {correo && (
+                <div className="flex items-center gap-1">
+                  <Mail className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
+                    onClick={() => handleCopy(correo, copyCorreoId)}
+                  >
+                    {copiedId === copyCorreoId ? (
+                      <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
+                    ) : (
+                      <Copy className="h-2.5 w-2.5" />
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {contraseña && (
+                <div className="flex items-center gap-1">
+                  <KeyRound className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={contraseña}>{mascararContrasena(contraseña)}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
+                    onClick={() => handleCopy(contraseña, copyPassId)}
+                  >
+                    {copiedId === copyPassId ? (
+                      <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
+                    ) : (
+                      <Copy className="h-2.5 w-2.5" />
+                    )}
+                  </Button>
+                </div>
+              )}
+
               {sub.pin_perfil && (
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-muted-foreground">PIN:</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground">PIN:</span>
+                  <span className="text-[10px] text-muted-foreground">
                     {sub.pin_perfil}
                   </span>
                   <CopyButton
                     text={sub.pin_perfil}
-                    className="h-3.5 w-3.5"
+                    className="h-3 w-3"
                   />
                 </div>
               )}
@@ -408,7 +516,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                      className="h-5 w-5 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
                       title="Enviar credenciales"
                       onClick={() =>
                         openWhatsApp(
@@ -417,21 +525,21 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )
                       }
                     >
-                      <Send className="h-3.5 w-3.5" />
+                      <Send className="h-2.5 w-2.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all duration-200"
+                      className="h-5 w-5 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
                       title="Actualizar contraseña"
                       onClick={() => handlePasswordUpdate(sub, phone)}
                     >
-                      <Key className="h-3.5 w-3.5" />
+                      <Key className="h-2.5 w-2.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                      className="h-5 w-5 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
                       title="Recordar renovación"
                       onClick={() =>
                         openWhatsApp(
@@ -440,12 +548,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )
                       }
                     >
-                      <Bell className="h-3.5 w-3.5" />
+                      <Bell className="h-2.5 w-2.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-all duration-200"
+                      className="h-5 w-5 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
                       title="Aviso vencimiento"
                       onClick={() =>
                         openWhatsApp(
@@ -454,34 +562,34 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         )
                       }
                     >
-                      <AlertTriangle className="h-3.5 w-3.5" />
+                      <AlertTriangle className="h-2.5 w-2.5" />
                     </Button>
                   </>
                 )}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-all duration-200"
+                  className="h-5 w-5 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-md transition-all duration-200"
                   title="Renovar suscripción"
                   onClick={() => handleRenew(sub.id)}
                 >
-                  <RotateCw className="h-3.5 w-3.5" />
+                  <RotateCw className="h-2.5 w-2.5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                  className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
                   onClick={() => handleEdit(sub)}
                 >
-                  <Edit className="h-3.5 w-3.5" />
+                  <Edit className="h-2.5 w-2.5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                  className="h-5 w-5 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
                   onClick={() => handleDelete(sub.id)}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-2.5 w-2.5" />
                 </Button>
               </div>
             </div>

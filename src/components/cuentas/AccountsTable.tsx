@@ -83,13 +83,6 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
     window.location.reload();
   };
 
-  const getCredenciales = (account: Account) => {
-    if (isIptv(account.plataforma)) {
-      return account.usuario_xtream || "Sin usuario";
-    }
-    return account.correo || "Sin correo";
-  };
-
   const getCorreo = (account: Account) => {
     if (isIptv(account.plataforma)) {
       return account.usuario_xtream || "";
@@ -171,13 +164,13 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium py-2">Plataforma</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Correo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Contraseña</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Perfiles</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Costo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-2">Vence</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right py-2">Acciones</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Plataforma</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Correo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Contraseña</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Perfiles</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Costo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Vence</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-1.5 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -192,79 +185,79 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
 
               return (
                 <TableRow key={account.id} className="border-b border-border hover:bg-accent/30 transition-colors">
-                  <TableCell className="py-2">
-                    <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
+                  <TableCell className="py-1.5">
+                    <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px]`}>
                       {plataforma?.label || account.plataforma}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground text-xs font-mono" title={correo || undefined}>
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground text-[10px] font-mono" title={correo || undefined}>
                         {correo ? truncarCorreo(correo) : "-"}
                       </span>
                       {correo && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
                           onClick={() => handleCopy(correo, copyCorreoId)}
                         >
                           {copiedId === copyCorreoId ? (
-                            <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                            <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
                           ) : (
-                            <Copy className="h-3 w-3" />
+                            <Copy className="h-2.5 w-2.5" />
                           )}
                         </Button>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground text-xs font-mono" title={contrasena || undefined}>
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground text-[10px] font-mono" title={contrasena || undefined}>
                         {contrasena ? mascararContrasena(contrasena) : "-"}
                       </span>
                       {contrasena && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
                           onClick={() => handleCopy(contrasena, copyPassId)}
                         >
                           {copiedId === copyPassId ? (
-                            <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                            <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
                           ) : (
-                            <Copy className="h-3 w-3" />
+                            <Copy className="h-2.5 w-2.5" />
                           )}
                         </Button>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2">
-                    <div className="flex items-center gap-1">
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-0.5">
                       {profiles.map((profile, i) => (
                         <div
                           key={i}
                           title={profile.tooltip}
-                          className={`h-3 w-3 rounded-full transition-all duration-200 hover:scale-150 cursor-default ${
+                          className={`h-2.5 w-2.5 rounded-full transition-all duration-200 hover:scale-150 cursor-default ${
                             profile.status === "free"
                               ? "bg-muted border border-border"
                               : `${getStatusColor(profile.status)}`
                           }`}
                         />
                       ))}
-                      <span className="text-muted-foreground text-xs ml-0.5">
+                      <span className="text-muted-foreground text-[10px] ml-0.5">
                         {profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground text-sm py-2">
+                  <TableCell className="text-foreground text-xs py-1.5">
                     {account.precio_costo
                       ? `${MONEDA} ${account.precio_costo.toFixed(2)}`
                       : "-"}
                   </TableCell>
-                  <TableCell className="py-2">
+                  <TableCell className="py-1.5">
                     <span
-                      className={`font-medium text-sm ${getVencimientoColor(
+                      className={`font-medium text-xs ${getVencimientoColor(
                         account.fecha_vencimiento_proveedor
                       )}`}
                     >
@@ -275,34 +268,34 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                         : "-"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right py-2">
+                  <TableCell className="text-right py-1.5">
                     <div className="flex items-center justify-end gap-0.5">
                       {plataformaUrl && (
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                          className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
                           title="Abrir plataforma"
                           onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}
                         >
-                          <ExternalLink className="h-3.5 w-3.5" />
+                          <ExternalLink className="h-3 w-3" />
                         </Button>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
                         onClick={() => handleEdit(account)}
                       >
-                        <Edit className="h-3.5 w-3.5" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                        className="h-6 w-6 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
                         onClick={() => handleDelete(account.id)}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </TableCell>
@@ -314,7 +307,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-2">
+      <div className="md:hidden space-y-1.5">
         {accounts.map((account) => {
           const plataforma = getPlataformaByValue(account.plataforma);
           const correo = getCorreo(account);
@@ -325,87 +318,87 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
           const profiles = getAccountProfiles(account.id, account.total_perfiles);
 
           return (
-            <div key={account.id} className="rounded-xl p-3 bg-card border border-border space-y-2">
+            <div key={account.id} className="rounded-xl p-2.5 bg-card border border-border space-y-1.5">
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
+                <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px]`}>
                   {plataforma?.label || account.plataforma}
                 </Badge>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   {plataformaUrl && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
+                      className="h-5 w-5 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
                       title="Abrir plataforma"
                       onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}
                     >
-                      <ExternalLink className="h-3 w-3" />
+                      <ExternalLink className="h-2.5 w-2.5" />
                     </Button>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
+                    className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
                     onClick={() => handleEdit(account)}
                   >
-                    <Edit className="h-3 w-3" />
+                    <Edit className="h-2.5 w-2.5" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
+                    className="h-5 w-5 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
                     onClick={() => handleDelete(account.id)}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-2.5 w-2.5" />
                   </Button>
                 </div>
               </div>
 
               {correo && (
-                <div className="flex items-center gap-1.5">
-                  <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground text-xs font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
+                <div className="flex items-center gap-1">
+                  <Mail className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5 text-muted-foreground hover:text-foreground shrink-0"
+                    className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
                     onClick={() => handleCopy(correo, copyCorreoId)}
                   >
                     {copiedId === copyCorreoId ? (
-                      <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                      <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
                     ) : (
-                      <Copy className="h-3 w-3" />
+                      <Copy className="h-2.5 w-2.5" />
                     )}
                   </Button>
                 </div>
               )}
 
               {contrasena && (
-                <div className="flex items-center gap-1.5">
-                  <KeyRound className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground text-xs font-mono truncate" title={contrasena}>{mascararContrasena(contrasena)}</span>
+                <div className="flex items-center gap-1">
+                  <KeyRound className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={contrasena}>{mascararContrasena(contrasena)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-5 w-5 text-muted-foreground hover:text-foreground shrink-0"
+                    className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
                     onClick={() => handleCopy(contrasena, copyPassId)}
                   >
                     {copiedId === copyPassId ? (
-                      <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                      <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
                     ) : (
-                      <Copy className="h-3 w-3" />
+                      <Copy className="h-2.5 w-2.5" />
                     )}
                   </Button>
                 </div>
               )}
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {profiles.map((profile, i) => (
                     <div
                       key={i}
                       title={profile.tooltip}
-                      className={`h-4 w-4 rounded-full transition-all duration-200 cursor-default border-2 ${
+                      className={`h-3.5 w-3.5 rounded-full transition-all duration-200 cursor-default border-2 ${
                         profile.status === "free"
                           ? "bg-muted border-border border-dashed"
                           : profile.status === "active"
@@ -418,19 +411,19 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                       }`}
                     />
                   ))}
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-muted-foreground text-[10px]">
                     {profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-foreground text-[10px]">
                     {account.precio_costo
                       ? `${MONEDA} ${account.precio_costo.toFixed(2)}`
                       : "-"}
                   </span>
                   <span
-                    className={`font-medium text-xs ${getVencimientoColor(
+                    className={`font-medium text-[10px] ${getVencimientoColor(
                       account.fecha_vencimiento_proveedor
                     )}`}
                   >
