@@ -293,6 +293,100 @@ export async function createClientAction(params: {
   return { success: true };
 }
 
+export async function createAccountAction(params: {
+  plataforma: string;
+  correo?: string;
+  contraseña?: string;
+  total_perfiles?: number;
+  precio_costo?: number;
+  usuario_xtream?: string;
+  url_server?: string;
+  servidor_xtream?: string;
+}) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("accounts").insert({
+    plataforma: params.plataforma,
+    correo: params.correo || null,
+    contraseña: params.contraseña || null,
+    total_perfiles: params.total_perfiles || 1,
+    precio_costo: params.precio_costo || null,
+    usuario_xtream: params.usuario_xtream || null,
+    url_server: params.url_server || null,
+    servidor_xtream: params.servidor_xtream || null,
+  });
+  if (error) return { success: false, error: "Error al crear la cuenta: " + error.message };
+  return { success: true };
+}
+
+export async function createSubscriptionAction(params: {
+  cliente_id: string;
+  cuenta_id: string;
+  nombre_perfil: string;
+  pin_perfil?: string;
+  precio_cobrado?: number;
+  fecha_inicio?: string;
+}) {
+  const supabase = await createClient();
+  const today = params.fecha_inicio || new Date().toISOString().split("T")[0];
+  const venc = new Date(today);
+  venc.setMonth(venc.getMonth() + 1);
+  const fechaVenc = venc.toISOString().split("T")[0];
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const vencDate = new Date(fechaVenc);
+  vencDate.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((vencDate.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  let estado = "Activo";
+  if (diffDays <= 0) estado = "Vencido";
+  else if (diffDays <= 7) estado = "Por Vencer";
+
+  const { error } = await supabase.from("subscriptions").insert({
+    cliente_id: params.cliente_id,
+    cuenta_id: params.cuenta_id,
+    nombre_perfil: params.nombre_perfil,
+    pin_perfil: params.pin_perfil || null,
+    fecha_inicio: today,
+    fecha_vencimiento: fechaVenc,
+    precio_cobrado: params.precio_cobrado || null,
+    estado,
+  });
+  if (error) return { success: false, error: "Error al crear la suscripción: " + error.message };
+  return { success: true, fechaVencimiento: fechaVenc, estado };
+}
+
+export async function deleteSubscriptionAction(id: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("subscriptions").delete().eq("id", id);
+  if (error) return { success: false, error: "Error al eliminar la suscripción" };
+  return { success: true };
+}
+
+export async function updateSubscriptionAction(params: {
+  id: string;
+  nombre_perfil?: string;
+  pin_perfil?: string;
+  precio_cobrado?: number;
+  fecha_inicio?: string;
+  fecha_vencimiento?: string;
+  estado?: string;
+}) {
+  const supabase = await createClient();
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if (params.nombre_perfil !== undefined) updates.nombre_perfil = params.nombre_perfil;
+  if (params.pin_perfil !== undefined) updates.pin_perfil = params.pin_perfil || null;
+  if (params.precio_cobrado !== undefined) updates.precio_cobrado = params.precio_cobrado;
+  if (params.fecha_inicio !== undefined) updates.fecha_inicio = params.fecha_inicio;
+  if (params.fecha_vencimiento !== undefined) updates.fecha_vencimiento = params.fecha_vencimiento;
+  if (params.estado !== undefined) updates.estado = params.estado;
+
+  const { error } = await supabase
+    .from("subscriptions")
+    .update(updates)
+    .eq("id", params.id);
+  if (error) return { success: false, error: "Error al actualizar la suscripción" };
+  return { success: true };
+}
+
 export async function renewSubscriptionAction(id: string) {
   const supabase = await createClient();
   const today = new Date().toISOString().split("T")[0];
