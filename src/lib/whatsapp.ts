@@ -45,17 +45,19 @@ export function generateWelcomeMessage(sub: SubscriptionWithDetails): string {
 }
 
 export function generatePasswordUpdateMessage(
-  sub: SubscriptionWithDetails,
-  nuevaContrasena: string
+  sub: SubscriptionWithDetails
 ): string {
   const platform = getPlatformName(sub);
   const credential = getCredential(sub);
+  const password = getPassword(sub);
 
   let message = `Se actualizó la contraseña de tu cuenta de ${platform}.\n\n`;
   message += `📧 Usuario: ${credential}\n`;
-  message += `🔑 Nueva contraseña: ${nuevaContrasena}\n`;
-  message += `👤 Perfil: ${sub.nombre_perfil}\n\n`;
-  message += `Si tienes alguna consulta, escríbeme. 👍`;
+  message += `🔑 Contraseña: ${password}\n`;
+  message += `👤 Perfil: ${sub.nombre_perfil}\n`;
+  if (sub.pin_perfil) {
+    message += `🔒 PIN: ${sub.pin_perfil}\n`;
+  }
 
   return message;
 }

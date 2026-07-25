@@ -118,18 +118,6 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
     return (sub.clients as { whatsapp?: string })?.whatsapp || "";
   };
 
-  const openWhatsApp = (phone: string, message: string) => {
-    window.open(getWhatsAppUrl(phone, message), "_blank");
-  };
-
-  const handlePasswordUpdate = (sub: SubscriptionWithDetails, phone: string) => {
-    const password = prompt("Ingresa la nueva contraseña:");
-    if (password) {
-      const msg = generatePasswordUpdateMessage(sub, password);
-      openWhatsApp(phone, msg);
-    }
-  };
-
   if (subscriptions.length === 0) {
     return (
       <div className="rounded-xl p-10 text-center bg-card border border-border">
@@ -299,57 +287,42 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                     <div className="flex items-center justify-end gap-0.5">
                       {phone && (
                         <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
+                          <a
+                            href={getWhatsAppUrl(phone, generateWelcomeMessage(sub))}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             title="Enviar credenciales"
-                            onClick={() =>
-                              openWhatsApp(
-                                phone,
-                                generateWelcomeMessage(sub)
-                              )
-                            }
+                            className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
                           >
                             <Send className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
+                          </a>
+                          <a
+                            href={getWhatsAppUrl(phone, generatePasswordUpdateMessage(sub))}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             title="Actualizar contraseña"
-                            onClick={() => handlePasswordUpdate(sub, phone)}
+                            className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
                           >
                             <Key className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
+                          </a>
+                          <a
+                            href={getWhatsAppUrl(phone, generateRenewalMessage(sub))}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             title="Recordar renovación"
-                            onClick={() =>
-                              openWhatsApp(
-                                phone,
-                                generateRenewalMessage(sub)
-                              )
-                            }
+                            className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
                           >
                             <Bell className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
+                          </a>
+                          <a
+                            href={getWhatsAppUrl(phone, generateExpiryMessage(sub))}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             title="Aviso vencimiento"
-                            onClick={() =>
-                              openWhatsApp(
-                                phone,
-                                generateExpiryMessage(sub)
-                              )
-                            }
+                            className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
                           >
                             <AlertTriangle className="h-3 w-3" />
-                          </Button>
+                          </a>
                         </>
                       )}
                       <Button
@@ -510,57 +483,42 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
               <div className="flex items-center justify-end gap-0.5 pt-0">
                 {phone && (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
+                    <a
+                      href={getWhatsAppUrl(phone, generateWelcomeMessage(sub))}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       title="Enviar credenciales"
-                      onClick={() =>
-                        openWhatsApp(
-                          phone,
-                          generateWelcomeMessage(sub)
-                        )
-                      }
+                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
                     >
                       <Send className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
+                    </a>
+                    <a
+                      href={getWhatsAppUrl(phone, generatePasswordUpdateMessage(sub))}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       title="Actualizar contraseña"
-                      onClick={() => handlePasswordUpdate(sub, phone)}
+                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
                     >
                       <Key className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
+                    </a>
+                    <a
+                      href={getWhatsAppUrl(phone, generateRenewalMessage(sub))}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       title="Recordar renovación"
-                      onClick={() =>
-                        openWhatsApp(
-                          phone,
-                          generateRenewalMessage(sub)
-                        )
-                      }
+                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
                     >
                       <Bell className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
+                    </a>
+                    <a
+                      href={getWhatsAppUrl(phone, generateExpiryMessage(sub))}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       title="Aviso vencimiento"
-                      onClick={() =>
-                        openWhatsApp(
-                          phone,
-                          generateExpiryMessage(sub)
-                        )
-                      }
+                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
                     >
                       <AlertTriangle className="h-3 w-3" />
-                    </Button>
+                    </a>
                   </>
                 )}
                 <Button
