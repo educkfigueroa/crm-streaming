@@ -1,5 +1,10 @@
 import { google } from "@ai-sdk/google";
-import { streamText, type UIMessage } from "ai";
+import {
+  streamText,
+  convertToModelMessages,
+  toUIMessageStream,
+  createUIMessageStreamResponse,
+} from "ai";
 import { z } from "zod";
 import { SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
 import {
@@ -15,22 +20,9 @@ import {
   generateWhatsAppMessageAction,
 } from "@/lib/ai/tools";
 
-function uiMessagesToModelMessages(messages: UIMessage[]) {
-  return messages.map((msg) => {
-    const text =
-      msg.parts
-        ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-        .map((p) => p.text)
-        .join("") || "";
-    return { role: msg.role, content: text };
-  });
-}
-
 export async function POST(request: Request) {
   try {
     const { messages } = await request.json();
-
-    console.log("[chat] Received", messages.length, "messages");
 
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     if (!apiKey) {
@@ -41,15 +33,10 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("[chat] API key prefix:", apiKey.substring(0, 6) + "...");
-
-    const modelMessages = uiMessagesToModelMessages(messages);
-    console.log("[chat] Model messages:", JSON.stringify(modelMessages.map(m => ({ role: m.role, len: m.content.length }))));
-
     const result = streamText({
       model: google("gemini-3.5-flash"),
-      system: SYSTEM_PROMPT,
-      messages: modelMessages,
+      instructions: SYSTEM_PROMPT,
+      messages: await convertToModelMessages(messages),
       tools: {
         getDashboardStats: {
           description: "Obtener estadísticas generales del CRM: total cuentas, total clientes, suscripciones activas, por vencer",
@@ -124,15 +111,13 @@ export async function POST(request: Request) {
           execute: (params) => generateWhatsAppMessageAction(params.subscriptionIds, params.tipo || "credenciales"),
         },
       },
-      onError(error) {
-        console.error("[chat] Stream error:", JSON.stringify(error, null, 2));
-      },
     });
 
-    console.log("[chat] streamText created, returning stream response");
-    return result.toUIMessageStreamResponse();
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({ stream: result.stream }),
+    });
   } catch (error) {
-    console.error("[chat] Catch error:", error);
+    console.error("[chat] API error:", error);
     const message = error instanceof Error ? error.message : "Error desconocido";
     return new Response(
       JSON.stringify({ error: message }),
