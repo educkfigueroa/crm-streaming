@@ -152,10 +152,10 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   }, [clienteId, clientes, isEditing]);
 
   useEffect(() => {
-    if (!isEditing && fechaInicio) {
+    if (fechaInicio) {
       setFechaVencimiento(addOneMonth(fechaInicio));
     }
-  }, [fechaInicio, isEditing]);
+  }, [fechaInicio]);
 
   const loadData = async () => {
     const [clientesData, cuentasData] = await Promise.all([
@@ -226,7 +226,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   };
 
   const canSubmit = platformType === "iptv"
-    ? clienteId && selectedIptvUrl && profiles[0]?.nombrePerfil
+    ? clienteId && (isEditing ? profiles[0]?.cuentaId : selectedIptvUrl) && profiles[0]?.nombrePerfil
     : clienteId && profiles.every((p) => p.platform && p.cuentaId && p.nombrePerfil);
 
   return (

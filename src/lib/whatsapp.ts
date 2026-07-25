@@ -39,21 +39,22 @@ export function generateWelcomeMessage(sub: SubscriptionWithDetails): string {
 
   if (isIptvSub(sub)) {
     const serverUrl = getServerUrl(sub);
-    let message = "";
+    let message = `📺 Datos de acceso a ${platform}:\n\n`;
     if (serverUrl) {
-      message += `${serverUrl}\n`;
+      message += `🌐 URL: ${serverUrl}\n`;
     }
-    message += `${credential}\n`;
-    message += `${password}`;
+    message += `👤 Usuario: ${credential}\n`;
+    message += `🔑 Contraseña: ${password}\n`;
+    message += `\n📅 Vence: ${fecha}`;
     return message;
   }
 
-  let message = `Tus datos de acceso a ${platform} son:\n\n`;
-  message += `📧 Usuario: ${credential}\n`;
+  let message = `📺 Datos de acceso a ${platform}:\n\n`;
+  message += `👤 Usuario: ${credential}\n`;
   if (password) {
     message += `🔑 Contraseña: ${password}\n`;
   }
-  message += `👤 Perfil: ${sub.nombre_perfil}\n`;
+  message += `🎭 Perfil: ${sub.nombre_perfil}\n`;
   if (sub.pin_perfil) {
     message += `🔒 PIN: ${sub.pin_perfil}\n`;
   }
@@ -70,19 +71,19 @@ export function generatePasswordUpdateMessage(
 
   if (isIptvSub(sub)) {
     const serverUrl = getServerUrl(sub);
-    let message = "";
+    let message = `🔄 Se actualizó la contraseña de ${platform}:\n\n`;
     if (serverUrl) {
-      message += `${serverUrl}\n`;
+      message += `🌐 URL: ${serverUrl}\n`;
     }
-    message += `${credential}\n`;
-    message += `${password}`;
+    message += `👤 Usuario: ${credential}\n`;
+    message += `🔑 Contraseña: ${password}`;
     return message;
   }
 
-  let message = `Se actualizó la contraseña de tu cuenta de ${platform}.\n\n`;
-  message += `📧 Usuario: ${credential}\n`;
+  let message = `🔄 Se actualizó la contraseña de ${platform}:\n\n`;
+  message += `👤 Usuario: ${credential}\n`;
   message += `🔑 Contraseña: ${password}\n`;
-  message += `👤 Perfil: ${sub.nombre_perfil}\n`;
+  message += `🎭 Perfil: ${sub.nombre_perfil}\n`;
   if (sub.pin_perfil) {
     message += `🔒 PIN: ${sub.pin_perfil}\n`;
   }
@@ -95,8 +96,8 @@ export function generateRenewalMessage(sub: SubscriptionWithDetails): string {
   const fecha = new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE");
 
   let message = `¡Hola ${clientName}! 👋\n\n`;
-  message += `Tu suscripción a ${platform} vence el ${fecha}.\n\n`;
-  message += `Para continuar disfrutando del servicio, por favor realiza el pago correspondiente.\n\n`;
+  message += `📅 Tu suscripción a *${platform}* vence el *${fecha}*.\n\n`;
+  message += `💰 Para continuar disfrutando del servicio, por favor realiza el pago correspondiente.\n\n`;
   message += `¿Deseas renovar? Responde a este mensaje y te atiendo. 😊`;
 
   return message;
@@ -107,7 +108,7 @@ export function generateExpiryMessage(sub: SubscriptionWithDetails): string {
   const platform = getPlatformName(sub);
 
   let message = `¡Hola ${clientName}! 👋\n\n`;
-  message += `Tu suscripción a ${platform} ha vencido.\n\n`;
+  message += `⚠️ Tu suscripción a *${platform}* ha vencido.\n\n`;
   message += `Si deseas reactivar el servicio, por favor contactame.\n\n`;
   message += `¡Espero verte pronto! 🙂`;
 
