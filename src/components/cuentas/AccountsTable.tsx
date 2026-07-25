@@ -93,6 +93,11 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
     return correo.length > 5 ? correo.slice(0, 5) + "..." : correo;
   };
 
+  const mascararContrasena = (pass: string) => {
+    if (!pass) return "";
+    return "•••••";
+  };
+
   const getVencimientoColor = (fecha: string | null) => {
     if (!fecha) return "text-muted-foreground";
     const today = new Date();
@@ -125,8 +130,11 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
 
   if (accounts.length === 0) {
     return (
-      <div className="rounded-xl p-8 text-center bg-card border border-border">
-        <p className="text-muted-foreground text-sm">No hay cuentas registradas.</p>
+      <div className="rounded-xl p-10 text-center bg-card border border-border">
+        <p className="text-muted-foreground">No hay cuentas registradas.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Crea una nueva cuenta para comenzar.
+        </p>
       </div>
     );
   }
@@ -138,13 +146,13 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground font-medium py-1 text-[11px]">Plataforma</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1 text-[11px]">Correo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1 text-[11px]">Contraseña</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1 text-[11px]">Perfiles</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1 text-[11px]">Costo</TableHead>
-              <TableHead className="text-muted-foreground font-medium py-1 text-[11px]">Vence</TableHead>
-              <TableHead className="text-muted-foreground font-medium text-right py-1 text-[11px]"></TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Plataforma</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Correo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Contraseña</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Perfiles</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Costo</TableHead>
+              <TableHead className="text-muted-foreground font-medium py-1.5 text-xs">Vence</TableHead>
+              <TableHead className="text-muted-foreground font-medium text-right py-1.5 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -159,63 +167,63 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
 
               return (
                 <TableRow key={account.id} className="border-b border-border hover:bg-accent/30 transition-colors">
-                  <TableCell className="py-1">
-                    <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px]`}>
+                  <TableCell className="py-1.5">
+                    <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
                       {plataforma?.label || account.plataforma}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-1">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-[10px] font-mono" title={correo || undefined}>
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground text-xs font-mono" title={correo || undefined}>
                         {correo ? truncarCorreo(correo) : "-"}
                       </span>
                       {correo && (
-                        <Button variant="ghost" size="icon" className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" onClick={() => handleCopy(correo, copyCorreoId)}>
-                          {copiedId === copyCorreoId ? <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
+                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleCopy(correo, copyCorreoId)}>
+                          {copiedId === copyCorreoId ? <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-3 w-3" />}
                         </Button>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-1">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-[10px] font-mono">
-                        {contrasena ? "•••••" : "-"}
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground text-xs font-mono">
+                        {contrasena ? mascararContrasena(contrasena) : "-"}
                       </span>
                       {contrasena && (
-                        <Button variant="ghost" size="icon" className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" onClick={() => handleCopy(contrasena, copyPassId)}>
-                          {copiedId === copyPassId ? <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
+                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleCopy(contrasena, copyPassId)}>
+                          {copiedId === copyPassId ? <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-3 w-3" />}
                         </Button>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-1">
-                    <div className="flex items-center gap-0.5">
+                  <TableCell className="py-1.5">
+                    <div className="flex items-center gap-1">
                       {profiles.map((profile, i) => (
-                        <div key={i} title={profile.tooltip} className={`h-2 w-2 rounded-full hover:scale-150 cursor-default transition-all ${profile.status === "free" ? "bg-muted border border-border" : getStatusColor(profile.status)}`} />
+                        <div key={i} title={profile.tooltip} className={`h-3 w-3 rounded-full hover:scale-150 cursor-default transition-all ${profile.status === "free" ? "bg-muted border border-border" : getStatusColor(profile.status)}`} />
                       ))}
-                      <span className="text-muted-foreground text-[9px] ml-0.5">{profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}</span>
+                      <span className="text-muted-foreground text-xs ml-0.5">{profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-foreground text-[10px] py-1">
+                  <TableCell className="text-foreground text-sm py-1.5">
                     {account.precio_costo ? `${MONEDA} ${account.precio_costo.toFixed(2)}` : "-"}
                   </TableCell>
-                  <TableCell className="py-1">
-                    <span className={`font-medium text-[10px] ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
+                  <TableCell className="py-1.5">
+                    <span className={`font-medium text-sm ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
                       {account.fecha_vencimiento_proveedor ? new Date(account.fecha_vencimiento_proveedor).toLocaleDateString("es-PE") : "-"}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right py-1">
+                  <TableCell className="text-right py-1.5">
                     <div className="flex items-center justify-end gap-0.5">
                       {plataformaUrl && (
-                        <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md" onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}>
-                          <ExternalLink className="h-3 w-3" />
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200" title="Abrir plataforma" onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}>
+                          <ExternalLink className="h-3.5 w-3.5" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md" onClick={() => handleEdit(account)}>
-                        <Edit className="h-3 w-3" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200" onClick={() => handleEdit(account)}>
+                        <Edit className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md" onClick={() => handleDelete(account.id)}>
-                        <Trash2 className="h-3 w-3" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200" onClick={() => handleDelete(account.id)}>
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </TableCell>
@@ -227,7 +235,7 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-1">
+      <div className="md:hidden space-y-1.5">
         {accounts.map((account) => {
           const plataforma = getPlataformaByValue(account.plataforma);
           const correo = getCorreo(account);
@@ -238,57 +246,61 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
           const profiles = getAccountProfiles(account.id, account.total_perfiles);
 
           return (
-            <div key={account.id} className="rounded-lg p-2 bg-card border border-border space-y-1">
+            <div key={account.id} className="rounded-xl p-3 bg-card border border-border space-y-2">
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px]`}>
+                <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
                   {plataforma?.label || account.plataforma}
                 </Badge>
-                <div className="flex items-center gap-0.5">
+                <div className="flex items-center gap-1">
                   {plataformaUrl && (
-                    <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md" onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}>
-                      <ExternalLink className="h-2.5 w-2.5" />
+                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200" title="Abrir plataforma" onClick={() => window.open(plataformaUrl, "_blank", "noopener,noreferrer")}>
+                      <ExternalLink className="h-3 w-3" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md" onClick={() => handleEdit(account)}>
-                    <Edit className="h-2.5 w-2.5" />
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200" onClick={() => handleEdit(account)}>
+                    <Edit className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md" onClick={() => handleDelete(account.id)}>
-                    <Trash2 className="h-2.5 w-2.5" />
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200" onClick={() => handleDelete(account.id)}>
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
 
               {correo && (
-                <div className="flex items-center gap-1">
-                  <Mail className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
-                  <Button variant="ghost" size="icon" className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground shrink-0" onClick={() => handleCopy(correo, copyCorreoId)}>
-                    {copiedId === copyCorreoId ? <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
+                <div className="flex items-center gap-1.5">
+                  <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground text-xs font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground shrink-0" onClick={() => handleCopy(correo, copyCorreoId)}>
+                    {copiedId === copyCorreoId ? <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-3 w-3" />}
                   </Button>
                 </div>
               )}
 
               {contrasena && (
-                <div className="flex items-center gap-1">
-                  <KeyRound className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground text-[10px] font-mono">•••••</span>
-                  <Button variant="ghost" size="icon" className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground shrink-0" onClick={() => handleCopy(contrasena, copyPassId)}>
-                    {copiedId === copyPassId ? <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
+                <div className="flex items-center gap-1.5">
+                  <KeyRound className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground text-xs font-mono truncate" title={contrasena}>{mascararContrasena(contrasena)}</span>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground shrink-0" onClick={() => handleCopy(contrasena, copyPassId)}>
+                    {copiedId === copyPassId ? <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-3 w-3" />}
                   </Button>
                 </div>
               )}
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {profiles.map((profile, i) => (
-                    <div key={i} title={profile.tooltip} className={`h-3 w-3 rounded-full cursor-default border-[1.5px] ${profile.status === "free" ? "bg-muted border-border border-dashed" : profile.status === "active" ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-600 dark:border-emerald-500" : profile.status === "expiring" ? "bg-amber-500 dark:bg-amber-400 border-amber-600 dark:border-amber-500" : profile.status === "expired" ? "bg-red-500 dark:bg-red-400 border-red-600 dark:border-red-500" : "bg-muted-foreground/50 border-muted-foreground/70"}`} />
+                    <div key={i} title={profile.tooltip} className={`h-4 w-4 rounded-full cursor-default border-2 ${profile.status === "free" ? "bg-muted border-border border-dashed" : profile.status === "active" ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-600 dark:border-emerald-500" : profile.status === "expiring" ? "bg-amber-500 dark:bg-amber-400 border-amber-600 dark:border-amber-500" : profile.status === "expired" ? "bg-red-500 dark:bg-red-400 border-red-600 dark:border-red-500" : "bg-muted-foreground/50 border-muted-foreground/70"}`} />
                   ))}
-                  <span className="text-muted-foreground text-[9px]">{profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}</span>
+                  <span className="text-muted-foreground text-xs">
+                    {profiles.filter((p) => p.status !== "free").length}/{account.total_perfiles}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-foreground text-[10px]">{account.precio_costo ? `${MONEDA} ${account.precio_costo.toFixed(2)}` : ""}</span>
-                  <span className={`font-medium text-[10px] ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
-                    {account.fecha_vencimiento_proveedor ? new Date(account.fecha_vencimiento_proveedor).toLocaleDateString("es-PE") : ""}
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground text-xs">
+                    {account.precio_costo ? `${MONEDA} ${account.precio_costo.toFixed(2)}` : "-"}
+                  </span>
+                  <span className={`font-medium text-xs ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
+                    {account.fecha_vencimiento_proveedor ? new Date(account.fecha_vencimiento_proveedor).toLocaleDateString("es-PE") : "-"}
                   </span>
                 </div>
               </div>
