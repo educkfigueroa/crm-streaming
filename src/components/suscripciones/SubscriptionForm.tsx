@@ -72,7 +72,18 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
 
   const [state, formAction, isPending] = useActionState(
     isEditing
-      ? (prev: unknown, formData: FormData) => updateSubscription(subscription!.id, prev, formData)
+      ? async (prev: unknown, _formData: FormData) => {
+          const fd = new FormData();
+          fd.set("cliente_id", clienteId);
+          fd.set("cuenta_id", profiles[0]?.cuentaId || "");
+          fd.set("nombre_perfil", profiles[0]?.nombrePerfil || "");
+          fd.set("pin_perfil", profiles[0]?.pinPerfil || "");
+          fd.set("fecha_inicio", fechaInicio);
+          fd.set("fecha_vencimiento", fechaVencimiento);
+          fd.set("precio_cobrado", profiles[0]?.precio || "");
+          fd.set("estado", estado);
+          return updateSubscription(subscription!.id, prev, fd);
+        }
       : async (prev: unknown, formData: FormData) => {
           if (platformType === "iptv") {
             if (!selectedIptvUrl) return { error: "Selecciona un servidor IPTV" };

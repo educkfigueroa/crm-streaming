@@ -12,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CopyButton } from "@/components/shared/CopyButton";
 import { MONEDA, getPlataformaByValue, getPlatformColorClasses, isIptv } from "@/lib/constants";
 import {
   generateWelcomeMessage,
@@ -166,18 +165,6 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                         <span className="font-medium text-foreground text-xs">
                           {sub.nombre_perfil}
                         </span>
-                        {sub.pin_perfil && (
-                          <div className="flex items-center gap-1 mt-0">
-                            <span className="text-[10px] text-muted-foreground">PIN:</span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {sub.pin_perfil}
-                            </span>
-                            <CopyButton
-                              text={sub.pin_perfil}
-                              className="h-3 w-3"
-                            />
-                          </div>
-                        )}
                       </div>
                     </div>
                   </TableCell>
@@ -381,15 +368,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-[10px] text-foreground truncate">
                   {(sub.clients as { nombre_completo?: string })
                     ?.nombre_completo ?? "Sin cliente"}
                 </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span
                     className={`text-[10px] font-medium ${
                       days <= 0
@@ -409,121 +393,106 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                 </div>
               </div>
 
-              {correo && (
-                <div className="flex items-center gap-1">
+              <div className="flex items-center justify-between pt-0.5">
+                <div className="flex items-center gap-0.5">
+                  {correo && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground shrink-0"
+                      title={correo}
+                      onClick={() => handleCopy(correo, copyCorreoId)}
+                    >
+                      {copiedId === copyCorreoId ? (
+                        <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
+                      ) : (
+                        <Mail className="h-3 w-3" />
+                      )}
+                    </Button>
+                  )}
+                  {contraseña && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 text-muted-foreground hover:text-foreground shrink-0"
+                      title="Copiar contraseña"
+                      onClick={() => handleCopy(contraseña, copyPassId)}
+                    >
+                      {copiedId === copyPassId ? (
+                        <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
+                      ) : (
+                        <KeyRound className="h-3 w-3" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {phone && (
+                    <>
+                      <a
+                        href={getWhatsAppUrl(phone, generateWelcomeMessage(sub))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Enviar credenciales"
+                        className="inline-flex items-center justify-center h-5 w-5 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
+                      >
+                        <Send className="h-3 w-3" />
+                      </a>
+                      <a
+                        href={getWhatsAppUrl(phone, generatePasswordUpdateMessage(sub))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Actualizar contraseña"
+                        className="inline-flex items-center justify-center h-5 w-5 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
+                      >
+                        <Key className="h-3 w-3" />
+                      </a>
+                      <a
+                        href={getWhatsAppUrl(phone, generateRenewalMessage(sub))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Recordar renovación"
+                        className="inline-flex items-center justify-center h-5 w-5 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
+                      >
+                        <Bell className="h-3 w-3" />
+                      </a>
+                      <a
+                        href={getWhatsAppUrl(phone, generateExpiryMessage(sub))}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Aviso vencimiento"
+                        className="inline-flex items-center justify-center h-5 w-5 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                      </a>
+                    </>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
-                    title={correo}
-                    onClick={() => handleCopy(correo, copyCorreoId)}
+                    className="h-5 w-5 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-md transition-all duration-200"
+                    title="Renovar suscripción"
+                    onClick={() => handleRenew(sub.id)}
                   >
-                    {copiedId === copyCorreoId ? (
-                      <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
-                    ) : (
-                      <Mail className="h-3 w-3" />
-                    )}
+                    <RotateCw className="h-3 w-3" />
                   </Button>
-                </div>
-              )}
-
-              {contraseña && (
-                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
-                    title="Copiar contraseña"
-                    onClick={() => handleCopy(contraseña, copyPassId)}
+                    className="h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
+                    onClick={() => handleEdit(sub)}
                   >
-                    {copiedId === copyPassId ? (
-                      <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
-                    ) : (
-                      <KeyRound className="h-3 w-3" />
-                    )}
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-5 w-5 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
+                    onClick={() => handleDelete(sub.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
-              )}
-
-              {sub.pin_perfil && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-muted-foreground">PIN:</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {sub.pin_perfil}
-                  </span>
-                  <CopyButton
-                    text={sub.pin_perfil}
-                    className="h-3 w-3"
-                  />
-                </div>
-              )}
-
-              <div className="flex items-center justify-end gap-0.5 pt-0">
-                {phone && (
-                  <>
-                    <a
-                      href={getWhatsAppUrl(phone, generateWelcomeMessage(sub))}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Enviar credenciales"
-                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all duration-200"
-                    >
-                      <Send className="h-3 w-3" />
-                    </a>
-                    <a
-                      href={getWhatsAppUrl(phone, generatePasswordUpdateMessage(sub))}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Actualizar contraseña"
-                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10 rounded-md transition-all duration-200"
-                    >
-                      <Key className="h-3 w-3" />
-                    </a>
-                    <a
-                      href={getWhatsAppUrl(phone, generateRenewalMessage(sub))}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Recordar renovación"
-                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all duration-200"
-                    >
-                      <Bell className="h-3 w-3" />
-                    </a>
-                    <a
-                      href={getWhatsAppUrl(phone, generateExpiryMessage(sub))}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Aviso vencimiento"
-                      className="inline-flex items-center justify-center h-6 w-6 text-muted-foreground hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 rounded-md transition-all duration-200"
-                    >
-                      <AlertTriangle className="h-3 w-3" />
-                    </a>
-                  </>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-cyan-500 dark:hover:text-cyan-400 hover:bg-cyan-500/10 rounded-md transition-all duration-200"
-                  title="Renovar suscripción"
-                  onClick={() => handleRenew(sub.id)}
-                >
-                  <RotateCw className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-all duration-200"
-                  onClick={() => handleEdit(sub)}
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all duration-200"
-                  onClick={() => handleDelete(sub.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
               </div>
             </div>
           );
