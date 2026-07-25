@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle, Copy, Check, Mail, KeyRound } from "lucide-react";
+import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle, Check, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -61,16 +61,6 @@ function getCredenciales(sub: SubscriptionWithDetails): { correo: string; contra
   const correo = isIptv(account.plataforma) ? account.usuario_xtream || "" : account.correo || "";
   const contraseña = account.contraseña || "";
   return { correo, contraseña };
-}
-
-function truncarCorreo(correo: string) {
-  if (!correo) return "";
-  return correo.length > 5 ? correo.slice(0, 5) + "..." : correo;
-}
-
-function mascararContrasena(pass: string) {
-  if (!pass) return "";
-  return "•••••";
 }
 
 export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
@@ -201,46 +191,42 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                     )}
                   </TableCell>
                   <TableCell className="py-1.5">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-[10px] font-mono" title={correo || undefined}>
-                        {correo ? truncarCorreo(correo) : "-"}
-                      </span>
-                      {correo && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
-                          onClick={() => handleCopy(correo, copyCorreoId)}
-                        >
-                          {copiedId === copyCorreoId ? (
-                            <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
-                          ) : (
-                            <Copy className="h-2.5 w-2.5" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
+                    {correo ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                        title={correo}
+                        onClick={() => handleCopy(correo, copyCorreoId)}
+                      >
+                        {copiedId === copyCorreoId ? (
+                          <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                        ) : (
+                          <Mail className="h-3 w-3" />
+                        )}
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground text-[10px]">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="py-1.5">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground text-[10px] font-mono" title={contraseña || undefined}>
-                        {contraseña ? mascararContrasena(contraseña) : "-"}
-                      </span>
-                      {contraseña && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 text-muted-foreground hover:text-foreground"
-                          onClick={() => handleCopy(contraseña, copyPassId)}
-                        >
-                          {copiedId === copyPassId ? (
-                            <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
-                          ) : (
-                            <Copy className="h-2.5 w-2.5" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
+                    {contraseña ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                        title="Copiar contraseña"
+                        onClick={() => handleCopy(contraseña, copyPassId)}
+                      >
+                        {copiedId === copyPassId ? (
+                          <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+                        ) : (
+                          <KeyRound className="h-3 w-3" />
+                        )}
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground text-[10px]">-</span>
+                    )}
                   </TableCell>
                   <TableCell className="py-1.5">
                     <div>
@@ -431,18 +417,17 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
 
               {correo && (
                 <div className="flex items-center gap-1">
-                  <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
+                    title={correo}
                     onClick={() => handleCopy(correo, copyCorreoId)}
                   >
                     {copiedId === copyCorreoId ? (
                       <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
                     ) : (
-                      <Copy className="h-2.5 w-2.5" />
+                      <Mail className="h-3 w-3" />
                     )}
                   </Button>
                 </div>
@@ -450,18 +435,17 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
 
               {contraseña && (
                 <div className="flex items-center gap-1">
-                  <KeyRound className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground text-[10px] font-mono truncate" title={contraseña}>{mascararContrasena(contraseña)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0"
+                    title="Copiar contraseña"
                     onClick={() => handleCopy(contraseña, copyPassId)}
                   >
                     {copiedId === copyPassId ? (
                       <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" />
                     ) : (
-                      <Copy className="h-2.5 w-2.5" />
+                      <KeyRound className="h-3 w-3" />
                     )}
                   </Button>
                 </div>
