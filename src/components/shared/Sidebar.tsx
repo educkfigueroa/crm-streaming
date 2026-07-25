@@ -39,6 +39,7 @@ export function Sidebar() {
           "fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col bg-card/95 backdrop-blur-xl border-r border-border transition-transform duration-300 md:static md:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ paddingTop: "var(--safe-top, 0px)" }}
       >
         <div className="flex h-16 items-center gap-3 px-6 border-b border-border">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/10">

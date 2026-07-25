@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f1119"/>
+  <rect x="24" y="24" width="464" height="464" rx="72" fill="#10b981" opacity="0.15"/>
+  <text x="256" y="300" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="200" font-weight="700" fill="#10b981">CS</text>
+  <circle cx="400" cy="120" r="32" fill="#10b981"/>
+  <rect x="380" y="116" width="40" height="8" rx="4" fill="#0f1119"/>
+</svg>

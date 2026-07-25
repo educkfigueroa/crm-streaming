@@ -114,6 +114,7 @@ export function ChatAssistant() {
             ? "bg-red-500/90 hover:bg-red-500 rotate-0"
             : "bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 hover:scale-110 hover:shadow-emerald-500/25"
         }`}
+        style={{ bottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
       >
         {open ? (
           <X className="h-5 w-5 text-white" />
@@ -124,7 +125,10 @@ export function ChatAssistant() {
 
       {/* Chat Panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[550px] max-h-[calc(100vh-8rem)] rounded-2xl shadow-2xl border border-border/50 bg-card/95 backdrop-blur-xl flex flex-col overflow-hidden">
+        <div
+          className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[550px] max-h-[calc(100vh-8rem)] rounded-2xl shadow-2xl border border-border/50 bg-card/95 backdrop-blur-xl flex flex-col overflow-hidden"
+          style={{ bottom: "max(6rem, calc(env(safe-area-inset-bottom, 0px) + 6rem))" }}
+        >
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
