@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { SidebarProvider } from "@/components/shared/SidebarContext";
+import { ChatAssistant } from "@/components/ai/ChatAssistant";
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
+      <ChatAssistant />
     </SidebarProvider>
   );
 }
