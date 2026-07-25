@@ -359,22 +359,22 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
               </div>
 
               <div className="space-y-2">
-                <Label className="text-muted-foreground text-sm font-medium">Nombre del perfil *</Label>
+                <Label className="text-muted-foreground text-sm font-medium">Usuario *</Label>
                 <Input
                   value={profiles[0]?.nombrePerfil || ""}
                   onChange={(e) => updateProfile(0, "nombrePerfil", e.target.value)}
-                  placeholder="Nombre en el perfil"
+                  placeholder="Usuario Xtream"
                   required
                   className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-purple-500/30 focus:ring-purple-500/10"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-muted-foreground text-sm font-medium">PIN (opcional)</Label>
+                <Label className="text-muted-foreground text-sm font-medium">Contraseña</Label>
                 <Input
                   value={profiles[0]?.pinPerfil || ""}
                   onChange={(e) => updateProfile(0, "pinPerfil", e.target.value)}
-                  placeholder="PIN de restricción"
+                  placeholder="Contraseña del usuario"
                   className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-purple-500/30 focus:ring-purple-500/10"
                 />
               </div>
@@ -631,29 +631,29 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm font-medium">Nombre del Perfil *</Label>
+                  <Label className="text-muted-foreground text-sm font-medium">{platformType === "iptv" ? "Usuario" : "Nombre del Perfil"} *</Label>
                   <Input
                     name="nombre_perfil"
                     value={profiles[0]?.nombrePerfil || ""}
                     onChange={(e) => updateProfile(0, "nombrePerfil", e.target.value)}
-                    placeholder="Nombre que aparece en el perfil"
+                    placeholder={platformType === "iptv" ? "Usuario Xtream" : "Nombre que aparece en el perfil"}
                     required
                     className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-emerald-500/30 focus:ring-emerald-500/10"
                   />
                 </div>
 
-                {accountHasPin(profiles[0]?.cuentaId || "") && (
+                {platformType === "iptv" || accountHasPin(profiles[0]?.cuentaId || "") ? (
                   <div className="space-y-2">
-                    <Label className="text-muted-foreground text-sm font-medium">PIN del Perfil</Label>
+                    <Label className="text-muted-foreground text-sm font-medium">{platformType === "iptv" ? "Contraseña" : "PIN del Perfil"}</Label>
                     <Input
                       name="pin_perfil"
                       value={profiles[0]?.pinPerfil || ""}
                       onChange={(e) => updateProfile(0, "pinPerfil", e.target.value)}
-                      placeholder="PIN de restricción"
+                      placeholder={platformType === "iptv" ? "Contraseña del usuario" : "PIN de restricción"}
                       className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-emerald-500/30 focus:ring-emerald-500/10"
                     />
                   </div>
-                )}
+                ) : null}
               </div>
             </>
           ) : null}

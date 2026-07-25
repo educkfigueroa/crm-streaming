@@ -39,15 +39,12 @@ export function generateWelcomeMessage(sub: SubscriptionWithDetails): string {
 
   if (isIptvSub(sub)) {
     const serverUrl = getServerUrl(sub);
-    let message = `Tus datos de acceso a ${platform} son:\n\n`;
+    let message = "";
     if (serverUrl) {
-      message += `📺 Servidor: ${serverUrl}\n`;
+      message += `${serverUrl}\n`;
     }
-    message += `📧 Usuario: ${credential}\n`;
-    if (password) {
-      message += `🔑 Contraseña: ${password}\n`;
-    }
-    message += `\n📅 Vence: ${fecha}`;
+    message += `${credential}\n`;
+    message += `${password}`;
     return message;
   }
 
@@ -73,12 +70,12 @@ export function generatePasswordUpdateMessage(
 
   if (isIptvSub(sub)) {
     const serverUrl = getServerUrl(sub);
-    let message = `Se actualizó la contraseña de tu cuenta de ${platform}.\n\n`;
+    let message = "";
     if (serverUrl) {
-      message += `📺 Servidor: ${serverUrl}\n`;
+      message += `${serverUrl}\n`;
     }
-    message += `📧 Usuario: ${credential}\n`;
-    message += `🔑 Contraseña: ${password}\n`;
+    message += `${credential}\n`;
+    message += `${password}`;
     return message;
   }
 
