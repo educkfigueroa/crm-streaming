@@ -4,6 +4,7 @@ import {
   convertToModelMessages,
   toUIMessageStream,
   createUIMessageStreamResponse,
+  isStepCount,
 } from "ai";
 import { z } from "zod";
 import { SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
       model: google("gemini-3.5-flash"),
       instructions: SYSTEM_PROMPT,
       messages: await convertToModelMessages(messages),
+      stopWhen: isStepCount(10),
       tools: {
         getDashboardStats: {
           description: "Obtener estadísticas generales del CRM: total cuentas, total clientes, suscripciones activas, por vencer",

@@ -84,14 +84,6 @@ export function ChatAssistant() {
   const isLoading = status === "submitted" || status === "streaming";
 
   useEffect(() => {
-    console.log("[chat-client] status:", status, "messages:", messages.length);
-    if (messages.length > 0) {
-      const last = messages[messages.length - 1];
-      console.log("[chat-client] last msg:", last.role, JSON.stringify(last.parts?.slice(0, 3)));
-    }
-  }, [status, messages]);
-
-  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
