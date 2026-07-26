@@ -19,11 +19,12 @@ function isIptvSub(sub: SubscriptionWithDetails): boolean {
 }
 
 function getCredential(sub: SubscriptionWithDetails): string {
-  if (isIptvSub(sub)) return sub.accounts?.usuario_xtream || "";
+  if (isIptvSub(sub)) return sub.nombre_perfil || sub.accounts?.usuario_xtream || "";
   return sub.accounts?.correo || "";
 }
 
 function getPassword(sub: SubscriptionWithDetails): string {
+  if (isIptvSub(sub)) return sub.pin_perfil || sub.accounts?.contraseña || "";
   return sub.accounts?.contraseña || "";
 }
 

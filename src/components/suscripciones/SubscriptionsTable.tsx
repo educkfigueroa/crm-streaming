@@ -64,9 +64,13 @@ function getCalculatedEstado(fechaVencimiento: string): string {
 function getCredenciales(sub: SubscriptionWithDetails): { correo: string; contraseña: string } {
   const account = sub.accounts;
   if (!account) return { correo: "", contraseña: "" };
-  const correo = isIptv(account.plataforma) ? account.usuario_xtream || "" : account.correo || "";
-  const contraseña = account.contraseña || "";
-  return { correo, contraseña };
+  if (isIptv(account.plataforma)) {
+    return {
+      correo: sub.nombre_perfil || account.usuario_xtream || "",
+      contraseña: sub.pin_perfil || account.contraseña || "",
+    };
+  }
+  return { correo: account.correo || "", contraseña: account.contraseña || "" };
 }
 
 export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
