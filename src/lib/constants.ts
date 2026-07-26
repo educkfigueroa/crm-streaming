@@ -19,6 +19,7 @@ export type PlataformaValue = (typeof PLATAFORMAS)[number]["value"];
 export const MONEDA = "S/";
 
 export function getPlataformaByValue(value: string) {
+  if (value === PLATAFORMA_IPTV.value) return PLATAFORMA_IPTV;
   return PLATAFORMAS.find((p) => p.value === value);
 }
 

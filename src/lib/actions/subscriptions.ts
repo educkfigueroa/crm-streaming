@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { Subscription, SubscriptionWithDetails } from "@/types";
+import { sendExpirationNotification } from "./push";
 
 function addOneMonth(dateStr: string): string {
   const date = new Date(dateStr);
@@ -28,7 +29,7 @@ export async function getSubscriptions(): Promise<SubscriptionWithDetails[]> {
     .select(`
       *,
       clients (id, nombre_completo, whatsapp),
-      accounts (id, plataforma, correo, usuario_xtream, total_perfiles, contraseña)
+      accounts (id, plataforma, correo, usuario_xtream, total_perfiles, contraseña, servidor_xtream, url_server)
     `)
     .order("fecha_vencimiento", { ascending: true });
 
@@ -48,7 +49,7 @@ export async function getSubscription(id: string): Promise<SubscriptionWithDetai
     .select(`
       *,
       clients (id, nombre_completo, whatsapp),
-      accounts (id, plataforma, correo, usuario_xtream, total_perfiles, contraseña)
+      accounts (id, plataforma, correo, usuario_xtream, total_perfiles, contraseña, servidor_xtream, url_server)
     `)
     .eq("id", id)
     .single();
@@ -104,6 +105,24 @@ export async function createSubscription(
   if (error) {
     console.error("Error creating subscription:", error);
     return { error: "Error al crear la suscripción" };
+  }
+
+  const vencimiento = new Date(fechaVencimiento);
+  const hoy = new Date();
+  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 2) {
+    const { data: client } = await supabase
+      .from("clients").select("nombre_completo, alias").eq("id", clienteId).single();
+    const { data: account } = await supabase
+      .from("accounts").select("plataforma").eq("id", cuentaId).single();
+    if (client && account) {
+      sendExpirationNotification(
+        client.alias || client.nombre_completo,
+        account.plataforma,
+        fechaVencimiento,
+        diffDays
+      );
+    }
   }
 
   return { success: true };
@@ -177,6 +196,15 @@ export async function renewSubscription(
   if (error) {
     console.error("Error renewing subscription:", error);
     return { error: "Error al renovar la suscripción" };
+  }
+
+  const sub = await getSubscription(id);
+  if (sub) {
+    const clientData = sub.clients as unknown as { alias?: string; nombre_completo: string } | null;
+    const accountData = sub.accounts as unknown as { plataforma: string } | null;
+    const clientName = clientData?.alias || clientData?.nombre_completo || "Cliente";
+    const platform = accountData?.plataforma || "N/A";
+    sendExpirationNotification(clientName, platform, newExpiry);
   }
 
   return { success: true };

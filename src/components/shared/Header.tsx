@@ -3,6 +3,7 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
+import { PushManager } from "@/components/notifications/PushManager";
 import { useSidebar } from "./SidebarContext";
 
 export function Header() {
@@ -22,7 +23,8 @@ export function Header() {
         <h2 className="text-lg font-semibold text-foreground tracking-tight">Panel de Control</h2>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <PushManager />
         <ModeToggle />
       </div>
     </header>

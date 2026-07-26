@@ -54,6 +54,13 @@ function getDaysUntilExpiry(fechaVencimiento: string): number {
   return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+function getCalculatedEstado(fechaVencimiento: string): string {
+  const days = getDaysUntilExpiry(fechaVencimiento);
+  if (days <= 0) return "Vencido";
+  if (days <= 7) return "Por Vencer";
+  return "Activo";
+}
+
 function getCredenciales(sub: SubscriptionWithDetails): { correo: string; contraseña: string } {
   const account = sub.accounts;
   if (!account) return { correo: "", contraseña: "" };
@@ -248,9 +255,9 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   <TableCell className="py-1">
                     <Badge
                       variant="outline"
-                      className={`${getStatusColor(sub.estado)} text-[10px]`}
+                      className={`${getStatusColor(getCalculatedEstado(sub.fecha_vencimiento))} text-[10px]`}
                     >
-                      {sub.estado}
+                      {getCalculatedEstado(sub.fecha_vencimiento)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right py-1">
@@ -362,9 +369,9 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                 </div>
                 <Badge
                   variant="outline"
-                  className={`shrink-0 text-[10px] ${getStatusColor(sub.estado)}`}
+                  className={`shrink-0 text-[10px] ${getStatusColor(getCalculatedEstado(sub.fecha_vencimiento))}`}
                 >
-                  {sub.estado}
+                  {getCalculatedEstado(sub.fecha_vencimiento)}
                 </Badge>
               </div>
 

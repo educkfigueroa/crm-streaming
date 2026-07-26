@@ -2,6 +2,8 @@ import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { SidebarProvider } from "@/components/shared/SidebarContext";
 import { ChatAssistant } from "@/components/ai/ChatAssistant";
+import { ServiceWorkerRegistrar } from "@/components/notifications/ServiceWorkerRegistrar";
+import { PushPermissionDialog } from "@/components/notifications/PushPermissionDialog";
 
 export default function DashboardLayout({
   children,
@@ -10,6 +12,8 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
+      <ServiceWorkerRegistrar />
+      <PushPermissionDialog />
       <div className="flex h-screen overflow-hidden bg-background">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">

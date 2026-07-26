@@ -6,25 +6,37 @@ import type { DashboardStats, SubscriptionWithDetails } from "@/types";
 export async function getDashboardStats(): Promise<DashboardStats> {
   const supabase = await createClient();
 
-  const [cuentasResult, clientesResult, activasResult, porVencerResult] =
-    await Promise.all([
-      supabase.from("accounts").select("id", { count: "exact", head: true }),
-      supabase.from("clients").select("id", { count: "exact", head: true }),
-      supabase
-        .from("subscriptions")
-        .select("id", { count: "exact", head: true })
-        .eq("estado", "Activo"),
-      supabase
-        .from("subscriptions")
-        .select("id", { count: "exact", head: true })
-        .eq("estado", "Por Vencer"),
-    ]);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const sieteDias = new Date(hoy);
+  sieteDias.setDate(hoy.getDate() + 7);
+
+  const hoyStr = hoy.toISOString().split("T")[0];
+  const sieteDiasStr = sieteDias.toISOString().split("T")[0];
+
+  const [cuentasResult, clientesResult, subsResult] = await Promise.all([
+    supabase.from("accounts").select("id", { count: "exact", head: true }),
+    supabase.from("clients").select("id", { count: "exact", head: true }),
+    supabase.from("subscriptions").select("fecha_vencimiento"),
+  ]);
+
+  const subs = subsResult.data || [];
+  let activas = 0;
+  let porVencer = 0;
+
+  for (const sub of subs) {
+    const venc = new Date(sub.fecha_vencimiento);
+    venc.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff > 7) activas++;
+    else if (diff > 0) porVencer++;
+  }
 
   return {
     totalCuentas: cuentasResult.count ?? 0,
     totalClientes: clientesResult.count ?? 0,
-    suscripcionesActivas: activasResult.count ?? 0,
-    porVencer: porVencerResult.count ?? 0,
+    suscripcionesActivas: activas,
+    porVencer,
   };
 }
 
@@ -32,8 +44,12 @@ export async function getExpiringSoon(): Promise<SubscriptionWithDetails[]> {
   const supabase = await createClient();
 
   const today = new Date();
-  const sevenDaysLater = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sevenDaysLater = new Date(today);
   sevenDaysLater.setDate(today.getDate() + 7);
+
+  const todayStr = today.toISOString().split("T")[0];
+  const sevenDaysStr = sevenDaysLater.toISOString().split("T")[0];
 
   const { data, error } = await supabase
     .from("subscriptions")
@@ -42,8 +58,8 @@ export async function getExpiringSoon(): Promise<SubscriptionWithDetails[]> {
       clients (nombre_completo, whatsapp),
       accounts (plataforma, correo)
     `)
-    .lte("fecha_vencimiento", sevenDaysLater.toISOString().split("T")[0])
-    .in("estado", ["Activo", "Por Vencer"])
+    .gte("fecha_vencimiento", todayStr)
+    .lte("fecha_vencimiento", sevenDaysStr)
     .order("fecha_vencimiento", { ascending: true })
     .limit(10);
 
