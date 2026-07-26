@@ -42,7 +42,7 @@ export function StatsCards({ stats, revenueData = [] }: StatsCardsProps) {
       accent: "from-emerald-500/20 to-transparent",
       shadow: "shadow-emerald-500/5",
       sparkColor: "#10b981",
-      href: "/suscripciones",
+      href: "/suscripciones?estado=Activo",
     },
     {
       title: "Por Vencer",
@@ -53,7 +53,7 @@ export function StatsCards({ stats, revenueData = [] }: StatsCardsProps) {
       accent: "from-amber-500/20 to-transparent",
       shadow: "shadow-amber-500/5",
       sparkColor: "#f59e0b",
-      href: "/suscripciones",
+      href: "/suscripciones?estado=Por%20Vencer",
     },
   ];
 

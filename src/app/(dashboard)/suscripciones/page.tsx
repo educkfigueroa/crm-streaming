@@ -22,17 +22,24 @@ import type { SubscriptionWithDetails, Client } from "@/types";
 function SuscripcionesContent() {
   const searchParams = useSearchParams();
   const clienteId = searchParams.get("cliente");
+  const estadoParam = searchParams.get("estado");
 
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [filteredClient, setFilteredClient] = useState<Client | null>(null);
   const [filterPlataforma, setFilterPlataforma] = useState<string>("all");
-  const [filterEstado, setFilterEstado] = useState<string>("all");
+  const [filterEstado, setFilterEstado] = useState<string>(estadoParam || "all");
 
   useEffect(() => {
     loadSubscriptions();
   }, [clienteId]);
+
+  useEffect(() => {
+    if (estadoParam) {
+      setFilterEstado(estadoParam);
+    }
+  }, [estadoParam]);
 
   useEffect(() => {
     if (clienteId) {
@@ -63,9 +70,15 @@ function SuscripcionesContent() {
   }
 
   if (filterEstado !== "all") {
-    filteredSubscriptions = filteredSubscriptions.filter(
-      (sub) => sub.estado === filterEstado
-    );
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    filteredSubscriptions = filteredSubscriptions.filter((sub) => {
+      const venc = new Date(sub.fecha_vencimiento);
+      venc.setHours(0, 0, 0, 0);
+      const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+      const estado = diff > 7 ? "Activo" : diff > 0 ? "Por Vencer" : "Vencido";
+      return estado === filterEstado;
+    });
   }
 
   const hasActiveFilters = filterPlataforma !== "all" || filterEstado !== "all" || !!clienteId;
