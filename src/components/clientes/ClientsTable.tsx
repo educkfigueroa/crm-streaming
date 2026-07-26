@@ -135,68 +135,64 @@ export function ClientsTable({ clients }: ClientsTableProps) {
           return (
             <div
               key={`card-${client.id}`}
-              className="rounded-xl p-2.5 bg-card border border-border"
+              className="rounded-xl p-2.5 bg-card border border-border flex items-start justify-between gap-2"
             >
-              <div className="flex items-center justify-between gap-2 mb-1.5">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <button
-                    onClick={() => viewSubscriptions(client.id)}
-                    className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left truncate text-sm"
-                  >
-                    {client.nombre_completo}
-                  </button>
-                  {client.whatsapp && (
-                    <a
-                      href={getWhatsAppLink(client.whatsapp)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors shrink-0"
-                    >
-                      {country && <span className="text-xs">{country.flag}</span>}
-                      <span className="text-xs font-mono">{maskPhone(client.whatsapp)}</span>
-                    </a>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-full text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
-                  title="Ver suscripciones"
+              <div className="flex items-center gap-1.5 min-w-0 py-0.5">
+                <button
                   onClick={() => viewSubscriptions(client.id)}
+                  className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left truncate text-sm"
                 >
-                  <FileText className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">Suscripciones</span>
-                </Button>
+                  {client.nombre_completo}
+                </button>
                 {client.whatsapp && (
                   <a
                     href={getWhatsAppLink(client.whatsapp)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center h-7 w-full text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                    className="inline-flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors shrink-0"
                   >
-                    <WhatsAppIcon className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">WhatsApp</span>
+                    {country && <span className="text-xs">{country.flag}</span>}
+                    <span className="text-xs font-mono">{maskPhone(client.whatsapp)}</span>
                   </a>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-0.5 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                  title="Ver suscripciones"
+                  onClick={() => viewSubscriptions(client.id)}
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                </Button>
+                {client.whatsapp ? (
+                  <a
+                    href={getWhatsAppLink(client.whatsapp)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center h-7 w-7 text-muted-foreground hover:text-emerald-500 dark:hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all duration-200"
+                  >
+                    <WhatsAppIcon className="h-3.5 w-3.5" />
+                  </a>
+                ) : (
+                  <div className="h-7 w-7" />
                 )}
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-full text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-all duration-200"
                   onClick={() => handleEdit(client)}
                 >
-                  <Edit className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">Editar</span>
+                  <Edit className="h-3.5 w-3.5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-full text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                  className="h-7 w-7 text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
                   onClick={() => handleDelete(client.id)}
                 >
-                  <Trash2 className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">Eliminar</span>
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
