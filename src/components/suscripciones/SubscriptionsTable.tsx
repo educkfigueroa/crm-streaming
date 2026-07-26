@@ -160,7 +160,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
               return (
                 <TableRow
                   key={sub.id}
-                  className="border-b border-border hover:bg-accent/30 transition-colors"
+                  className="border-b border-border hover:bg-accent/30 transition-all duration-300"
                 >
                   <TableCell className="py-1">
                     <div className="flex items-center gap-1.5">
@@ -341,8 +341,8 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
       </div>
 
       {/* Mobile card layout (below md) */}
-      <div className="md:hidden space-y-1">
-        {subscriptions.map((sub) => {
+      <div className="md:hidden space-y-2">
+        {subscriptions.map((sub, i) => {
           const plataforma = sub.accounts
             ? getPlataformaByValue(sub.accounts.plataforma)
             : null;
@@ -351,11 +351,12 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
           const { correo, contraseña } = getCredenciales(sub);
           const copyCorreoId = `sub-correo-m-${sub.id}`;
           const copyPassId = `sub-pass-m-${sub.id}`;
+          const colorKey = plataforma?.color ?? "slate";
 
           return (
             <div
               key={sub.id}
-              className="rounded-xl p-2 bg-card border border-border space-y-1"
+              className={`card-3d rounded-xl p-3 bg-card border border-border/50 animate-fade-in-up animate-stagger-${Math.min(i + 1, 8)} ${getPlatformColorClasses(colorKey).accent}`}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">

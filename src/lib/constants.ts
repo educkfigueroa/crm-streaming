@@ -38,18 +38,18 @@ export function hasPin(value: string): boolean {
   return !PLATFORMS_WITHOUT_PIN.includes(value);
 }
 
-const PLATFORM_COLORS: Record<string, { badge: string; dot: string }> = {
-  red:    { badge: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",    dot: "bg-red-500 dark:bg-red-400" },
-  blue:   { badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",  dot: "bg-blue-500 dark:bg-blue-400" },
-  purple: { badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20", dot: "bg-purple-500 dark:bg-purple-400" },
-  cyan:   { badge: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",  dot: "bg-cyan-500 dark:bg-cyan-400" },
-  sky:    { badge: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",     dot: "bg-sky-500 dark:bg-sky-400" },
-  pink:   { badge: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",   dot: "bg-pink-500 dark:bg-pink-400" },
-  orange: { badge: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20", dot: "bg-orange-500 dark:bg-orange-400" },
-  green:  { badge: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20", dot: "bg-green-500 dark:bg-green-400" },
-  rose:   { badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",   dot: "bg-rose-500 dark:bg-rose-400" },
-  slate:  { badge: "bg-muted text-muted-foreground border-border",                           dot: "bg-muted-foreground/50" },
-  teal:   { badge: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",  dot: "bg-teal-500 dark:bg-teal-400" },
+const PLATFORM_COLORS: Record<string, { badge: string; dot: string; shadow: string; accent: string }> = {
+  red:    { badge: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/25",    dot: "bg-red-500 dark:bg-red-400", shadow: "shadow-red-500/10", accent: "accent-red" },
+  blue:   { badge: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/25",  dot: "bg-blue-500 dark:bg-blue-400", shadow: "shadow-blue-500/10", accent: "accent-blue" },
+  purple: { badge: "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/25", dot: "bg-purple-500 dark:bg-purple-400", shadow: "shadow-purple-500/10", accent: "accent-purple" },
+  cyan:   { badge: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/25",  dot: "bg-cyan-500 dark:bg-cyan-400", shadow: "shadow-cyan-500/10", accent: "accent-cyan" },
+  sky:    { badge: "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/25",     dot: "bg-sky-500 dark:bg-sky-400", shadow: "shadow-sky-500/10", accent: "accent-sky" },
+  pink:   { badge: "bg-pink-500/15 text-pink-600 dark:text-pink-400 border-pink-500/25",   dot: "bg-pink-500 dark:bg-pink-400", shadow: "shadow-pink-500/10", accent: "accent-pink" },
+  orange: { badge: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/25", dot: "bg-orange-500 dark:bg-orange-400", shadow: "shadow-orange-500/10", accent: "accent-orange" },
+  green:  { badge: "bg-green-500/15 text-green-600 dark:text-green-400 border-green-500/25", dot: "bg-green-500 dark:bg-green-400", shadow: "shadow-green-500/10", accent: "accent-green" },
+  rose:   { badge: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/25",   dot: "bg-rose-500 dark:bg-rose-400", shadow: "shadow-rose-500/10", accent: "accent-rose" },
+  slate:  { badge: "bg-muted text-muted-foreground border-border",                           dot: "bg-muted-foreground/50", shadow: "", accent: "accent-slate" },
+  teal:   { badge: "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/25",  dot: "bg-teal-500 dark:bg-teal-400", shadow: "shadow-teal-500/10", accent: "accent-teal" },
 };
 
 export function getPlatformColorClasses(color: string) {

@@ -10,17 +10,17 @@ export function Header() {
   const { toggle } = useSidebar();
 
   return (
-    <header className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-border bg-card/50 backdrop-blur-sm">
+    <header className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-border/50 glass-strong">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9 md:hidden text-muted-foreground hover:text-foreground hover:bg-accent"
+          className="h-9 w-9 md:hidden text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-300"
           onClick={toggle}
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <h2 className="text-lg font-semibold text-foreground tracking-tight">Panel de Control</h2>
+        <h2 className="text-lg font-bold text-foreground tracking-tight">Panel de Control</h2>
       </div>
 
       <div className="flex items-center gap-3">
