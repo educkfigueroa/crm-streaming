@@ -63,7 +63,6 @@ function getCountryInfo(phone: string): { flag: string; code: string } | null {
 
 function maskPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, "");
-  // Find the country code length
   let codeLen = 0;
   for (const country of COUNTRIES) {
     const digits = country.code.replace(/\D/g, "");
@@ -73,10 +72,11 @@ function maskPhone(phone: string): string {
     }
   }
   const local = cleaned.slice(codeLen);
-  if (local.length <= 2) return local;
-  const visible = local.slice(-2);
-  const masked = "•".repeat(Math.min(local.length - 2, 6));
-  return `${masked} ${visible}`;
+  if (local.length <= 4) return local;
+  const first2 = local.slice(0, 2);
+  const last2 = local.slice(-2);
+  const masked = "•".repeat(Math.min(local.length - 4, 4));
+  return `${first2} ${masked} ${last2}`;
 }
 
 interface ClientsTableProps {
