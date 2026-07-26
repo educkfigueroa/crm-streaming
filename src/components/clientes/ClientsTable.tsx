@@ -129,15 +129,15 @@ export function ClientsTable({ clients }: ClientsTableProps) {
   return (
     <>
       {/* Mobile card layout */}
-      <div className="md:hidden space-y-1.5">
+      <div className="md:hidden space-y-2">
         {clients.map((client) => {
           const country = client.whatsapp ? getCountryInfo(client.whatsapp) : null;
           return (
             <div
               key={`card-${client.id}`}
-              className="rounded-xl p-2.5 bg-card border border-border flex items-start justify-between gap-2"
+              className="rounded-xl p-2.5 bg-card border border-border flex items-center justify-between gap-2"
             >
-              <div className="flex items-center gap-1.5 min-w-0 py-0.5">
+              <div className="flex items-center gap-1.5 min-w-0">
                 <button
                   onClick={() => viewSubscriptions(client.id)}
                   className="font-medium text-foreground hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer text-left truncate text-sm"
@@ -156,7 +156,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                   </a>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-0.5 shrink-0">
+              <div className="flex items-center gap-0.5 shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -166,7 +166,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                 >
                   <FileText className="h-3.5 w-3.5" />
                 </Button>
-                {client.whatsapp ? (
+                {client.whatsapp && (
                   <a
                     href={getWhatsAppLink(client.whatsapp)}
                     target="_blank"
@@ -175,8 +175,6 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                   >
                     <WhatsAppIcon className="h-3.5 w-3.5" />
                   </a>
-                ) : (
-                  <div className="h-7 w-7" />
                 )}
                 <Button
                   variant="ghost"
