@@ -9,6 +9,7 @@ export interface Account {
   fecha_vencimiento_proveedor: string | null;
   servidor_xtream: string | null;
   url_server: string | null;
+  url_panel_iptv: string | null;
   usuario_xtream: string | null;
   created_at: string;
   updated_at: string;

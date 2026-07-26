@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Radio, Edit } from "lucide-react";
+import { Plus, Trash2, Radio, Edit, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [url, setUrl] = useState("");
   const [nombre, setNombre] = useState("");
+  const [urlPanel, setUrlPanel] = useState("");
   const [loading, setLoading] = useState(false);
 
   const iptvAccounts = accounts.filter((a) => a.plataforma === "iptv");
@@ -35,10 +36,12 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
       setEditingAccount(account);
       setNombre(account.servidor_xtream || "");
       setUrl(account.url_server || "");
+      setUrlPanel(account.url_panel_iptv || "");
     } else {
       setEditingAccount(null);
       setNombre("");
       setUrl("");
+      setUrlPanel("");
     }
     setOpen(true);
   };
@@ -47,6 +50,7 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
     setEditingAccount(null);
     setNombre("");
     setUrl("");
+    setUrlPanel("");
     setOpen(false);
   };
 
@@ -64,6 +68,7 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
     fd.set("fecha_vencimiento_proveedor", "");
     fd.set("servidor_xtream", nombre);
     fd.set("url_server", url);
+    fd.set("url_panel_iptv", urlPanel);
     fd.set("usuario_xtream", "");
 
     if (editingAccount) {
@@ -119,6 +124,17 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                {account.url_panel_iptv && (
+                  <a
+                    href={account.url_panel_iptv}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-8 w-8 flex items-center justify-center rounded-lg text-purple-500 dark:text-purple-400 hover:bg-purple-500/10 transition-colors"
+                    title="Abrir panel"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -170,6 +186,16 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="http://ejemplo.com:8080"
                 required
+                className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-foreground text-sm font-medium">URL Panel IPTV</Label>
+              <Input
+                value={urlPanel}
+                onChange={(e) => setUrlPanel(e.target.value)}
+                placeholder="http://ejemplo.com:panel"
                 className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>

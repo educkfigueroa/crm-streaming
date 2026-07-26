@@ -56,6 +56,7 @@ export async function createAccount(
   const fechaVencimiento = formData.get("fecha_vencimiento_proveedor") as string || null;
   const servidorXtream = formData.get("servidor_xtream") as string || null;
   const urlServer = formData.get("url_server") as string || null;
+  const urlPanelIptv = formData.get("url_panel_iptv") as string || null;
   const usuarioXtream = formData.get("usuario_xtream") as string || null;
 
   if (!plataforma) {
@@ -75,6 +76,7 @@ export async function createAccount(
     fecha_vencimiento_proveedor: fechaVencimiento || null,
     servidor_xtream: servidorXtream,
     url_server: urlServer,
+    url_panel_iptv: urlPanelIptv,
     usuario_xtream: usuarioXtream,
   });
 
@@ -101,6 +103,7 @@ export async function updateAccount(
   const fechaVencimiento = formData.get("fecha_vencimiento_proveedor") as string || null;
   const servidorXtream = formData.get("servidor_xtream") as string || null;
   const urlServer = formData.get("url_server") as string || null;
+  const urlPanelIptv = formData.get("url_panel_iptv") as string || null;
   const usuarioXtream = formData.get("usuario_xtream") as string || null;
 
   if (!plataforma) {
@@ -122,6 +125,7 @@ export async function updateAccount(
       fecha_vencimiento_proveedor: fechaVencimiento || null,
       servidor_xtream: servidorXtream,
       url_server: urlServer,
+      url_panel_iptv: urlPanelIptv,
       usuario_xtream: usuarioXtream,
       updated_at: new Date().toISOString(),
     })
