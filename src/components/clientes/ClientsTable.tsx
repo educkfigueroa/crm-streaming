@@ -24,41 +24,38 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-const COUNTRY_FLAGS: Record<string, string> = {
-  "+51": "🇵🇪",
-  "+52": "🇲🇽",
-  "+54": "🇦🇷",
-  "+56": "🇨🇱",
-  "+57": "🇨🇴",
-  "+53": "🇨🇺",
-  "+58": "🇻🇪",
-  "+593": "🇪🇨",
-  "+591": "🇧🇴",
-  "+595": "🇵🇾",
-  "+598": "🇺🇾",
-  "+1": "🇺🇸",
-  "+34": "🇪🇸",
-  "+55": "🇧🇷",
-  "+44": "🇬🇧",
-  "+33": "🇫🇷",
-  "+49": "🇩🇪",
-  "+39": "🇮🇹",
-  "+81": "🇯🇵",
-  "+86": "🇨🇳",
-  "+82": "🇰🇷",
-  "+91": "🇮🇳",
-  "+61": "🇦🇺",
-};
+const COUNTRIES = [
+  { code: "+51", flag: "🇵🇪", label: "Perú" },
+  { code: "+52", flag: "🇲🇽", label: "México" },
+  { code: "+54", flag: "🇦🇷", label: "Argentina" },
+  { code: "+56", flag: "🇨🇱", label: "Chile" },
+  { code: "+57", flag: "🇨🇴", label: "Colombia" },
+  { code: "+53", flag: "🇨🇺", label: "Cuba" },
+  { code: "+58", flag: "🇻🇪", label: "Venezuela" },
+  { code: "+593", flag: "🇪🇨", label: "Ecuador" },
+  { code: "+591", flag: "🇧🇴", label: "Bolivia" },
+  { code: "+595", flag: "🇵🇾", label: "Paraguay" },
+  { code: "+598", flag: "🇺🇾", label: "Uruguay" },
+  { code: "+1", flag: "🇺🇸", label: "USA" },
+  { code: "+34", flag: "🇪🇸", label: "España" },
+  { code: "+55", flag: "🇧🇷", label: "Brasil" },
+  { code: "+44", flag: "🇬🇧", label: "UK" },
+  { code: "+33", flag: "🇫🇷", label: "Francia" },
+  { code: "+49", flag: "🇩🇪", label: "Alemania" },
+  { code: "+39", flag: "🇮🇹", label: "Italia" },
+  { code: "+81", flag: "🇯🇵", label: "Japón" },
+  { code: "+86", flag: "🇨🇳", label: "China" },
+  { code: "+82", flag: "🇰🇷", label: "Corea" },
+  { code: "+91", flag: "🇮🇳", label: "India" },
+  { code: "+61", flag: "🇦🇺", label: "Australia" },
+] as const;
 
 function getCountryInfo(phone: string): { flag: string; code: string } | null {
   const cleaned = phone.replace(/\D/g, "");
-  // Try longest codes first (3 digits), then 2, then 1
-  for (const len of [3, 2, 1]) {
-    for (const [code, flag] of Object.entries(COUNTRY_FLAGS)) {
-      const digits = code.replace(/\D/g, "");
-      if (cleaned.startsWith(digits) && cleaned.length > len) {
-        return { flag, code };
-      }
+  for (const country of COUNTRIES) {
+    const digits = country.code.replace(/\D/g, "");
+    if (cleaned.startsWith(digits) && cleaned.length > digits.length) {
+      return { flag: country.flag, code: country.code };
     }
   }
   return null;
@@ -66,11 +63,20 @@ function getCountryInfo(phone: string): { flag: string; code: string } | null {
 
 function maskPhone(phone: string): string {
   const cleaned = phone.replace(/\D/g, "");
-  if (cleaned.length <= 4) return phone;
-  const visible = cleaned.slice(-2);
-  const prefix = cleaned.slice(0, cleaned.length > 8 ? 3 : cleaned.length - 4);
-  const masked = "•".repeat(Math.min(cleaned.length - prefix.length - 2, 6));
-  return `+${prefix} ${masked} ${visible}`;
+  // Find the country code length
+  let codeLen = 0;
+  for (const country of COUNTRIES) {
+    const digits = country.code.replace(/\D/g, "");
+    if (cleaned.startsWith(digits)) {
+      codeLen = digits.length;
+      break;
+    }
+  }
+  const local = cleaned.slice(codeLen);
+  if (local.length <= 2) return local;
+  const visible = local.slice(-2);
+  const masked = "•".repeat(Math.min(local.length - 2, 6));
+  return `${masked} ${visible}`;
 }
 
 interface ClientsTableProps {
@@ -181,7 +187,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
                   href={getWhatsAppLink(client.whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors"
                 >
                   {country && <span className="text-xs">{country.flag}</span>}
                   <span className="text-xs font-mono">{maskPhone(client.whatsapp)}</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useActionState } from "react";
+import { useEffect, useActionState, useState } from "react";
 import { createClientAction, updateClient } from "@/lib/actions/clients";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,46 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { User, MessageCircle, FileText } from "lucide-react";
+import { User, FileText, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Client } from "@/types";
+
+const COUNTRIES = [
+  { code: "+51", flag: "🇵🇪", label: "Perú" },
+  { code: "+52", flag: "🇲🇽", label: "México" },
+  { code: "+54", flag: "🇦🇷", label: "Argentina" },
+  { code: "+56", flag: "🇨🇱", label: "Chile" },
+  { code: "+57", flag: "🇨🇴", label: "Colombia" },
+  { code: "+53", flag: "🇨🇺", label: "Cuba" },
+  { code: "+58", flag: "🇻🇪", label: "Venezuela" },
+  { code: "+593", flag: "🇪🇨", label: "Ecuador" },
+  { code: "+591", flag: "🇧🇴", label: "Bolivia" },
+  { code: "+595", flag: "🇵🇾", label: "Paraguay" },
+  { code: "+598", flag: "🇺🇾", label: "Uruguay" },
+  { code: "+1", flag: "🇺🇸", label: "USA" },
+  { code: "+34", flag: "🇪🇸", label: "España" },
+  { code: "+55", flag: "🇧🇷", label: "Brasil" },
+  { code: "+44", flag: "🇬🇧", label: "UK" },
+  { code: "+33", flag: "🇫🇷", label: "Francia" },
+  { code: "+49", flag: "🇩🇪", label: "Alemania" },
+  { code: "+39", flag: "🇮🇹", label: "Italia" },
+  { code: "+81", flag: "🇯🇵", label: "Japón" },
+  { code: "+86", flag: "🇨🇳", label: "China" },
+  { code: "+82", flag: "🇰🇷", label: "Corea" },
+  { code: "+91", flag: "🇮🇳", label: "India" },
+  { code: "+61", flag: "🇦🇺", label: "Australia" },
+] as const;
+
+function parseExistingPhone(phone: string): { countryCode: string; local: string } {
+  const cleaned = phone.replace(/\D/g, "");
+  for (const c of COUNTRIES) {
+    const digits = c.code.replace(/\D/g, "");
+    if (cleaned.startsWith(digits)) {
+      return { countryCode: c.code, local: cleaned.slice(digits.length) };
+    }
+  }
+  return { countryCode: "+51", local: cleaned };
+}
 
 interface ClientFormProps {
   open: boolean;
@@ -24,10 +62,33 @@ interface ClientFormProps {
 
 export function ClientForm({ open, onOpenChange, client }: ClientFormProps) {
   const isEditing = !!client;
+
+  const existing = client?.whatsapp ? parseExistingPhone(client.whatsapp) : null;
+  const [countryCode, setCountryCode] = useState(existing?.countryCode || "+51");
+  const [localNumber, setLocalNumber] = useState(existing?.local || "");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      const ex = client?.whatsapp ? parseExistingPhone(client.whatsapp) : null;
+      setCountryCode(ex?.countryCode || "+51");
+      setLocalNumber(ex?.local || "");
+    }
+  }, [open, client]);
+
+  const selectedCountry = COUNTRIES.find((c) => c.code === countryCode) || COUNTRIES[0];
+  const fullPhone = countryCode + localNumber;
+
   const [state, formAction, isPending] = useActionState(
     isEditing
-      ? (prev: unknown, formData: FormData) => updateClient(client!.id, prev, formData)
-      : createClientAction,
+      ? (prev: unknown, formData: FormData) => {
+          formData.set("whatsapp", fullPhone);
+          return updateClient(client!.id, prev, formData);
+        }
+      : (prev: unknown, formData: FormData) => {
+          formData.set("whatsapp", fullPhone);
+          return createClientAction(prev, formData);
+        },
     null
   );
 
@@ -101,13 +162,56 @@ export function ClientForm({ open, onOpenChange, client }: ClientFormProps) {
 
             <div className="space-y-2">
               <Label className="text-muted-foreground text-sm font-medium">WhatsApp</Label>
-              <Input
-                name="whatsapp"
-                type="tel"
-                defaultValue={client?.whatsapp || ""}
-                placeholder="+51 999 999 999"
-                className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-purple-500/30 focus:ring-purple-500/10"
-              />
+              <div className="flex gap-2">
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className={cn(
+                      "flex items-center gap-1.5 h-11 px-3 rounded-xl bg-background border border-border text-sm font-medium text-foreground transition-colors hover:bg-accent/50 min-w-[100px]",
+                      "focus:outline-none focus:ring-2 focus:ring-purple-500/15 focus:border-purple-500/20"
+                    )}
+                  >
+                    <span>{selectedCountry.flag}</span>
+                    <span className="text-xs text-muted-foreground">{selectedCountry.code}</span>
+                    <ChevronDown className="h-3 w-3 text-muted-foreground ml-auto" />
+                  </button>
+                  {dropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                      <div className="absolute z-50 mt-1 w-56 max-h-60 overflow-y-auto rounded-xl bg-popover border border-border shadow-xl py-1">
+                        {COUNTRIES.map((c) => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            onClick={() => {
+                              setCountryCode(c.code);
+                              setDropdownOpen(false);
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors text-left",
+                              countryCode === c.code && "bg-accent text-foreground"
+                            )}
+                          >
+                            <span>{c.flag}</span>
+                            <span className="text-foreground">{c.label}</span>
+                            <span className="text-muted-foreground text-xs ml-auto">{c.code}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <Input
+                  name="whatsapp_local"
+                  type="tel"
+                  value={localNumber}
+                  onChange={(e) => setLocalNumber(e.target.value.replace(/\D/g, ""))}
+                  placeholder="999 999 999"
+                  className="flex-1 h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-purple-500/30 focus:ring-purple-500/10 font-mono"
+                />
+              </div>
+              <input type="hidden" name="whatsapp" value={fullPhone} />
             </div>
           </div>
 
