@@ -48,6 +48,7 @@ export interface DashboardStats {
   totalClientes: number;
   suscripcionesActivas: number;
   porVencer: number;
+  vencidas: number;
 }
 
 export type SubscriptionStatus = "Activo" | "Por Vencer" | "Vencido" | "Suspendido";

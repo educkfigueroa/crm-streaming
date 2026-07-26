@@ -144,6 +144,11 @@
     padding-right: var(--safe-right);
   }
 
+  /* Tabular figures for numbers */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
   input, textarea, select {
     font-size: 16px !important;
     -webkit-appearance: none;
@@ -335,6 +340,21 @@
 .accent-rose { border-left: 3px solid oklch(0.65 0.2 10); }
 .accent-teal { border-left: 3px solid oklch(0.7 0.15 175); }
 .accent-slate { border-left: 3px solid oklch(0.55 0 0); }
+
+/* Text gradient */
+.text-gradient {
+  background: linear-gradient(135deg, oklch(0.65 0.17 160) 0%, oklch(0.7 0.15 180) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .text-gradient {
+  background: linear-gradient(135deg, oklch(0.75 0.17 160) 0%, oklch(0.8 0.15 180) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 /* Scrollable containers with proper overscroll */
 .scrollable {

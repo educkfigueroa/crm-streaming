@@ -23,6 +23,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const subs = subsResult.data || [];
   let activas = 0;
   let porVencer = 0;
+  let vencidas = 0;
 
   for (const sub of subs) {
     const venc = new Date(sub.fecha_vencimiento);
@@ -30,6 +31,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
     if (diff > 7) activas++;
     else if (diff > 0) porVencer++;
+    else vencidas++;
   }
 
   return {
@@ -37,6 +39,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalClientes: clientesResult.count ?? 0,
     suscripcionesActivas: activas,
     porVencer,
+    vencidas,
   };
 }
 

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Tv, Users, Shield, AlertTriangle } from "lucide-react";
 import type { DashboardStats } from "@/types";
+import { AnimatedCounter } from "./AnimatedCounter";
+import { MiniSparkline } from "./MiniSparkline";
 
 interface StatsCardsProps {
   stats: DashboardStats;
+  revenueData?: number[];
 }
 
-export function StatsCards({ stats }: StatsCardsProps) {
+export function StatsCards({ stats, revenueData = [] }: StatsCardsProps) {
   const cards = [
     {
       title: "Total Cuentas",
@@ -15,6 +18,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
       color: "text-blue-500 dark:text-blue-400",
       iconBg: "bg-blue-500/10",
       accent: "from-blue-500/20 to-transparent",
+      shadow: "shadow-blue-500/5",
+      sparkColor: "#3b82f6",
       href: "/cuentas",
     },
     {
@@ -24,15 +29,19 @@ export function StatsCards({ stats }: StatsCardsProps) {
       color: "text-purple-500 dark:text-purple-400",
       iconBg: "bg-purple-500/10",
       accent: "from-purple-500/20 to-transparent",
+      shadow: "shadow-purple-500/5",
+      sparkColor: "#a855f7",
       href: "/clientes",
     },
     {
-      title: "Suscripciones Activas",
+      title: "Activas",
       value: stats.suscripcionesActivas,
       icon: Shield,
       color: "text-emerald-500 dark:text-emerald-400",
       iconBg: "bg-emerald-500/10",
       accent: "from-emerald-500/20 to-transparent",
+      shadow: "shadow-emerald-500/5",
+      sparkColor: "#10b981",
       href: "/suscripciones",
     },
     {
@@ -42,31 +51,41 @@ export function StatsCards({ stats }: StatsCardsProps) {
       color: "text-amber-500 dark:text-amber-400",
       iconBg: "bg-amber-500/10",
       accent: "from-amber-500/20 to-transparent",
+      shadow: "shadow-amber-500/5",
+      sparkColor: "#f59e0b",
       href: "/suscripciones",
     },
   ];
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card) => (
+      {cards.map((card, i) => (
         <Link
           key={card.title}
           href={card.href}
-          className="group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg bg-card border border-border cursor-pointer"
+          className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:${card.shadow} bg-card border border-border/50 card-3d animate-fade-in-up animate-stagger-${Math.min(i + 1, 8)}`}
         >
           <div className={`absolute inset-0 bg-gradient-to-br ${card.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground tracking-wide">{card.title}</p>
+              <p className="text-xs font-medium text-muted-foreground tracking-wide uppercase">{card.title}</p>
               <p className={`mt-2 text-3xl font-bold tracking-tight ${card.color}`}>
-                {card.value}
+                <AnimatedCounter value={card.value} />
               </p>
             </div>
-            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.iconBg} transition-transform duration-300 group-hover:scale-110`}>
-              <card.icon className={`h-6 w-6 ${card.color}`} />
+            <div className="flex flex-col items-end gap-2">
+              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.iconBg} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                <card.icon className={`h-5 w-5 ${card.color}`} />
+              </div>
+              <MiniSparkline
+                data={revenueData.length ? revenueData : [0, 0, 0, 0, 0, 0, card.value]}
+                color={card.sparkColor}
+                height={24}
+                width={60}
+              />
             </div>
           </div>
-          <div className="relative mt-3 text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+          <div className="relative mt-3 text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300">
             Ver detalle →
           </div>
         </Link>

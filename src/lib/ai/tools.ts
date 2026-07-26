@@ -52,23 +52,33 @@ function buildRenewalMessage(sub: SubscriptionWithDetails): string {
 
 export async function getDashboardStatsAction() {
   const supabase = await createClient();
-  const [cuentas, clientes, activas, porVencer] = await Promise.all([
+  const [cuentas, clientes, subs] = await Promise.all([
     supabase.from("accounts").select("id", { count: "exact", head: true }),
     supabase.from("clients").select("id", { count: "exact", head: true }),
-    supabase
-      .from("subscriptions")
-      .select("id", { count: "exact", head: true })
-      .eq("estado", "Activo"),
-    supabase
-      .from("subscriptions")
-      .select("id", { count: "exact", head: true })
-      .eq("estado", "Por Vencer"),
+    supabase.from("subscriptions").select("fecha_vencimiento"),
   ]);
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  let activas = 0;
+  let porVencer = 0;
+  let vencidas = 0;
+
+  for (const sub of subs.data || []) {
+    const venc = new Date(sub.fecha_vencimiento);
+    venc.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff > 7) activas++;
+    else if (diff > 0) porVencer++;
+    else vencidas++;
+  }
+
   return {
     totalCuentas: cuentas.count ?? 0,
     totalClientes: clientes.count ?? 0,
-    suscripcionesActivas: activas.count ?? 0,
-    porVencer: porVencer.count ?? 0,
+    suscripcionesActivas: activas,
+    porVencer,
+    vencidas,
   };
 }
 
