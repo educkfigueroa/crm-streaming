@@ -86,23 +86,21 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
 
   return (
     <div className="rounded-2xl p-6 bg-card border border-border">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10">
-            <Radio className="h-5 w-5 text-purple-500 dark:text-purple-400" />
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Servidores IPTV</h3>
-            <p className="text-xs text-muted-foreground">URLs disponibles para suscripciones IPTV</p>
-          </div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500/10">
+          <Radio className="h-5 w-5 text-purple-500 dark:text-purple-400" />
         </div>
-        <Button
+        <div>
+          <h3 className="text-base font-semibold text-foreground">Servidores IPTV</h3>
+          <p className="text-xs text-muted-foreground">URLs disponibles para suscripciones IPTV</p>
+        </div>
+        <button
           onClick={() => handleOpen()}
-          className="rounded-xl bg-purple-500/10 text-purple-500 dark:text-purple-400 hover:bg-purple-500/20 border-0 font-medium"
+          className="ml-auto h-7 w-7 rounded-lg bg-purple-500/10 text-purple-500 dark:text-purple-400 hover:bg-purple-500/20 flex items-center justify-center transition-colors"
+          title="Agregar servidor"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Agregar URL
-        </Button>
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
 
       {iptvAccounts.length === 0 ? (
@@ -116,12 +114,9 @@ export function IptvManager({ accounts, onUpdate }: IptvManagerProps) {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Radio className="h-4 w-4 text-purple-500 dark:text-purple-400 shrink-0" />
-                <div className="min-w-0">
-                  {account.servidor_xtream && (
-                    <p className="text-sm font-medium text-foreground truncate">{account.servidor_xtream}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground truncate">{account.url_server || "-"}</p>
-                </div>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {account.servidor_xtream || "Servidor IPTV"}
+                </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <Button
