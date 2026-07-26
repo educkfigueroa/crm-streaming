@@ -54,7 +54,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
           Ganancias Mensuales
         </h3>
         <div className="text-right">
-          <p className="text-xs text-muted-foreground">Total 7 meses</p>
+          <p className="text-xs text-foreground/60">Total 7 meses</p>
           <p className="text-lg font-bold text-emerald-500 dark:text-emerald-400">
             {MONEDA} {total.toFixed(2)}
           </p>
@@ -70,13 +70,12 @@ export function RevenueChart({ data }: RevenueChartProps) {
             />
             <XAxis
               dataKey="label"
-              className="text-muted-foreground"
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              tick={{ fill: "hsl(var(--foreground))", fontSize: 12, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              tick={{ fill: "hsl(var(--foreground))", fontSize: 12, opacity: 0.6 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `${MONEDA}${v}`}
