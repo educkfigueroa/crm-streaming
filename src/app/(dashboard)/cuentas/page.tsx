@@ -133,27 +133,25 @@ export default function CuentasPage() {
       </div>
 
       {/* Two-column top section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
         {/* Streaming Accounts */}
-        <div className="rounded-2xl p-5 bg-card border border-border/50 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
-                <Tv className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Cuenta Streaming</h3>
-                <p className="text-xs text-muted-foreground">{streamingAccounts.length} cuentas</p>
-              </div>
+        <div className="rounded-2xl p-5 bg-card border border-border/50 transition-all duration-300 hover:shadow-lg flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+              <Tv className="h-5 w-5 text-blue-500 dark:text-blue-400" />
             </div>
-            <button
-              onClick={() => setFormOpen(true)}
-              className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-500 dark:text-blue-400 hover:bg-blue-500/20 flex items-center justify-center transition-colors"
-              title="Agregar cuenta"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Cuentas Streaming</h3>
+              <p className="text-xs text-muted-foreground">{streamingAccounts.length} cuentas</p>
+            </div>
           </div>
+          <button
+            onClick={() => setFormOpen(true)}
+            className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-500 dark:text-blue-400 hover:bg-blue-500/20 flex items-center justify-center transition-colors"
+            title="Agregar cuenta"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
         </div>
 
         {/* IPTV Servers */}
