@@ -15,19 +15,27 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 
 export function usePushNotifications() {
   const [isSupported, setIsSupported] = useState<boolean | null>(null);
+  const [isStandalone, setIsStandalone] = useState<boolean | null>(null);
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const supported =
+    const pushSupported =
       "Notification" in window &&
       "serviceWorker" in navigator &&
       "PushManager" in window;
 
-    setIsSupported(supported);
+    const standalone =
+      (navigator as unknown as { standalone?: boolean }).standalone === true ||
+      window.matchMedia("(display-mode: standalone)").matches;
 
-    if (supported) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    setIsStandalone(standalone);
+    setIsSupported(pushSupported && (!isIOS || standalone));
+
+    if (pushSupported) {
       setPermission(Notification.permission);
 
       navigator.serviceWorker.ready
@@ -115,6 +123,7 @@ export function usePushNotifications() {
 
   return {
     isSupported,
+    isStandalone,
     permission,
     isSubscribed,
     loading,

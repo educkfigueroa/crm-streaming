@@ -18,6 +18,7 @@ const PUSH_ASKED_KEY = "crm_push_asked";
 export function PushPermissionDialog() {
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState(false);
+  const [error, setError] = useState(false);
   const { isSupported, isSubscribed, loading, subscribe } =
     usePushNotifications();
 
@@ -50,11 +51,13 @@ export function PushPermissionDialog() {
   }, [isSupported, isSubscribed]);
 
   const handleAccept = async () => {
+    setError(false);
     const success = await subscribe();
-    localStorage.setItem(PUSH_ASKED_KEY, "true");
-    setOpen(false);
-    if (!success) {
-      alert("No se pudieron activar las notificaciones. Verifica los permisos del browser.");
+    if (success) {
+      localStorage.setItem(PUSH_ASKED_KEY, "true");
+      setOpen(false);
+    } else {
+      setError(true);
     }
   };
 
@@ -87,14 +90,21 @@ export function PushPermissionDialog() {
             {notSupported ? (
               <>
                 Para recibir notificaciones push en <strong>iOS</strong>, agrega
-                esta app al pantalla de inicio (PWA). En Android funciona
-                directamente desde el navegador.
+                esta app a la pantalla de inicio. Toca{" "}
+                <strong>Compartir → Agregar a pantalla de inicio</strong> en
+                Safari, luego abrela desde ahí.
               </>
             ) : (
               <>
                 Recibe alertas cuando una suscripción esté por vencer. Te
                 avisamos <strong>2 días antes</strong> del vencimiento.
               </>
+            )}
+            {error && (
+              <p className="mt-2 text-red-500 dark:text-red-400 text-xs">
+                No se pudo activar. Verifica que no hayas bloqueado los permisos
+                de notificación en ajustes del navegador.
+              </p>
             )}
           </DialogDescription>
         </DialogHeader>
