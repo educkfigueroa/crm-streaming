@@ -353,7 +353,12 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                   required
                 >
                   <SelectTrigger className="h-11 rounded-xl bg-background border-border">
-                    <SelectValue placeholder="Seleccionar servidor IPTV" className="text-foreground" />
+                    <SelectValue className="text-foreground">
+                      {(() => {
+                        const account = iptvAccounts.find((a) => a.id === selectedIptvUrl);
+                        return account ? getIptvLabel(account) : "Seleccionar servidor IPTV";
+                      })()}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="rounded-xl bg-popover border-border">
                     {iptvAccounts.map((account) => (
@@ -471,7 +476,12 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                         disabled={!profile.platform}
                       >
                         <SelectTrigger className="h-10 rounded-lg text-sm bg-background border-border">
-                          <SelectValue placeholder={profile.platform ? "Cuenta" : "Primero plataforma"} className="text-foreground" />
+                          <SelectValue className="text-foreground">
+                            {(() => {
+                              const cuenta = getAccountsForPlatform(profile.platform).find((c) => c.id === profile.cuentaId);
+                              return cuenta ? getAccountLabel(cuenta) : (profile.platform ? "Cuenta" : "Primero plataforma");
+                            })()}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-xl bg-popover border-border">
                           {getAccountsForPlatform(profile.platform).map((cuenta) => (
@@ -574,7 +584,12 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                       required
                     >
                       <SelectTrigger className="h-11 rounded-xl bg-background border-border">
-                        <SelectValue placeholder="Seleccionar servidor IPTV" className="text-foreground" />
+                        <SelectValue className="text-foreground">
+                          {(() => {
+                            const account = iptvAccounts.find((a) => a.id === profiles[0]?.cuentaId);
+                            return account ? getIptvLabel(account) : "Seleccionar servidor IPTV";
+                          })()}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="rounded-xl bg-popover border-border">
                         {iptvAccounts.map((account) => (
@@ -629,7 +644,12 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                         required
                       >
                         <SelectTrigger className="h-11 rounded-xl bg-background border-border">
-                          <SelectValue placeholder="Seleccionar cuenta" className="text-foreground" />
+                          <SelectValue className="text-foreground">
+                            {(() => {
+                              const cuenta = getAccountsForPlatform(profiles[0]?.platform || "").find((c) => c.id === profiles[0]?.cuentaId);
+                              return cuenta ? getAccountLabel(cuenta) : "Seleccionar cuenta";
+                            })()}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="rounded-xl bg-popover border-border">
                           {getAccountsForPlatform(profiles[0]?.platform || "").map((cuenta) => (
