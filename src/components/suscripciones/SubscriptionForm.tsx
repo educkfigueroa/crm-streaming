@@ -284,7 +284,12 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                 required
               >
                 <SelectTrigger className="h-11 rounded-xl bg-background border-border">
-                  <SelectValue placeholder="Seleccionar cliente" className="text-foreground" />
+                  <SelectValue className="text-foreground">
+                    {(() => {
+                      const c = clientes.find((c) => c.id === clienteId);
+                      return c ? `${c.nombre_completo}${c.alias ? ` (${c.alias})` : ""}` : "Seleccionar cliente";
+                    })()}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="rounded-xl bg-popover border-border">
                   {clientes.map((cliente) => (
