@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { MONEDA, getPlataformaByValue, getPlatformColorClasses, isIptv } from "@/lib/constants";
+import { SwipeableRow } from "@/components/shared/SwipeableRow";
 import {
   generateWelcomeMessage,
   generatePasswordUpdateMessage,
@@ -354,10 +355,16 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
           const colorKey = plataforma?.color ?? "slate";
 
           return (
-            <div
+            <SwipeableRow
               key={sub.id}
-              className={`card-3d rounded-xl p-3 bg-card border border-border/50 animate-fade-in-up animate-stagger-${Math.min(i + 1, 8)} ${getPlatformColorClasses(colorKey).accent}`}
+              onSwipeLeft={() => handleDelete(sub.id)}
+              onSwipeRight={() => handleRenew(sub.id)}
+              leftLabel="Eliminar"
+              rightLabel="Renovar"
             >
+              <div
+                className={`card-3d rounded-xl p-3 bg-card border border-border/50 animate-fade-in-up animate-stagger-${Math.min(i + 1, 8)} ${getPlatformColorClasses(colorKey).accent}`}
+              >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <Badge
@@ -506,7 +513,8 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   </Button>
                 </div>
               </div>
-            </div>
+              </div>
+            </SwipeableRow>
           );
         })}
       </div>

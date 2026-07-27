@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { SubscriptionsTable } from "@/components/suscripciones/SubscriptionsTable";
 import { SubscriptionForm } from "@/components/suscripciones/SubscriptionForm";
 import { FilterBar } from "@/components/suscripciones/FilterBar";
+import { SubscriptionsRefresh } from "@/components/suscripciones/SubscriptionsRefresh";
 import { getSubscriptions } from "@/lib/actions/subscriptions";
 import { getClients } from "@/lib/actions/clients";
 import type { SubscriptionWithDetails, Client } from "@/types";
@@ -81,26 +82,27 @@ function SuscripcionesContent() {
   const hasActiveFilters = filterPlataforma !== "all" || filterEstado !== "all" || !!clienteId || searchQuery.length > 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Suscripciones</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {filteredClient
-                ? `Suscripciones de ${filteredClient.nombre_completo}`
-                : "Perfiles asignados a clientes"}
-            </p>
+    <SubscriptionsRefresh>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">Suscripciones</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {filteredClient
+                  ? `Suscripciones de ${filteredClient.nombre_completo}`
+                  : "Perfiles asignados a clientes"}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => setFormOpen(true)}
+            className="h-9 w-9 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors shrink-0"
+            title="Nueva Suscripción"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
         </div>
-        <button
-          onClick={() => setFormOpen(true)}
-          className="h-9 w-9 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors shrink-0"
-          title="Nueva Suscripción"
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-      </div>
 
       <FilterBar
         searchQuery={searchQuery}
@@ -128,6 +130,7 @@ function SuscripcionesContent() {
         defaultClienteId={clienteId || undefined}
       />
     </div>
+    </SubscriptionsRefresh>
   );
 }
 

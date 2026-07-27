@@ -5,6 +5,7 @@ import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { StatusPieChart } from "@/components/dashboard/StatusPieChart";
 import { ExpirationTimeline } from "@/components/dashboard/ExpirationTimeline";
 import { CollapsibleSection } from "@/components/dashboard/CollapsibleSection";
+import { DashboardRefresh } from "@/components/dashboard/DashboardRefresh";
 import { Clock, PieChart, ListOrdered } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -18,7 +19,8 @@ export default async function DashboardPage() {
   const revenueSparkline = monthlyRevenue.map((d) => d.total);
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <DashboardRefresh>
+      <div className="space-y-6 sm:space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gradient tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground font-light">Vista general de tu negocio</p>
@@ -58,5 +60,6 @@ export default async function DashboardPage() {
         <ExpirationTimeline subscriptions={expiringSoon} />
       </CollapsibleSection>
     </div>
+    </DashboardRefresh>
   );
 }
