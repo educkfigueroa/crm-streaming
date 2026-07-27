@@ -123,7 +123,7 @@ export function AccountsFilterBar({
                     "h-7 px-3 rounded-lg text-xs font-medium border transition-all duration-200 inline-flex items-center gap-1.5",
                     isActive
                       ? cn(platformColor.badge, "shadow-sm", platformColor.shadow)
-                      : "bg-muted/30 text-muted-foreground border-transparent hover:bg-muted/60 hover:text-foreground"
+                      : cn(platformColor.badge, "opacity-60 hover:opacity-100")
                   )}
                 >
                   <Icon className="h-3 w-3" />

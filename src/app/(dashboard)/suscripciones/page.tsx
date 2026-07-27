@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { SubscriptionsTable } from "@/components/suscripciones/SubscriptionsTable";
 import { SubscriptionForm } from "@/components/suscripciones/SubscriptionForm";
 import { FilterBar } from "@/components/suscripciones/FilterBar";
@@ -89,24 +88,24 @@ function SuscripcionesContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Suscripciones</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {filteredClient
-              ? `Suscripciones de ${filteredClient.nombre_completo}`
-              : "Perfiles asignados a clientes"}
-          </p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Suscripciones</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {filteredClient
+                ? `Suscripciones de ${filteredClient.nombre_completo}`
+                : "Perfiles asignados a clientes"}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            onClick={() => setFormOpen(true)}
-            className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-lg shadow-primary/5 transition-all duration-200 hover:scale-[1.02]"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva Suscripción
-          </Button>
-        </div>
+        <button
+          onClick={() => setFormOpen(true)}
+          className="h-9 w-9 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors shrink-0"
+          title="Nueva Suscripción"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
 
       <FilterBar
