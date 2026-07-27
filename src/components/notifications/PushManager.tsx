@@ -1,7 +1,6 @@
 "use client";
 
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { Button } from "@/components/ui/button";
 import { Bell, BellOff } from "lucide-react";
 
 export function PushManager() {
@@ -11,26 +10,25 @@ export function PushManager() {
   if (!isSupported) return null;
 
   return (
-    <Button
-      variant={isSubscribed ? "default" : "outline"}
-      size="sm"
+    <button
       onClick={isSubscribed ? unsubscribe : subscribe}
       disabled={loading}
-      className={isSubscribed ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+      title={isSubscribed ? "Desactivar notificaciones" : "Activar notificaciones"}
+      className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 shrink-0 ${
+        loading
+          ? "animate-pulse bg-muted text-muted-foreground"
+          : isSubscribed
+            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25"
+            : "bg-red-500/15 text-red-500 dark:text-red-400 hover:bg-red-500/25"
+      }`}
     >
       {loading ? (
-        <span className="animate-pulse">...</span>
+        <Bell className="h-4 w-4" />
       ) : isSubscribed ? (
-        <>
-          <BellOff className="h-4 w-4 mr-2" />
-          Notificaciones ON
-        </>
+        <BellOff className="h-4 w-4" />
       ) : (
-        <>
-          <Bell className="h-4 w-4 mr-2" />
-          Activar Notificaciones
-        </>
+        <Bell className="h-4 w-4" />
       )}
-    </Button>
+    </button>
   );
 }
