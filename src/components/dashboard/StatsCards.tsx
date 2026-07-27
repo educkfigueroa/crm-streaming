@@ -12,7 +12,7 @@ interface StatsCardsProps {
 export function StatsCards({ stats, revenueData = [] }: StatsCardsProps) {
   const cards = [
     {
-      title: "Total Cuentas",
+      title: "Cuentas",
       value: stats.totalCuentas,
       icon: Tv,
       color: "text-blue-500 dark:text-blue-400",
@@ -23,7 +23,7 @@ export function StatsCards({ stats, revenueData = [] }: StatsCardsProps) {
       href: "/cuentas",
     },
     {
-      title: "Total Clientes",
+      title: "Clientes",
       value: stats.totalClientes,
       icon: Users,
       color: "text-purple-500 dark:text-purple-400",
@@ -58,34 +58,36 @@ export function StatsCards({ stats, revenueData = [] }: StatsCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {cards.map((card, i) => (
         <Link
           key={card.title}
           href={card.href}
-          className={`group relative overflow-hidden rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:${card.shadow} bg-card border border-border/50 card-3d animate-fade-in-up animate-stagger-${Math.min(i + 1, 8)}`}
+          className={`group relative overflow-hidden rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:${card.shadow} bg-card border border-border/50 card-3d animate-fade-in-up animate-stagger-${Math.min(i + 1, 8)}`}
         >
           <div className={`absolute inset-0 bg-gradient-to-br ${card.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
           <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-muted-foreground tracking-wide uppercase">{card.title}</p>
-              <p className={`mt-2 text-3xl font-bold tracking-tight ${card.color}`}>
+              <p className="text-[10px] sm:text-xs font-medium text-muted-foreground tracking-wide uppercase">{card.title}</p>
+              <p className={`mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold tracking-tight ${card.color}`}>
                 <AnimatedCounter value={card.value} />
               </p>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${card.iconBg} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                <card.icon className={`h-5 w-5 ${card.color}`} />
+              <div className={`flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl ${card.iconBg} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                <card.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${card.color}`} />
               </div>
-              <MiniSparkline
-                data={revenueData.length ? revenueData : [0, 0, 0, 0, 0, 0, card.value]}
-                color={card.sparkColor}
-                height={24}
-                width={60}
-              />
+              <div className="hidden sm:block">
+                <MiniSparkline
+                  data={revenueData.length ? revenueData : [0, 0, 0, 0, 0, 0, card.value]}
+                  color={card.sparkColor}
+                  height={24}
+                  width={60}
+                />
+              </div>
             </div>
           </div>
-          <div className="relative mt-3 text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+          <div className="relative mt-2 sm:mt-3 text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300">
             Ver detalle →
           </div>
         </Link>
