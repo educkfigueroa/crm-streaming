@@ -1,16 +1,18 @@
-import { getDashboardStats, getExpiringSoon, getMonthlyRevenue } from "@/lib/actions/dashboard";
+import { getDashboardStats, getExpiringSoon, getMonthlyRevenue, getFinancialSummary } from "@/lib/actions/dashboard";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { ExpiringSoon } from "@/components/dashboard/ExpiringSoon";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { FinancialSummary } from "@/components/dashboard/FinancialSummary";
 import { StatusPieChart } from "@/components/dashboard/StatusPieChart";
 import { ExpirationTimeline } from "@/components/dashboard/ExpirationTimeline";
 import { Clock, PieChart } from "lucide-react";
 
 export default async function DashboardPage() {
-  const [stats, expiringSoon, monthlyRevenue] = await Promise.all([
+  const [stats, expiringSoon, monthlyRevenue, financial] = await Promise.all([
     getDashboardStats(),
     getExpiringSoon(),
     getMonthlyRevenue(),
+    getFinancialSummary(),
   ]);
 
   const revenueSparkline = monthlyRevenue.map((d) => d.total);
@@ -23,6 +25,8 @@ export default async function DashboardPage() {
       </div>
 
       <StatsCards stats={stats} revenueData={revenueSparkline} />
+
+      <FinancialSummary data={financial} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RevenueChart data={monthlyRevenue} />

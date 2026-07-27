@@ -137,3 +137,35 @@ export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
 
   return result;
 }
+
+export interface FinancialSummary {
+  inversionTotal: number;
+  gananciaTotal: number;
+  gananciaNeta: number;
+  margen: number;
+}
+
+export async function getFinancialSummary(): Promise<FinancialSummary> {
+  const supabase = await createClient();
+
+  const [cuentasResult, subsResult] = await Promise.all([
+    supabase.from("accounts").select("precio_costo").not("plataforma", "eq", "iptv"),
+    supabase.from("subscriptions").select("precio_cobrado"),
+  ]);
+
+  const inversionTotal = (cuentasResult.data || [])
+    .reduce((sum, a) => sum + (a.precio_costo || 0), 0);
+
+  const gananciaTotal = (subsResult.data || [])
+    .reduce((sum, s) => sum + (s.precio_cobrado || 0), 0);
+
+  const gananciaNeta = gananciaTotal - inversionTotal;
+  const margen = gananciaTotal > 0 ? Math.round((gananciaNeta / gananciaTotal) * 100) : 0;
+
+  return {
+    inversionTotal: Math.round(inversionTotal * 100) / 100,
+    gananciaTotal: Math.round(gananciaTotal * 100) / 100,
+    gananciaNeta: Math.round(gananciaNeta * 100) / 100,
+    margen,
+  };
+}
