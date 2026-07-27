@@ -52,10 +52,12 @@ function buildRenewalMessage(sub: SubscriptionWithDetails): string {
 
 export async function getDashboardStatsAction() {
   const supabase = await createClient();
-  const [cuentas, clientes, subs] = await Promise.all([
+  const [cuentas, clientes, subs, cuentasCosto, subsCobrado] = await Promise.all([
     supabase.from("accounts").select("id", { count: "exact", head: true }),
     supabase.from("clients").select("id", { count: "exact", head: true }),
     supabase.from("subscriptions").select("fecha_vencimiento"),
+    supabase.from("accounts").select("precio_costo").not("plataforma", "eq", "iptv"),
+    supabase.from("subscriptions").select("precio_cobrado"),
   ]);
 
   const hoy = new Date();
@@ -73,12 +75,18 @@ export async function getDashboardStatsAction() {
     else vencidas++;
   }
 
+  const inversionTotal = (cuentasCosto.data || []).reduce((s, a) => s + (a.precio_costo || 0), 0);
+  const gananciaTotal = (subsCobrado.data || []).reduce((s, s2) => s + (s2.precio_cobrado || 0), 0);
+
   return {
     totalCuentas: cuentas.count ?? 0,
     totalClientes: clientes.count ?? 0,
     suscripcionesActivas: activas,
     porVencer,
     vencidas,
+    inversionTotal: Math.round(inversionTotal * 100) / 100,
+    gananciaTotal: Math.round(gananciaTotal * 100) / 100,
+    gananciaNeta: Math.round((gananciaTotal - inversionTotal) * 100) / 100,
   };
 }
 

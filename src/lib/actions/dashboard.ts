@@ -78,6 +78,7 @@ export interface MonthlyRevenue {
   month: string;
   label: string;
   total: number;
+  inversion: number;
 }
 
 export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
@@ -87,34 +88,41 @@ export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   const startDate = sixMonthsAgo.toISOString().split("T")[0];
 
-  const { data, error } = await supabase
-    .from("subscriptions")
-    .select("fecha_inicio, precio_cobrado")
-    .gte("fecha_inicio", startDate)
-    .order("fecha_inicio", { ascending: true });
+  const [subsResult, cuentasResult] = await Promise.all([
+    supabase
+      .from("subscriptions")
+      .select("fecha_inicio, precio_cobrado")
+      .gte("fecha_inicio", startDate)
+      .order("fecha_inicio", { ascending: true }),
+    supabase
+      .from("accounts")
+      .select("precio_costo, created_at")
+      .not("plataforma", "eq", "iptv"),
+  ]);
 
-  if (error) {
-    console.error("Error fetching monthly revenue:", error);
-    return [];
-  }
-
-  const monthlyMap = new Map<string, number>();
+  const monthlyMap = new Map<string, { total: number; inversion: number }>();
 
   const now = new Date();
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("es-PE", { month: "short", year: "2-digit" });
-    monthlyMap.set(key, 0);
+    monthlyMap.set(key, { total: 0, inversion: 0 });
   }
 
-  for (const sub of data) {
+  for (const sub of subsResult.data || []) {
     if (!sub.fecha_inicio || !sub.precio_cobrado) continue;
     const date = new Date(sub.fecha_inicio);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    if (monthlyMap.has(key)) {
-      monthlyMap.set(key, (monthlyMap.get(key) || 0) + sub.precio_cobrado);
-    }
+    const entry = monthlyMap.get(key);
+    if (entry) entry.total += sub.precio_cobrado;
+  }
+
+  for (const account of cuentasResult.data || []) {
+    if (!account.precio_costo || !account.created_at) continue;
+    const date = new Date(account.created_at);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const entry = monthlyMap.get(key);
+    if (entry) entry.inversion += account.precio_costo;
   }
 
   const result: MonthlyRevenue[] = [];
@@ -127,11 +135,12 @@ export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
     monthNames[key] = label;
   }
 
-  for (const [key, total] of monthlyMap) {
+  for (const [key, values] of monthlyMap) {
     result.push({
       month: key,
       label: monthNames[key] || key,
-      total: Math.round(total * 100) / 100,
+      total: Math.round(values.total * 100) / 100,
+      inversion: Math.round(values.inversion * 100) / 100,
     });
   }
 

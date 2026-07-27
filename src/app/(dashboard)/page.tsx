@@ -2,7 +2,6 @@ import { getDashboardStats, getExpiringSoon, getMonthlyRevenue, getFinancialSumm
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { ExpiringSoon } from "@/components/dashboard/ExpiringSoon";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
-import { FinancialSummary } from "@/components/dashboard/FinancialSummary";
 import { StatusPieChart } from "@/components/dashboard/StatusPieChart";
 import { ExpirationTimeline } from "@/components/dashboard/ExpirationTimeline";
 import { Clock, PieChart } from "lucide-react";
@@ -26,10 +25,8 @@ export default async function DashboardPage() {
 
       <StatsCards stats={stats} revenueData={revenueSparkline} />
 
-      <FinancialSummary data={financial} />
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RevenueChart data={monthlyRevenue} />
+        <RevenueChart data={monthlyRevenue} financial={financial} />
 
         {/* Status Pie Chart */}
         <div className="rounded-2xl p-6 bg-card border border-border/50 transition-all duration-300 hover:shadow-lg">
