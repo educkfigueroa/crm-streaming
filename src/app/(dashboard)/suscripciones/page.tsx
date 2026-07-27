@@ -62,14 +62,8 @@ function SuscripcionesContent() {
   }
 
   if (filterEstado !== "all") {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
     filteredSubscriptions = filteredSubscriptions.filter((sub) => {
-      const venc = new Date(sub.fecha_vencimiento);
-      venc.setHours(0, 0, 0, 0);
-      const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-      const estado = diff > 7 ? "Activo" : diff > 0 ? "Por Vencer" : "Vencido";
-      return estado === filterEstado;
+      return sub.estadoCalculado === filterEstado;
     });
   }
 

@@ -4,6 +4,17 @@ import { createClient } from "@/lib/supabase/server";
 import { getPlataformaByValue, isIptv } from "@/lib/constants";
 import type { SubscriptionWithDetails } from "@/types";
 
+function calcularEstado(fechaVencimiento: string): string {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const vencimiento = new Date(fechaVencimiento);
+  vencimiento.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 0) return "Vencido";
+  if (diffDays <= 7) return "Por Vencer";
+  return "Activo";
+}
+
 function getPlatformLabel(sub: SubscriptionWithDetails): string {
   const p = sub.accounts ? getPlataformaByValue(sub.accounts.plataforma) : null;
   return p?.label || sub.accounts?.plataforma || "Desconocido";
@@ -60,18 +71,14 @@ export async function getDashboardStatsAction() {
     supabase.from("subscriptions").select("precio_cobrado"),
   ]);
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
   let activas = 0;
   let porVencer = 0;
   let vencidas = 0;
 
   for (const sub of subs.data || []) {
-    const venc = new Date(sub.fecha_vencimiento);
-    venc.setHours(0, 0, 0, 0);
-    const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-    if (diff > 7) activas++;
-    else if (diff > 0) porVencer++;
+    const estado = calcularEstado(sub.fecha_vencimiento);
+    if (estado === "Activo") activas++;
+    else if (estado === "Por Vencer") porVencer++;
     else vencidas++;
   }
 

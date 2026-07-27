@@ -259,9 +259,9 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                   <TableCell className="py-1">
                     <Badge
                       variant="outline"
-                      className={`${getStatusColor(getCalculatedEstado(sub.fecha_vencimiento))} text-[10px]`}
-                    >
-                      {getCalculatedEstado(sub.fecha_vencimiento)}
+                        className={`${getStatusColor(sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento))} text-[10px]`}
+                      >
+                        {sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right py-1">
@@ -374,9 +374,9 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
                 </div>
                 <Badge
                   variant="outline"
-                  className={`shrink-0 text-[10px] ${getStatusColor(getCalculatedEstado(sub.fecha_vencimiento))}`}
+                  className={`shrink-0 text-[10px] ${getStatusColor(sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento))}`}
                 >
-                  {getCalculatedEstado(sub.fecha_vencimiento)}
+                  {sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento)}
                 </Badge>
               </div>
 

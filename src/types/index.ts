@@ -42,6 +42,7 @@ export interface Subscription {
 export interface SubscriptionWithDetails extends Subscription {
   clients?: Client;
   accounts?: Account;
+  estadoCalculado?: string;
 }
 
 export interface DashboardStats {

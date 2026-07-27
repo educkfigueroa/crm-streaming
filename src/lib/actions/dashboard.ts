@@ -3,16 +3,19 @@
 import { createClient } from "@/lib/supabase/server";
 import type { DashboardStats, SubscriptionWithDetails } from "@/types";
 
-export async function getDashboardStats(): Promise<DashboardStats> {
-  const supabase = await createClient();
-
+function calcularEstado(fechaVencimiento: string): string {
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
-  const sieteDias = new Date(hoy);
-  sieteDias.setDate(hoy.getDate() + 7);
+  const vencimiento = new Date(fechaVencimiento);
+  vencimiento.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays <= 0) return "Vencido";
+  if (diffDays <= 7) return "Por Vencer";
+  return "Activo";
+}
 
-  const hoyStr = hoy.toISOString().split("T")[0];
-  const sieteDiasStr = sieteDias.toISOString().split("T")[0];
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const supabase = await createClient();
 
   const [cuentasResult, clientesResult, subsResult] = await Promise.all([
     supabase.from("accounts").select("id", { count: "exact", head: true }),
@@ -26,11 +29,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   let vencidas = 0;
 
   for (const sub of subs) {
-    const venc = new Date(sub.fecha_vencimiento);
-    venc.setHours(0, 0, 0, 0);
-    const diff = Math.ceil((venc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-    if (diff > 7) activas++;
-    else if (diff > 0) porVencer++;
+    const estado = calcularEstado(sub.fecha_vencimiento);
+    if (estado === "Activo") activas++;
+    else if (estado === "Por Vencer") porVencer++;
     else vencidas++;
   }
 

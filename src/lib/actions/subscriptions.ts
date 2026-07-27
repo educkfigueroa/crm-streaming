@@ -38,7 +38,12 @@ export async function getSubscriptions(): Promise<SubscriptionWithDetails[]> {
     return [];
   }
 
-  return data as unknown as SubscriptionWithDetails[];
+  const enriched = (data as unknown as SubscriptionWithDetails[]).map((sub) => ({
+    ...sub,
+    estadoCalculado: calcularEstado(sub.fecha_vencimiento),
+  }));
+
+  return enriched;
 }
 
 export async function getSubscription(id: string): Promise<SubscriptionWithDetails | null> {
