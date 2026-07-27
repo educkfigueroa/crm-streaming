@@ -78,7 +78,7 @@ export function RevenueChart({ data, financial }: RevenueChartProps) {
         <div className="flex items-center gap-2 rounded-xl bg-emerald-500/5 border border-emerald-500/10 px-3 py-2">
           <DollarSign className="h-4 w-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
           <div>
-            <p className="text-[10px] text-muted-foreground">Ganancia</p>
+            <p className="text-[10px] text-muted-foreground">Ingreso</p>
             <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{MONEDA} {financial.gananciaTotal.toFixed(2)}</p>
           </div>
         </div>
@@ -96,7 +96,7 @@ export function RevenueChart({ data, financial }: RevenueChartProps) {
             <TrendingDown className="h-4 w-4 text-red-500 dark:text-red-400 shrink-0" />
           )}
           <div>
-            <p className="text-[10px] text-muted-foreground">Neta ({financial.margen}%)</p>
+            <p className="text-[10px] text-muted-foreground">Ganancia ({financial.margen}%)</p>
             <p className={`text-xs font-bold ${financial.gananciaNeta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
               {MONEDA} {financial.gananciaNeta.toFixed(2)}
             </p>
@@ -129,7 +129,7 @@ export function RevenueChart({ data, financial }: RevenueChartProps) {
             />
             <Bar
               dataKey="total"
-              name="Ganancia"
+              name="Ingreso"
               fill="url(#gainGradient)"
               radius={[4, 4, 0, 0]}
             />
