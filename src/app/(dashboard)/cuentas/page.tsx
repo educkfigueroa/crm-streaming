@@ -125,7 +125,7 @@ export default function CuentasPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-4">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Cuentas</h1>
