@@ -280,7 +280,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
               <Select
                 value={clienteId}
                 onValueChange={(value) => setClienteId(value ?? "")}
-                disabled={isEditing || !!defaultClienteId}
+                disabled={!!defaultClienteId}
                 required
               >
                 <SelectTrigger className="h-11 rounded-xl bg-background border-border">
