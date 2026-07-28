@@ -130,7 +130,21 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   useEffect(() => {
     if (open) {
       loadData();
-      if (!isEditing) {
+      if (isEditing && subscription) {
+        setClienteId(subscription.cliente_id || "");
+        setProfiles([{
+          platform: subscription.accounts?.plataforma || "",
+          cuentaId: subscription.cuenta_id || "",
+          nombrePerfil: subscription.nombre_perfil || "",
+          pinPerfil: subscription.pin_perfil || "",
+          precio: subscription.precio_cobrado?.toString() || "",
+        }]);
+        setFechaInicio(subscription.fecha_inicio || new Date().toISOString().split("T")[0]);
+        setFechaVencimiento(subscription.fecha_vencimiento || "");
+        setEstado(subscription.estado || "Activo");
+        setPlatformType(isIptvEditing ? "iptv" : "streaming");
+        setSelectedIptvUrl(subscription.cuenta_id || "");
+      } else if (!isEditing) {
         const today = new Date().toISOString().split("T")[0];
         setFechaInicio(today);
         setFechaVencimiento(addOneMonth(today));
