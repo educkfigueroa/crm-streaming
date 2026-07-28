@@ -38,8 +38,23 @@ function getColorText(days: number): string {
   return "text-emerald-500 dark:text-emerald-400";
 }
 
+function getClientName(sub: SubscriptionWithDetails): string {
+  return (sub.clients as { nombre_completo?: string })?.nombre_completo ?? "Sin cliente";
+}
+
+interface DayData {
+  uniqueClients: { name: string; days: number }[];
+  subs: SubscriptionWithDetails[];
+  worstDays: number;
+}
+
 export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const oneMonthLater = new Date(today);
+  oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -47,18 +62,40 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
 
+  const filteredSubs = useMemo(() => {
+    return subscriptions.filter((sub) => {
+      const fecha = new Date(sub.fecha_vencimiento);
+      fecha.setHours(0, 0, 0, 0);
+      return fecha >= today && fecha <= oneMonthLater;
+    });
+  }, [subscriptions]);
+
   const expirationsByDay = useMemo(() => {
-    const map = new Map<number, SubscriptionWithDetails[]>();
-    for (const sub of subscriptions) {
+    const map = new Map<number, DayData>();
+    for (const sub of filteredSubs) {
       const fecha = new Date(sub.fecha_vencimiento);
       if (fecha.getMonth() === currentMonth && fecha.getFullYear() === currentYear) {
         const day = fecha.getDate();
-        if (!map.has(day)) map.set(day, []);
-        map.get(day)!.push(sub);
+        const days = Math.ceil((fecha.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const clientName = getClientName(sub);
+
+        if (!map.has(day)) {
+          map.set(day, { uniqueClients: [], subs: [], worstDays: days });
+        }
+        const entry = map.get(day)!;
+        entry.subs.push(sub);
+
+        if (!entry.uniqueClients.some((c) => c.name === clientName)) {
+          entry.uniqueClients.push({ name: clientName, days });
+        }
+
+        if (days < entry.worstDays) {
+          entry.worstDays = days;
+        }
       }
     }
     return map;
-  }, [subscriptions, currentMonth, currentYear]);
+  }, [filteredSubs, currentMonth, currentYear]);
 
   const prevMonth = () => {
     setSelectedDay(null);
@@ -80,7 +117,7 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
     }
   };
 
-  const selectedSubs = selectedDay ? expirationsByDay.get(selectedDay) || [] : [];
+  const selectedData = selectedDay ? expirationsByDay.get(selectedDay) : null;
 
   return (
     <div className="space-y-4">
@@ -113,16 +150,16 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
         ))}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1;
-          const subs = expirationsByDay.get(day);
+          const data = expirationsByDay.get(day);
           const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
           const isSelected = day === selectedDay;
-          const hasEvents = subs && subs.length > 0;
+          const hasEvents = data && data.uniqueClients.length > 0;
 
           return (
             <button
               key={day}
               onClick={() => setSelectedDay(isSelected ? null : day)}
-              className={`relative h-10 flex flex-col items-center justify-center rounded-lg text-xs transition-all duration-150 ${
+              className={`relative min-h-[3rem] flex flex-col items-center justify-start rounded-lg text-xs transition-all duration-150 pt-1 ${
                 isSelected
                   ? "bg-primary/15 text-primary font-bold ring-1 ring-primary/30"
                   : isToday
@@ -132,16 +169,20 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
             >
               <span className={`${isToday && !isSelected ? "text-primary" : ""}`}>{day}</span>
               {hasEvents && (
-                <div className="flex gap-0.5 mt-0.5">
-                  {subs!.slice(0, 3).map((sub, idx) => {
-                    const days = Math.ceil((new Date(sub.fecha_vencimiento).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                    return (
-                      <div
-                        key={idx}
-                        className={`h-1 w-1 rounded-full ${getColorClass(days)}`}
-                      />
-                    );
-                  })}
+                <div className="w-full px-0.5 mt-0.5 space-y-0.5">
+                  {data!.uniqueClients.slice(0, 2).map((client, idx) => (
+                    <div
+                      key={idx}
+                      className={`text-[7px] leading-tight text-center truncate rounded px-0.5 py-px ${getColorClass(client.days)} text-white font-medium`}
+                    >
+                      {client.name.split(" ")[0]}
+                    </div>
+                  ))}
+                  {data!.uniqueClients.length > 2 && (
+                    <div className="text-[7px] text-center text-muted-foreground font-medium">
+                      +{data!.uniqueClients.length - 2}
+                    </div>
+                  )}
                 </div>
               )}
             </button>
@@ -150,17 +191,17 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
       </div>
 
       {/* Selected day details */}
-      {selectedDay && (
+      {selectedDay && selectedData && (
         <div className="rounded-xl border border-border/50 bg-background/50 p-3 space-y-2 animate-fade-in-up">
           <p className="text-xs font-semibold text-muted-foreground">
             {selectedDay} de {MONTH_NAMES[currentMonth]}
           </p>
-          {selectedSubs.length === 0 ? (
+          {selectedData.subs.length === 0 ? (
             <p className="text-xs text-muted-foreground">Sin vencimientos este día</p>
           ) : (
             <div className="space-y-1.5">
-              {selectedSubs.map((sub) => {
-                const days = Math.ceil((new Date(sub.fecha_vencimiento).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+              {selectedData.subs.map((sub) => {
+                const days = Math.ceil((new Date(sub.fecha_vencimiento).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                 const plataforma = sub.accounts ? getPlataformaByValue(sub.accounts.plataforma) : null;
                 const colorKey = plataforma?.color ?? "slate";
 
@@ -173,7 +214,7 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${getPlatformColorClasses(colorKey).dot}`} />
                       <span className="text-[10px] text-muted-foreground">
-                        {(sub.clients as { nombre_completo?: string })?.nombre_completo ?? "Sin cliente"}
+                        {getClientName(sub)}
                       </span>
                       <span className={`text-[10px] font-bold tabular-nums ${getColorText(days)}`}>
                         {days <= 0 ? "Vence hoy" : `${days}d`}
