@@ -111,15 +111,17 @@ export function RevenueChart({ data, financial }: RevenueChartProps) {
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: "hsl(var(--foreground))", fontSize: 12, fontWeight: 500 }}
+              tick={{ fill: "currentColor", fontSize: 12, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
+              className="text-foreground"
             />
             <YAxis
-              tick={{ fill: "hsl(var(--foreground))", fontSize: 12, opacity: 0.6 }}
+              tick={{ fill: "currentColor", fontSize: 12, opacity: 0.6 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `${MONEDA}${v}`}
+              className="text-foreground"
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--accent))" }} />
             <Legend

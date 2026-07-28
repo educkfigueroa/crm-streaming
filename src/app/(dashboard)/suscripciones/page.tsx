@@ -15,14 +15,16 @@ function SuscripcionesContent() {
   const searchParams = useSearchParams();
   const clienteId = searchParams.get("cliente");
   const estadoParam = searchParams.get("estado");
+  const plataformaParam = searchParams.get("plataforma");
+  const buscarParam = searchParams.get("buscar");
 
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [filteredClient, setFilteredClient] = useState<Client | null>(null);
-  const [filterPlataforma, setFilterPlataforma] = useState<string>("all");
+  const [filterPlataforma, setFilterPlataforma] = useState<string>(plataformaParam || "all");
   const [filterEstado, setFilterEstado] = useState<string>(estadoParam || "all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(buscarParam || "");
 
   useEffect(() => {
     loadSubscriptions();
@@ -32,7 +34,13 @@ function SuscripcionesContent() {
     if (estadoParam) {
       setFilterEstado(estadoParam);
     }
-  }, [estadoParam]);
+    if (plataformaParam) {
+      setFilterPlataforma(plataformaParam);
+    }
+    if (buscarParam) {
+      setSearchQuery(buscarParam);
+    }
+  }, [estadoParam, plataformaParam, buscarParam]);
 
   useEffect(() => {
     if (clienteId) {

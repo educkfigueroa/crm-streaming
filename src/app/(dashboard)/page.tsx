@@ -3,10 +3,10 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { ExpiringSoon } from "@/components/dashboard/ExpiringSoon";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { StatusPieChart } from "@/components/dashboard/StatusPieChart";
-import { ExpirationTimeline } from "@/components/dashboard/ExpirationTimeline";
+import { ExpirationCalendar } from "@/components/dashboard/ExpirationCalendar";
 import { CollapsibleSection } from "@/components/dashboard/CollapsibleSection";
 import { DashboardRefresh } from "@/components/dashboard/DashboardRefresh";
-import { Clock, PieChart, ListOrdered } from "lucide-react";
+import { Calendar, PieChart, ListOrdered } from "lucide-react";
 
 export default async function DashboardPage() {
   const [stats, expiringSoon, monthlyRevenue, financial] = await Promise.all([
@@ -53,11 +53,11 @@ export default async function DashboardPage() {
       </div>
 
       <CollapsibleSection
-        title="Línea de Tiempo"
-        subtitle="Proximos vencimientos"
-        icon={<Clock className="h-5 w-5 text-amber-500 dark:text-amber-400" />}
+        title="Calendario de Vencimientos"
+        subtitle="Vista mensual"
+        icon={<Calendar className="h-5 w-5 text-amber-500 dark:text-amber-400" />}
       >
-        <ExpirationTimeline subscriptions={expiringSoon} />
+        <ExpirationCalendar subscriptions={expiringSoon} />
       </CollapsibleSection>
     </div>
     </DashboardRefresh>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Trash2, Edit, Copy, Check, ExternalLink, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -168,15 +169,21 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
               return (
                 <TableRow key={account.id} className="border-b border-border hover:bg-accent/30 transition-colors">
                   <TableCell className="py-1">
-                    <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs`}>
-                      {plataforma?.label || account.plataforma}
-                    </Badge>
+                    <Link href={`/suscripciones?plataforma=${account.plataforma}`}>
+                      <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs hover:opacity-80 transition-opacity cursor-pointer`}>
+                        {plataforma?.label || account.plataforma}
+                      </Badge>
+                    </Link>
                   </TableCell>
                   <TableCell className="py-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground text-xs font-mono" title={correo || undefined}>
-                        {correo ? truncarCorreo(correo) : "-"}
-                      </span>
+                      {correo ? (
+                        <Link href={`/suscripciones?buscar=${encodeURIComponent(correo)}`} className="text-muted-foreground text-xs font-mono hover:text-foreground transition-colors truncate max-w-[120px]" title={correo}>
+                          {truncarCorreo(correo)}
+                        </Link>
+                      ) : (
+                        <span className="text-muted-foreground text-xs font-mono">-</span>
+                      )}
                       {correo && (
                         <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground" onClick={() => handleCopy(correo, copyCorreoId)}>
                           {copiedId === copyCorreoId ? <Check className="h-3 w-3 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-3 w-3" />}
@@ -250,9 +257,11 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
               {/* Row 1: Platform badge + profiles + actions */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs shrink-0`}>
-                    {plataforma?.label || account.plataforma}
-                  </Badge>
+                  <Link href={`/suscripciones?plataforma=${account.plataforma}`}>
+                    <Badge variant="secondary" className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-xs shrink-0 hover:opacity-80 transition-opacity cursor-pointer`}>
+                      {plataforma?.label || account.plataforma}
+                    </Badge>
+                  </Link>
                   <div className="flex items-center gap-1 shrink-0">
                     {profiles.map((profile, i) => (
                       <div key={i} title={profile.tooltip} className={`h-3 w-3 rounded-full cursor-default border-2 ${profile.status === "free" ? "bg-muted border-border border-dashed" : profile.status === "active" ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-600 dark:border-emerald-500" : profile.status === "expiring" ? "bg-amber-500 dark:bg-amber-400 border-amber-600 dark:border-amber-500" : profile.status === "expired" ? "bg-red-500 dark:bg-red-400 border-red-600 dark:border-red-500" : "bg-muted-foreground/50 border-muted-foreground/70"}`} />
@@ -282,7 +291,9 @@ export function AccountsTable({ accounts, subscriptions }: AccountsTableProps) {
                 {correo && (
                   <div className="flex items-center gap-1 min-w-0 flex-1">
                     <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
-                    <span className="text-muted-foreground font-mono truncate" title={correo}>{truncarCorreo(correo)}</span>
+                    <Link href={`/suscripciones?buscar=${encodeURIComponent(correo)}`} className="text-muted-foreground font-mono truncate hover:text-foreground transition-colors" title={correo}>
+                      {truncarCorreo(correo)}
+                    </Link>
                     <Button variant="ghost" size="icon" className="h-4 w-4 text-muted-foreground hover:text-foreground shrink-0" onClick={() => handleCopy(correo, copyCorreoId)}>
                       {copiedId === copyCorreoId ? <Check className="h-2.5 w-2.5 text-emerald-500 dark:text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
                     </Button>
