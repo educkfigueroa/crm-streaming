@@ -52,9 +52,6 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const oneMonthLater = new Date(today);
-  oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -66,7 +63,7 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
     return subscriptions.filter((sub) => {
       const fecha = new Date(sub.fecha_vencimiento);
       fecha.setHours(0, 0, 0, 0);
-      return fecha >= today && fecha <= oneMonthLater;
+      return fecha >= today;
     });
   }, [subscriptions]);
 
