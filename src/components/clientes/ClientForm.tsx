@@ -68,13 +68,15 @@ export function ClientForm({ open, onOpenChange, client }: ClientFormProps) {
   const [localNumber, setLocalNumber] = useState(existing?.local || "");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       const ex = client?.whatsapp ? parseExistingPhone(client.whatsapp) : null;
       setCountryCode(ex?.countryCode || "+51");
       setLocalNumber(ex?.local || "");
     }
-  }, [open, client]);
+  }
 
   const selectedCountry = COUNTRIES.find((c) => c.code === countryCode) || COUNTRIES[0];
   const fullPhone = countryCode + localNumber;

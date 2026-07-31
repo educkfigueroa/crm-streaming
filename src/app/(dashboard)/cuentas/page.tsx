@@ -36,10 +36,6 @@ export default function CuentasPage() {
   const [iptvUrlPanel, setIptvUrlPanel] = useState("");
   const [iptvLoading, setIptvLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     setLoading(true);
     const [accountsData, subsData] = await Promise.all([
@@ -50,6 +46,21 @@ export default function CuentasPage() {
     setSubscriptions(subsData);
     setLoading(false);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getAccounts(), getSubscriptions()]).then(
+      ([accountsData, subsData]) => {
+        if (cancelled) return;
+        setAccounts(accountsData);
+        setSubscriptions(subsData);
+        setLoading(false);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const iptvAccounts = accounts.filter((a) => a.plataforma === "iptv");
   let streamingAccounts = accounts.filter((a) => a.plataforma !== "iptv");

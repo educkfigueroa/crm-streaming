@@ -21,30 +21,36 @@ export function usePushNotifications() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const pushSupported =
-      "Notification" in window &&
-      "serviceWorker" in navigator &&
-      "PushManager" in window;
+    const init = async () => {
+      if (typeof window === "undefined") return;
 
-    const standalone =
-      (navigator as unknown as { standalone?: boolean }).standalone === true ||
-      window.matchMedia("(display-mode: standalone)").matches;
+      const pushSupported =
+        "Notification" in window &&
+        "serviceWorker" in navigator &&
+        "PushManager" in window;
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const standalone =
+        (navigator as unknown as { standalone?: boolean }).standalone === true ||
+        window.matchMedia("(display-mode: standalone)").matches;
 
-    setIsStandalone(standalone);
-    setIsSupported(pushSupported && (!isIOS || standalone));
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    if (pushSupported) {
-      setPermission(Notification.permission);
+      setIsStandalone(standalone);
+      setIsSupported(pushSupported && (!isIOS || standalone));
 
-      navigator.serviceWorker.ready
-        .then((registration) => registration.pushManager.getSubscription())
-        .then((subscription) => {
+      if (pushSupported) {
+        setPermission(Notification.permission);
+
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
           setIsSubscribed(!!subscription);
-        })
-        .catch(() => {});
-    }
+        } catch {
+        }
+      }
+    };
+
+    init();
   }, []);
 
   const subscribe = useCallback(async () => {

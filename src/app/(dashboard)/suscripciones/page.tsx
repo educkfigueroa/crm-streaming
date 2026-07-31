@@ -26,11 +26,31 @@ function SuscripcionesContent() {
   const [filterEstado, setFilterEstado] = useState<string>(estadoParam || "all");
   const [searchQuery, setSearchQuery] = useState(buscarParam || "");
 
-  useEffect(() => {
-    loadSubscriptions();
-  }, [clienteId]);
+  const loadSubscriptions = async () => {
+    setLoading(true);
+    const data = await getSubscriptions();
+    setSubscriptions(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
+    let cancelled = false;
+    getSubscriptions().then((data) => {
+      if (cancelled) return;
+      setSubscriptions(data);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [clienteId]);
+
+  const [prevFilterParams, setPrevFilterParams] = useState(
+    `${estadoParam ?? ""}|${plataformaParam ?? ""}|${buscarParam ?? ""}`
+  );
+  const currentFilterParams = `${estadoParam ?? ""}|${plataformaParam ?? ""}|${buscarParam ?? ""}`;
+  if (currentFilterParams !== prevFilterParams) {
+    setPrevFilterParams(currentFilterParams);
     if (estadoParam) {
       setFilterEstado(estadoParam);
     }
@@ -40,25 +60,20 @@ function SuscripcionesContent() {
     if (buscarParam) {
       setSearchQuery(buscarParam);
     }
-  }, [estadoParam, plataformaParam, buscarParam]);
+  }
 
   useEffect(() => {
-    if (clienteId) {
-      getClients().then((clients) => {
-        const client = clients.find((c) => c.id === clienteId);
-        setFilteredClient(client || null);
-      });
-    } else {
-      setFilteredClient(null);
-    }
+    if (!clienteId) return;
+    let cancelled = false;
+    getClients().then((clients) => {
+      if (cancelled) return;
+      const client = clients.find((c) => c.id === clienteId);
+      setFilteredClient(client || null);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [clienteId]);
-
-  const loadSubscriptions = async () => {
-    setLoading(true);
-    const data = await getSubscriptions();
-    setSubscriptions(data);
-    setLoading(false);
-  };
 
   let filteredSubscriptions = clienteId
     ? subscriptions.filter((sub) => sub.cliente_id === clienteId)
@@ -87,7 +102,7 @@ function SuscripcionesContent() {
     );
   }
 
-  const hasActiveFilters = filterPlataforma !== "all" || filterEstado !== "all" || !!clienteId || searchQuery.length > 0;
+  const displayClient = clienteId ? filteredClient : null;
 
   return (
     <SubscriptionsRefresh>
@@ -97,8 +112,8 @@ function SuscripcionesContent() {
             <div>
               <h1 className="text-2xl font-bold text-foreground tracking-tight">Suscripciones</h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                {filteredClient
-                  ? `Suscripciones de ${filteredClient.nombre_completo}`
+                {displayClient
+                  ? `Suscripciones de ${displayClient.nombre_completo}`
                   : "Perfiles asignados a clientes"}
               </p>
             </div>

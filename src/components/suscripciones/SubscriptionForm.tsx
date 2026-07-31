@@ -4,7 +4,7 @@ import { useState, useEffect, useActionState } from "react";
 import { createSubscription, updateSubscription } from "@/lib/actions/subscriptions";
 import { getClients } from "@/lib/actions/clients";
 import { getAccounts } from "@/lib/actions/accounts";
-import { ESTADOS_SUSCRIPCION, MONEDA, getPlataformaByValue, hasPin, PLATAFORMAS } from "@/lib/constants";
+import { ESTADOS_SUSCRIPCION, MONEDA, getPlataformaByValue, hasPin } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, Plus, X, Radio, User, Calendar, DollarSign } from "lucide-react";
+import { Shield, Plus, X, Radio, User, Calendar } from "lucide-react";
 import type { SubscriptionWithDetails, Client, Account } from "@/types";
 
 interface SubscriptionFormProps {
@@ -72,23 +72,18 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
 
   const [state, formAction, isPending] = useActionState(
     isEditing
-      ? async (prev: unknown, _formData: FormData) => {
-          const fd = new FormData();
-          fd.set("cliente_id", clienteId);
-          fd.set("cuenta_id", profiles[0]?.cuentaId || "");
-          fd.set("nombre_perfil", profiles[0]?.nombrePerfil || "");
-          fd.set("pin_perfil", profiles[0]?.pinPerfil || "");
-          fd.set("fecha_inicio", fechaInicio);
-          fd.set("fecha_vencimiento", fechaVencimiento);
-          fd.set("precio_cobrado", profiles[0]?.precio || "");
-          fd.set("estado", estado);
-          return updateSubscription(subscription!.id, prev, fd);
+      ? (prev: unknown, formData: FormData) => {
+          if (profiles[0]?.pinPerfil && !formData.get("pin_perfil")) {
+            formData.set("pin_perfil", profiles[0].pinPerfil);
+          }
+          return updateSubscription(subscription!.id, prev, formData);
         }
       : async (prev: unknown, formData: FormData) => {
+          const submittedClienteId = (formData.get("cliente_id") as string) || clienteId;
           if (platformType === "iptv") {
             if (!selectedIptvUrl) return { error: "Selecciona un servidor IPTV" };
             const fd = new FormData();
-            fd.set("cliente_id", clienteId);
+            fd.set("cliente_id", submittedClienteId);
             fd.set("cuenta_id", selectedIptvUrl);
             fd.set("nombre_perfil", profiles[0]?.nombrePerfil || "");
             fd.set("pin_perfil", profiles[0]?.pinPerfil || "");
@@ -101,7 +96,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
           const results = await Promise.all(
             profiles.map(async (profile) => {
               const fd = new FormData();
-              fd.set("cliente_id", clienteId);
+              fd.set("cliente_id", submittedClienteId);
               fd.set("cuenta_id", profile.cuentaId);
               fd.set("nombre_perfil", profile.nombrePerfil);
               fd.set("pin_perfil", profile.pinPerfil);
@@ -121,75 +116,47 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   );
 
   useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    Promise.all([getClients(), getAccounts()]).then(
+      ([clientesData, cuentasData]) => {
+        if (cancelled) return;
+        setClientes(clientesData);
+        setCuentas(cuentasData);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      const today = new Date().toISOString().split("T")[0];
+      setClienteId(subscription?.cliente_id || defaultClienteId || "");
+      setPlatformType(isIptvEditing ? "iptv" : "streaming");
+      setSelectedIptvUrl(subscription?.cuenta_id || "");
+      setEstado(subscription?.estado || "Activo");
+      setFechaInicio(subscription?.fecha_inicio || today);
+      setFechaVencimiento(
+        subscription?.fecha_vencimiento || addOneMonth(subscription?.fecha_inicio || today)
+      );
+      setProfiles(
+        isEditing
+          ? [{ platform: subscription?.accounts?.plataforma || "", cuentaId: subscription?.cuenta_id || "", nombrePerfil: subscription?.nombre_perfil || "", pinPerfil: subscription?.pin_perfil || "", precio: subscription?.precio_cobrado?.toString() || "" }]
+          : [{ platform: "", cuentaId: "", nombrePerfil: "", pinPerfil: "", precio: "" }]
+      );
+    }
+  }
+
+  useEffect(() => {
     if (state?.success) {
       onOpenChange(false);
       window.location.reload();
     }
   }, [state?.success, onOpenChange]);
-
-  useEffect(() => {
-    if (open) {
-      loadData();
-      if (isEditing && subscription) {
-        setClienteId(subscription.cliente_id || "");
-        setProfiles([{
-          platform: subscription.accounts?.plataforma || "",
-          cuentaId: subscription.cuenta_id || "",
-          nombrePerfil: subscription.nombre_perfil || "",
-          pinPerfil: subscription.pin_perfil || "",
-          precio: subscription.precio_cobrado?.toString() || "",
-        }]);
-        setFechaInicio(subscription.fecha_inicio || new Date().toISOString().split("T")[0]);
-        setFechaVencimiento(subscription.fecha_vencimiento || "");
-        setEstado(subscription.estado || "Activo");
-        setPlatformType(isIptvEditing ? "iptv" : "streaming");
-        setSelectedIptvUrl(subscription.cuenta_id || "");
-      } else if (!isEditing) {
-        const today = new Date().toISOString().split("T")[0];
-        setFechaInicio(today);
-        setFechaVencimiento(addOneMonth(today));
-        if (!defaultClienteId) {
-          setClienteId("");
-        }
-        setPlatformType("streaming");
-        setSelectedIptvUrl("");
-        setProfiles([{ platform: "", cuentaId: "", nombrePerfil: "", pinPerfil: "", precio: "" }]);
-      }
-    }
-  }, [open, isEditing, defaultClienteId]);
-
-  useEffect(() => {
-    if (defaultClienteId && open) {
-      setClienteId(defaultClienteId);
-    }
-  }, [defaultClienteId, open]);
-
-  useEffect(() => {
-    if (!isEditing && clienteId && clientes.length > 0) {
-      const selectedClient = clientes.find((c) => c.id === clienteId);
-      if (selectedClient) {
-        const autoName = selectedClient.alias || selectedClient.nombre_completo;
-        setProfiles((prev) =>
-          prev.map((p) => ({ ...p, nombrePerfil: autoName }))
-        );
-      }
-    }
-  }, [clienteId, clientes, isEditing]);
-
-  useEffect(() => {
-    if (fechaInicio) {
-      setFechaVencimiento(addOneMonth(fechaInicio));
-    }
-  }, [fechaInicio]);
-
-  const loadData = async () => {
-    const [clientesData, cuentasData] = await Promise.all([
-      getClients(),
-      getAccounts(),
-    ]);
-    setClientes(clientesData);
-    setCuentas(cuentasData);
-  };
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -293,7 +260,19 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
               <Label className="text-muted-foreground text-sm font-medium">Cliente *</Label>
               <Select
                 value={clienteId}
-                onValueChange={(value) => setClienteId(value ?? "")}
+                onValueChange={(value) => {
+                  const v = value ?? "";
+                  setClienteId(v);
+                  if (!isEditing) {
+                    const selectedClient = clientes.find((c) => c.id === v);
+                    if (selectedClient) {
+                      const autoName = selectedClient.alias || selectedClient.nombre_completo;
+                      setProfiles((prev) =>
+                        prev.map((p) => ({ ...p, nombrePerfil: autoName }))
+                      );
+                    }
+                  }
+                }}
                 disabled={!!defaultClienteId}
                 required
               >
@@ -720,7 +699,13 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                   name="fecha_inicio"
                   type="date"
                   value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFechaInicio(value);
+                    if (value) {
+                      setFechaVencimiento(addOneMonth(value));
+                    }
+                  }}
                   required
                   className="h-11 rounded-xl bg-background border-border text-foreground focus:border-blue-500/30 focus:ring-blue-500/10"
                 />
@@ -749,7 +734,8 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
                     type="number"
                     step="0.01"
                     min="0"
-                    defaultValue={subscription?.precio_cobrado || ""}
+                    value={profiles[0]?.precio || ""}
+                    onChange={(e) => updateProfile(0, "precio", e.target.value)}
                     placeholder="0.00"
                     className="h-11 rounded-xl bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500/30 focus:ring-blue-500/10"
                   />

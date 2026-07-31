@@ -17,37 +17,18 @@ const PUSH_ASKED_KEY = "crm_push_asked";
 
 export function PushPermissionDialog() {
   const [open, setOpen] = useState(false);
-  const [checked, setChecked] = useState(false);
   const [error, setError] = useState(false);
   const { isSupported, isSubscribed, loading, subscribe } =
     usePushNotifications();
 
   useEffect(() => {
-    if (isSupported === null) return;
-
-    if (isSubscribed) {
-      setChecked(true);
-      return;
-    }
-
-    if (!isSupported) {
-      const alreadyAsked = localStorage.getItem(PUSH_ASKED_KEY);
-      if (!alreadyAsked) {
-        const timer = setTimeout(() => setOpen(true), 1500);
-        setChecked(true);
-        return () => clearTimeout(timer);
-      }
-      setChecked(true);
-      return;
-    }
+    if (isSupported === null || isSubscribed) return;
 
     const alreadyAsked = localStorage.getItem(PUSH_ASKED_KEY);
     if (!alreadyAsked) {
       const timer = setTimeout(() => setOpen(true), 1500);
-      setChecked(true);
       return () => clearTimeout(timer);
     }
-    setChecked(true);
   }, [isSupported, isSubscribed]);
 
   const handleAccept = async () => {
@@ -66,7 +47,7 @@ export function PushPermissionDialog() {
     setOpen(false);
   };
 
-  if (!checked) return null;
+  if (isSupported === null) return null;
 
   const notSupported = isSupported === false;
 

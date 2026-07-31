@@ -13,16 +13,24 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
 
-  useEffect(() => {
-    loadClients();
-  }, []);
-
   const loadClients = async () => {
     setLoading(true);
     const data = await getClients();
     setClients(data);
     setLoading(false);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    getClients().then((data) => {
+      if (cancelled) return;
+      setClients(data);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="space-y-6 pb-4">

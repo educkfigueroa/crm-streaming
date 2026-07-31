@@ -48,17 +48,8 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
     }
   }, [state?.success, onOpenChange]);
 
-  const maxPerfiles = getMaxPerfiles(plataforma);
   const showIptvFields = isIptv(plataforma);
   const isOtro = plataforma === "otro";
-
-  useEffect(() => {
-    if (plataforma && maxPerfiles) {
-      setPerfiles(maxPerfiles);
-    } else if (plataforma === "otro") {
-      setPerfiles(account?.total_perfiles || 1);
-    }
-  }, [plataforma, maxPerfiles, account?.total_perfiles]);
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -101,7 +92,16 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
             <Label className="text-muted-foreground text-sm font-medium">Plataforma</Label>
             <Select
               value={plataforma}
-              onValueChange={(value) => setPlataforma(value ?? "")}
+              onValueChange={(value) => {
+                const p = value ?? "";
+                setPlataforma(p);
+                const m = getMaxPerfiles(p);
+                if (m) {
+                  setPerfiles(m);
+                } else if (p === "otro") {
+                  setPerfiles(account?.total_perfiles || 1);
+                }
+              }}
               required
             >
               <SelectTrigger className="h-11 rounded-xl bg-background border border-border">
