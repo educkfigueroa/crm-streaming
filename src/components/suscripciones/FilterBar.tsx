@@ -1,22 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Search, X, ChevronDown, Tv, Music, Radio, MoreHorizontal } from "lucide-react";
-import { PLATAFORMAS, PLATAFORMA_IPTV, getPlatformColorClasses } from "@/lib/constants";
+import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const ICONS: Record<string, typeof Tv> = {
-  Tv,
-  Music,
-  Radio,
-  MoreHorizontal,
-};
 
 interface FilterBarProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  filterPlataforma: string;
-  onPlataformaChange: (v: string) => void;
   filterEstado: string;
   onEstadoChange: (v: string) => void;
 }
@@ -45,25 +34,15 @@ const ESTADO_CLASSES: Record<string, { active: string; inactive: string }> = {
 export function FilterBar({
   searchQuery,
   onSearchChange,
-  filterPlataforma,
-  onPlataformaChange,
   filterEstado,
   onEstadoChange,
 }: FilterBarProps) {
-  const allPlatforms = [...PLATAFORMAS, PLATAFORMA_IPTV];
-  const [open, setOpen] = useState(false);
-
-  const activeFilters =
-    (filterPlataforma !== "all" ? 1 : 0) +
-    (filterEstado !== "all" ? 1 : 0);
-
-  const hasActive = activeFilters > 0 || searchQuery.length > 0;
+  const hasActive = searchQuery.length > 0 || filterEstado !== "all";
 
   return (
     <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
-      {/* Search row */}
-      <div className="flex items-center gap-2 p-3">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-2.5 p-3">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
@@ -87,105 +66,39 @@ export function FilterBar({
           )}
         </div>
 
-        <button
-          onClick={() => setOpen(!open)}
-          className={cn(
-            "flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-medium border transition-all duration-200 shrink-0",
-            open || activeFilters > 0
-              ? "bg-primary/10 text-primary border-primary/30"
-              : "bg-background text-muted-foreground border-border/50 hover:bg-accent hover:text-foreground"
-          )}
-        >
-          Filtros
-          {activeFilters > 0 && (
-            <span className="h-5 w-5 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center">
-              {activeFilters}
-            </span>
-          )}
-          <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", open && "rotate-180")} />
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mr-1">
+            Estado
+          </span>
+          {ESTADOS.map((e) => {
+            const isActive = filterEstado === e.value;
+            const cls = ESTADO_CLASSES[e.color];
+            return (
+              <button
+                key={e.value}
+                onClick={() => onEstadoChange(isActive ? "all" : e.value)}
+                className={cn(
+                  "h-7 px-3 rounded-lg text-xs font-medium border transition-all duration-200",
+                  isActive ? cls.active : cls.inactive
+                )}
+              >
+                {e.label}
+              </button>
+            );
+          })}
 
-        {hasActive && (
-          <button
-            onClick={() => {
-              onSearchChange("");
-              onPlataformaChange("all");
-              onEstadoChange("all");
-            }}
-            className="flex items-center gap-1 h-9 px-2.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
-          >
-            <X className="h-3 w-3" />
-            Limpiar
-          </button>
-        )}
-      </div>
-
-      {/* Collapsible filters */}
-      <div className={cn(
-        "overflow-hidden transition-all duration-200",
-        open ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
-      )}>
-        <div className="px-3 pb-3 space-y-2.5 border-t border-border/30 pt-3">
-          {/* Status chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mr-1">
-              Estado
-            </span>
-            {ESTADOS.map((e) => {
-              const isActive = filterEstado === e.value;
-              const cls = ESTADO_CLASSES[e.color];
-              return (
-                <button
-                  key={e.value}
-                  onClick={() => onEstadoChange(isActive ? "all" : e.value)}
-                  className={cn(
-                    "h-7 px-3 rounded-lg text-xs font-medium border transition-all duration-200",
-                    isActive ? cls.active : cls.inactive
-                  )}
-                >
-                  {e.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Platform chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mr-1">
-              Plataforma
-            </span>
+          {hasActive && (
             <button
-              onClick={() => onPlataformaChange("all")}
-              className={cn(
-                "h-7 px-3 rounded-lg text-xs font-medium border transition-all duration-200",
-                filterPlataforma === "all"
-                  ? "bg-primary/15 text-primary border-primary/30 shadow-sm shadow-primary/10"
-                  : "bg-muted/30 text-muted-foreground border-transparent hover:bg-muted/60 hover:text-foreground"
-              )}
+              onClick={() => {
+                onSearchChange("");
+                onEstadoChange("all");
+              }}
+              className="flex items-center gap-1 h-7 px-2.5 ml-auto rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             >
-              Todas
+              <X className="h-3 w-3" />
+              Limpiar
             </button>
-            {allPlatforms.map((p) => {
-              const isActive = filterPlataforma === p.value;
-              const platformColor = getPlatformColorClasses(p.color);
-              const Icon = ICONS[p.icon] ?? Tv;
-              return (
-                <button
-                  key={p.value}
-                  onClick={() => onPlataformaChange(isActive ? "all" : p.value)}
-                  className={cn(
-                    "h-7 px-3 rounded-lg text-xs font-medium border transition-all duration-200 inline-flex items-center gap-1.5",
-                    isActive
-                      ? cn(platformColor.badge, "shadow-sm", platformColor.shadow)
-                      : cn(platformColor.badge, "opacity-60 hover:opacity-100")
-                  )}
-                >
-                  <Icon className="h-3 w-3" />
-                  {p.label}
-                </button>
-              );
-            })}
-          </div>
+          )}
         </div>
       </div>
     </div>

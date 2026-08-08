@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { PushManager } from "@/components/notifications/PushManager";
+import { GlobalSearch } from "./GlobalSearch";
 import { useSidebar } from "./SidebarContext";
 
 export function Header() {
@@ -24,6 +25,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
+        <GlobalSearch />
         <PushManager />
         <ModeToggle />
       </div>

@@ -1,4 +1,4 @@
-import { getDashboardStats, getExpiringSoon, getMonthlyRevenue, getFinancialSummary } from "@/lib/actions/dashboard";
+import { getDashboardStats, getExpiringSoon, getMonthlyRevenue, getFinancialSummary, getCalendarSubscriptions } from "@/lib/actions/dashboard";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { ExpiringSoon } from "@/components/dashboard/ExpiringSoon";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
@@ -9,11 +9,12 @@ import { DashboardRefresh } from "@/components/dashboard/DashboardRefresh";
 import { Calendar, PieChart, ListOrdered } from "lucide-react";
 
 export default async function DashboardPage() {
-  const [stats, expiringSoon, monthlyRevenue, financial] = await Promise.all([
+  const [stats, expiringSoon, monthlyRevenue, financial, calendarSubs] = await Promise.all([
     getDashboardStats(),
     getExpiringSoon(),
     getMonthlyRevenue(),
     getFinancialSummary(),
+    getCalendarSubscriptions(),
   ]);
 
   const revenueSparkline = monthlyRevenue.map((d) => d.total);
@@ -28,6 +29,14 @@ export default async function DashboardPage() {
 
       <StatsCards stats={stats} revenueData={revenueSparkline} />
 
+      <CollapsibleSection
+        title="Calendario de Vencimientos"
+        subtitle="Vista mensual con vencimientos y cuentas vencidas"
+        icon={<Calendar className="h-5 w-5 text-amber-500 dark:text-amber-400" />}
+      >
+        <ExpirationCalendar subscriptions={calendarSubs} />
+      </CollapsibleSection>
+
       <RevenueChart data={monthlyRevenue} financial={financial} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -35,6 +44,7 @@ export default async function DashboardPage() {
           title="Estado de Suscripciones"
           subtitle="Distribución actual"
           icon={<PieChart className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />}
+          defaultOpen={false}
         >
           <StatusPieChart
             activas={stats.suscripcionesActivas}
@@ -47,18 +57,11 @@ export default async function DashboardPage() {
           title="Próximos Vencimientos"
           subtitle={`${expiringSoon.length} suscripciones por vencer`}
           icon={<ListOrdered className="h-5 w-5 text-blue-500 dark:text-blue-400" />}
+          defaultOpen={false}
         >
           <ExpiringSoon subscriptions={expiringSoon} />
         </CollapsibleSection>
       </div>
-
-      <CollapsibleSection
-        title="Calendario de Vencimientos"
-        subtitle="Vista mensual"
-        icon={<Calendar className="h-5 w-5 text-amber-500 dark:text-amber-400" />}
-      >
-        <ExpirationCalendar subscriptions={expiringSoon} />
-      </CollapsibleSection>
     </div>
     </DashboardRefresh>
   );

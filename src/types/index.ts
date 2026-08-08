@@ -67,3 +67,24 @@ export interface AccountInput {
   url_server?: string | null;
   usuario_xtream?: string | null;
 }
+
+export interface GlobalSearchClient {
+  id: string;
+  nombre_completo: string;
+  alias: string | null;
+  whatsapp: string | null;
+}
+
+export interface GlobalSearchSubscription {
+  id: string;
+  nombre_perfil: string;
+  fecha_vencimiento: string;
+  cliente_id: string;
+  clients?: { id: string; nombre_completo: string } | null;
+  accounts?: { plataforma: string } | null;
+}
+
+export interface GlobalSearchResult {
+  clients: GlobalSearchClient[];
+  subscriptions: GlobalSearchSubscription[];
+}

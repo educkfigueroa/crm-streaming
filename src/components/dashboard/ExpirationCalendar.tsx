@@ -49,8 +49,11 @@ interface DayData {
 }
 
 export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
 
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -59,17 +62,9 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
 
-  const filteredSubs = useMemo(() => {
-    return subscriptions.filter((sub) => {
-      const fecha = new Date(sub.fecha_vencimiento);
-      fecha.setHours(0, 0, 0, 0);
-      return fecha >= today;
-    });
-  }, [subscriptions]);
-
   const expirationsByDay = useMemo(() => {
     const map = new Map<number, DayData>();
-    for (const sub of filteredSubs) {
+    for (const sub of subscriptions) {
       const fecha = new Date(sub.fecha_vencimiento);
       if (fecha.getMonth() === currentMonth && fecha.getFullYear() === currentYear) {
         const day = fecha.getDate();
@@ -92,7 +87,7 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
       }
     }
     return map;
-  }, [filteredSubs, currentMonth, currentYear]);
+  }, [subscriptions, currentMonth, currentYear, today]);
 
   const prevMonth = () => {
     setSelectedDay(null);
@@ -214,7 +209,7 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
                         {getClientName(sub)}
                       </span>
                       <span className={`text-[10px] font-bold tabular-nums ${getColorText(days)}`}>
-                        {days <= 0 ? "Vence hoy" : `${days}d`}
+                        {days < 0 ? `Vencido · ${Math.abs(days)}d` : days === 0 ? "Vence hoy" : `${days}d`}
                       </span>
                     </div>
                   </div>

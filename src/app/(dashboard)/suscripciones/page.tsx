@@ -14,17 +14,13 @@ import type { SubscriptionWithDetails, Client } from "@/types";
 function SuscripcionesContent() {
   const searchParams = useSearchParams();
   const clienteId = searchParams.get("cliente");
-  const estadoParam = searchParams.get("estado");
-  const plataformaParam = searchParams.get("plataforma");
-  const buscarParam = searchParams.get("buscar");
 
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [filteredClient, setFilteredClient] = useState<Client | null>(null);
-  const [filterPlataforma, setFilterPlataforma] = useState<string>(plataformaParam || "all");
-  const [filterEstado, setFilterEstado] = useState<string>(estadoParam || "all");
-  const [searchQuery, setSearchQuery] = useState(buscarParam || "");
+  const [filterEstado, setFilterEstado] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadSubscriptions = async () => {
     setLoading(true);
@@ -45,23 +41,6 @@ function SuscripcionesContent() {
     };
   }, [clienteId]);
 
-  const [prevFilterParams, setPrevFilterParams] = useState(
-    `${estadoParam ?? ""}|${plataformaParam ?? ""}|${buscarParam ?? ""}`
-  );
-  const currentFilterParams = `${estadoParam ?? ""}|${plataformaParam ?? ""}|${buscarParam ?? ""}`;
-  if (currentFilterParams !== prevFilterParams) {
-    setPrevFilterParams(currentFilterParams);
-    if (estadoParam) {
-      setFilterEstado(estadoParam);
-    }
-    if (plataformaParam) {
-      setFilterPlataforma(plataformaParam);
-    }
-    if (buscarParam) {
-      setSearchQuery(buscarParam);
-    }
-  }
-
   useEffect(() => {
     if (!clienteId) return;
     let cancelled = false;
@@ -78,12 +57,6 @@ function SuscripcionesContent() {
   let filteredSubscriptions = clienteId
     ? subscriptions.filter((sub) => sub.cliente_id === clienteId)
     : subscriptions;
-
-  if (filterPlataforma !== "all") {
-    filteredSubscriptions = filteredSubscriptions.filter(
-      (sub) => sub.accounts?.plataforma === filterPlataforma
-    );
-  }
 
   if (filterEstado !== "all") {
     filteredSubscriptions = filteredSubscriptions.filter((sub) => {
@@ -130,8 +103,6 @@ function SuscripcionesContent() {
       <FilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        filterPlataforma={filterPlataforma}
-        onPlataformaChange={setFilterPlataforma}
         filterEstado={filterEstado}
         onEstadoChange={setFilterEstado}
       />

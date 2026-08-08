@@ -75,6 +75,26 @@ export async function getExpiringSoon(): Promise<SubscriptionWithDetails[]> {
   return data as unknown as SubscriptionWithDetails[];
 }
 
+export async function getCalendarSubscriptions(): Promise<SubscriptionWithDetails[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select(`
+      *,
+      clients (id, nombre_completo, whatsapp),
+      accounts (id, plataforma, correo)
+    `)
+    .order("fecha_vencimiento", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching calendar subscriptions:", error);
+    return [];
+  }
+
+  return data as unknown as SubscriptionWithDetails[];
+}
+
 export interface MonthlyRevenue {
   month: string;
   label: string;
