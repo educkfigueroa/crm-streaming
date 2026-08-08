@@ -122,6 +122,125 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ---------- Palette theme system ----------
+   A JS script on <html> sets the --t-* variables for the selected
+   palette. These tokens drive every surface of the app. */
+:root {
+  --t-accent: #10b981;
+  --t-accent2: #06b6d4;
+  --t-accent-deep: #0d9772;
+  --t-accent2-deep: #0891b2;
+  --t-on-accent: #04231a;
+  --t-bg-light: #eaf5ef;
+  --t-panel-light: #ffffff;
+  --t-panel2-light: #e0eee6;
+  --t-border-light: #bfd6c9;
+  --t-border-soft-light: #d9e7de;
+  --t-text-light: #0c1f16;
+  --t-muted-light: #4a5c52;
+  --t-bg-dark: #0c1017;
+  --t-panel-dark: #121722;
+  --t-panel2-dark: #161d29;
+  --t-border-dark: #1f2836;
+  --t-border-soft-dark: #1a2331;
+  --t-text-dark: #e6e9ef;
+  --t-muted-dark: #94a0b3;
+}
+
+:root {
+  --background: var(--t-bg-light);
+  --foreground: var(--t-text-light);
+  --card: var(--t-panel-light);
+  --card-foreground: var(--t-text-light);
+  --popover: var(--t-panel-light);
+  --popover-foreground: var(--t-text-light);
+  --primary: var(--t-accent-deep);
+  --primary-foreground: var(--t-on-accent);
+  --secondary: var(--t-panel2-light);
+  --secondary-foreground: var(--t-text-light);
+  --muted: var(--t-panel2-light);
+  --muted-foreground: var(--t-muted-light);
+  --accent: var(--t-panel2-light);
+  --accent-foreground: var(--t-text-light);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: var(--t-border-light);
+  --input: var(--t-border-light);
+  --ring: var(--t-accent);
+  --chart-1: var(--t-accent);
+  --chart-2: var(--t-accent2);
+  --chart-3: var(--t-muted-light);
+  --chart-4: var(--t-accent-deep);
+  --chart-5: var(--t-accent2-deep);
+  --sidebar: var(--t-panel-light);
+  --sidebar-foreground: var(--t-text-light);
+  --sidebar-primary: var(--t-accent-deep);
+  --sidebar-primary-foreground: var(--t-on-accent);
+  --sidebar-accent: var(--t-panel2-light);
+  --sidebar-accent-foreground: var(--t-text-light);
+  --sidebar-border: var(--t-border-light);
+  --sidebar-ring: var(--t-accent);
+}
+
+.dark {
+  --background: var(--t-bg-dark);
+  --foreground: var(--t-text-dark);
+  --card: var(--t-panel-dark);
+  --card-foreground: var(--t-text-dark);
+  --popover: var(--t-panel-dark);
+  --popover-foreground: var(--t-text-dark);
+  --primary: var(--t-accent);
+  --primary-foreground: var(--t-on-accent);
+  --secondary: var(--t-panel2-dark);
+  --secondary-foreground: var(--t-text-dark);
+  --muted: var(--t-panel2-dark);
+  --muted-foreground: var(--t-muted-dark);
+  --accent: var(--t-panel2-dark);
+  --accent-foreground: var(--t-text-dark);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: var(--t-border-dark);
+  --input: var(--t-border-dark);
+  --ring: var(--t-accent);
+  --chart-1: var(--t-accent);
+  --chart-2: var(--t-accent2);
+  --chart-3: var(--t-muted-dark);
+  --chart-4: var(--t-accent-deep);
+  --chart-5: var(--t-accent2-deep);
+  --sidebar: var(--t-panel-dark);
+  --sidebar-foreground: var(--t-text-dark);
+  --sidebar-primary: var(--t-accent);
+  --sidebar-primary-foreground: var(--t-on-accent);
+  --sidebar-accent: var(--t-panel2-dark);
+  --sidebar-accent-foreground: var(--t-text-dark);
+  --sidebar-border: var(--t-border-dark);
+  --sidebar-ring: var(--t-accent);
+}
+
+/* Remap the emerald/teal/cyan scales to the palette accent so all
+   brand-coloured Tailwind utilities follow the selected theme. */
+:root {
+  --color-emerald-50: color-mix(in srgb, var(--t-accent) 8%, white);
+  --color-emerald-100: color-mix(in srgb, var(--t-accent) 16%, white);
+  --color-emerald-200: color-mix(in srgb, var(--t-accent) 30%, white);
+  --color-emerald-300: color-mix(in srgb, var(--t-accent) 52%, white);
+  --color-emerald-400: color-mix(in srgb, var(--t-accent) 78%, white);
+  --color-emerald-500: var(--t-accent);
+  --color-emerald-600: var(--t-accent-deep);
+  --color-emerald-700: var(--t-accent-deep);
+  --color-emerald-800: var(--t-accent-deep);
+  --color-emerald-900: var(--t-accent-deep);
+  --color-teal-50: color-mix(in srgb, var(--t-accent2) 8%, white);
+  --color-teal-100: color-mix(in srgb, var(--t-accent2) 16%, white);
+  --color-teal-200: color-mix(in srgb, var(--t-accent2) 30%, white);
+  --color-teal-300: color-mix(in srgb, var(--t-accent2) 52%, white);
+  --color-teal-400: color-mix(in srgb, var(--t-accent2) 78%, white);
+  --color-teal-500: var(--t-accent2);
+  --color-teal-600: var(--t-accent2-deep);
+  --color-teal-700: var(--t-accent2-deep);
+  --color-cyan-400: color-mix(in srgb, var(--t-accent2) 80%, white);
+  --color-cyan-500: var(--t-accent2);
+  --color-cyan-600: var(--t-accent2-deep);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -196,10 +315,10 @@
     padding-right: var(--safe-right);
   }
   .shadow-emerald {
-    box-shadow: 0 4px 24px -4px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 4px 24px -4px color-mix(in srgb, var(--t-accent) 20%, transparent);
   }
   .shadow-emerald-lg {
-    box-shadow: 0 8px 32px -4px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 8px 32px -4px color-mix(in srgb, var(--t-accent) 26%, transparent);
   }
   .shadow-colored {
     box-shadow: 0 4px 24px -4px var(--tw-shadow-color, rgba(16, 185, 129, 0.15));
@@ -316,11 +435,11 @@
 
 /* Gradient backgrounds */
 .gradient-emerald {
-  background: linear-gradient(135deg, oklch(0.7 0.15 160 / 0.08) 0%, oklch(0.7 0.15 180 / 0.04) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--t-accent) 10%, transparent) 0%, color-mix(in srgb, var(--t-accent2) 6%, transparent) 100%);
 }
 
 .dark .gradient-emerald {
-  background: linear-gradient(135deg, oklch(0.7 0.15 160 / 0.12) 0%, oklch(0.7 0.15 180 / 0.06) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--t-accent) 14%, transparent) 0%, color-mix(in srgb, var(--t-accent2) 8%, transparent) 100%);
 }
 
 /* Smooth transitions globally */
@@ -343,14 +462,7 @@
 
 /* Text gradient */
 .text-gradient {
-  background: linear-gradient(135deg, oklch(0.65 0.17 160) 0%, oklch(0.7 0.15 180) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.dark .text-gradient {
-  background: linear-gradient(135deg, oklch(0.75 0.17 160) 0%, oklch(0.8 0.15 180) 100%);
+  background: linear-gradient(135deg, var(--t-accent) 0%, var(--t-accent2) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

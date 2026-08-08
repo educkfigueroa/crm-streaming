@@ -3,6 +3,7 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
+import { ThemePicker } from "@/components/theme/ThemePicker";
 import { PushManager } from "@/components/notifications/PushManager";
 import { GlobalSearch } from "./GlobalSearch";
 import { useSidebar } from "./SidebarContext";
@@ -27,6 +28,7 @@ export function Header() {
       <div className="flex items-center gap-3">
         <GlobalSearch />
         <PushManager />
+        <ThemePicker />
         <ModeToggle />
       </div>
     </header>

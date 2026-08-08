@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { themeScript } from "@/lib/themes";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -47,6 +48,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/gstreaming.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <script dangerouslySetInnerHTML={{ __html: themeScript() }} />
       </head>
       <body className="min-h-full flex flex-col font-sf overscroll-none">
         <ThemeProvider
