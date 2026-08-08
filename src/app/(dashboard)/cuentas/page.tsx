@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { AccountsTable } from "@/components/cuentas/AccountsTable";
 import { AccountForm } from "@/components/cuentas/AccountForm";
-import { AccountsFilterBar } from "@/components/cuentas/AccountsFilterBar";
 import { getAccounts, createAccount, updateAccount, deleteAccount } from "@/lib/actions/accounts";
 import { getSubscriptions } from "@/lib/actions/subscriptions";
 import type { Account, Subscription } from "@/types";
@@ -235,21 +234,19 @@ export default function CuentasPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <AccountsFilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filterPlataforma={filterPlataforma}
-        onPlataformaChange={setFilterPlataforma}
-      />
-
-      {/* Table */}
       {loading ? (
         <div className="rounded-2xl p-12 text-center bg-card border border-border">
           <p className="text-muted-foreground">Cargando cuentas...</p>
         </div>
       ) : (
-        <AccountsTable accounts={streamingAccounts} subscriptions={subscriptions} />
+        <AccountsTable
+          accounts={streamingAccounts}
+          subscriptions={subscriptions}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterPlataforma={filterPlataforma}
+          onPlataformaChange={setFilterPlataforma}
+        />
       )}
 
       {/* Streaming Account Form */}

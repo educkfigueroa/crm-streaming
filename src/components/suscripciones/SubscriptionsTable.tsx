@@ -565,16 +565,16 @@ export function SubscriptionsTable({
         </div>
         </div>
 
-        {/* Desktop slide-in drawer (right to left, content adjusts) */}
+        {/* Desktop slide-in drawer (right to left, content adjusts, follows scroll) */}
         <aside
           className={cn(
-            "hidden lg:block shrink-0 overflow-x-clip transition-all duration-300 ease-in-out border-l border-border/50",
+            "hidden lg:block lg:self-stretch shrink-0 overflow-x-clip transition-all duration-300 ease-in-out border-l border-border/50",
             panelHidden ? "lg:w-0 border-l-0" : "lg:w-[340px] lg:ml-6"
           )}
         >
-          <div className="w-[340px]">
+          <div className="w-[340px] lg:h-full">
             {activeSub && !panelHidden && detailProps && (
-              <div className="rounded-2xl border border-border/50 bg-card p-5 sticky top-16 h-fit">
+              <div className="rounded-2xl border border-border/50 bg-card p-5 lg:sticky lg:top-16 max-h-[calc(100vh-5rem)] overflow-y-auto">
                 <DetailsPanel {...detailProps} onClose={() => setPanelHidden(true)} />
               </div>
             )}
