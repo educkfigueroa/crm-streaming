@@ -301,7 +301,7 @@ function DetailsPanel({
 
 export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [panelHidden, setPanelHidden] = useState(false);
+  const [panelHidden, setPanelHidden] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] =
     useState<SubscriptionWithDetails | null>(null);
@@ -388,8 +388,8 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
 
   return (
     <>
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
-        <div className="w-full lg:flex-1 lg:min-w-0">
+      <div className="flex flex-col lg:flex-row items-start">
+        <div className="w-full lg:flex-1 lg:min-w-0 transition-all duration-300 ease-in-out">
           {/* Desktop table */}
           <div className="hidden lg:block rounded-xl overflow-hidden bg-card border border-border">
             <div className="overflow-x-auto">
@@ -545,19 +545,20 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
           </div>
         </div>
 
-        {/* Desktop side panel */}
-        <aside className="hidden lg:block w-[340px] shrink-0">
-          {activeSub && !panelHidden && detailProps ? (
-            <div className="rounded-2xl border border-border/50 bg-card p-5 sticky top-20">
-              <DetailsPanel {...detailProps} onClose={() => setPanelHidden(true)} />
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-border/50 bg-card p-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Selecciona una suscripción para ver sus detalles.
-              </p>
-            </div>
+        {/* Desktop slide-in drawer (right to left, content adjusts) */}
+        <aside
+          className={cn(
+            "hidden lg:block shrink-0 overflow-x-clip transition-all duration-300 ease-in-out border-l border-border/50",
+            panelHidden ? "lg:w-0 border-l-0" : "lg:w-[340px] lg:ml-6"
           )}
+        >
+          <div className="w-[340px]">
+            {activeSub && !panelHidden && detailProps && (
+              <div className="rounded-2xl border border-border/50 bg-card p-5 sticky top-20 h-fit">
+                <DetailsPanel {...detailProps} onClose={() => setPanelHidden(true)} />
+              </div>
+            )}
+          </div>
         </aside>
       </div>
 
