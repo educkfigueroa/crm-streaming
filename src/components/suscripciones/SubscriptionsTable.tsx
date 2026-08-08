@@ -27,6 +27,7 @@ import {
   getWhatsAppUrl,
 } from "@/lib/whatsapp";
 import { SubscriptionForm } from "./SubscriptionForm";
+import { FilterBar } from "./FilterBar";
 import {
   deleteSubscription,
   renewSubscription,
@@ -35,6 +36,10 @@ import type { SubscriptionWithDetails } from "@/types";
 
 interface SubscriptionsTableProps {
   subscriptions: SubscriptionWithDetails[];
+  searchQuery: string;
+  onSearchChange: (q: string) => void;
+  filterEstado: string;
+  onEstadoChange: (v: string) => void;
 }
 
 function getStatusColor(estado: string) {
@@ -299,7 +304,13 @@ function DetailsPanel({
 
 /* ---------- Tabla principal ---------- */
 
-export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
+export function SubscriptionsTable({
+  subscriptions,
+  searchQuery,
+  onSearchChange,
+  filterEstado,
+  onEstadoChange,
+}: SubscriptionsTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelHidden, setPanelHidden] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -390,7 +401,15 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
     <>
       <div className="flex flex-col lg:flex-row items-start">
         <div className="w-full lg:flex-1 lg:min-w-0 transition-all duration-300 ease-in-out">
-          {/* Desktop table */}
+          <div className="space-y-4">
+            <FilterBar
+              searchQuery={searchQuery}
+              onSearchChange={onSearchChange}
+              filterEstado={filterEstado}
+              onEstadoChange={onEstadoChange}
+            />
+
+            {/* Desktop table */}
           <div className="hidden lg:block rounded-xl overflow-hidden bg-card border border-border">
             <div className="overflow-x-auto">
               <Table className="min-w-[680px]">
@@ -544,6 +563,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
             })}
           </div>
         </div>
+        </div>
 
         {/* Desktop slide-in drawer (right to left, content adjusts) */}
         <aside
@@ -554,7 +574,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
         >
           <div className="w-[340px]">
             {activeSub && !panelHidden && detailProps && (
-              <div className="rounded-2xl border border-border/50 bg-card p-5 sticky top-20 h-fit">
+              <div className="rounded-2xl border border-border/50 bg-card p-5 sticky top-16 h-fit">
                 <DetailsPanel {...detailProps} onClose={() => setPanelHidden(true)} />
               </div>
             )}

@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { SubscriptionsTable } from "@/components/suscripciones/SubscriptionsTable";
 import { SubscriptionForm } from "@/components/suscripciones/SubscriptionForm";
-import { FilterBar } from "@/components/suscripciones/FilterBar";
 import { SubscriptionsRefresh } from "@/components/suscripciones/SubscriptionsRefresh";
 import { getSubscriptions } from "@/lib/actions/subscriptions";
 import { getClients } from "@/lib/actions/clients";
@@ -100,19 +99,18 @@ function SuscripcionesContent() {
           </button>
         </div>
 
-      <FilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filterEstado={filterEstado}
-        onEstadoChange={setFilterEstado}
-      />
-
       {loading ? (
         <div className="rounded-2xl p-12 text-center bg-card border border-border">
           <p className="text-muted-foreground">Cargando suscripciones...</p>
         </div>
       ) : (
-        <SubscriptionsTable subscriptions={filteredSubscriptions} />
+        <SubscriptionsTable
+          subscriptions={filteredSubscriptions}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterEstado={filterEstado}
+          onEstadoChange={setFilterEstado}
+        />
       )}
 
       <SubscriptionForm
