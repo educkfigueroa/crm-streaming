@@ -44,7 +44,6 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
   useEffect(() => {
     if (state?.success) {
       onOpenChange(false);
-      window.location.reload();
     }
   }, [state?.success, onOpenChange]);
 

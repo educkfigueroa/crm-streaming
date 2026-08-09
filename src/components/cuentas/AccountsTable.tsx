@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic } from "react";
 import Link from "next/link";
 import { Trash2, Edit, Copy, Check, ExternalLink, Mail, KeyRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ interface AccountsTableProps {
   onSearchChange: (q: string) => void;
   filterPlataforma: string;
   onPlataformaChange: (v: string) => void;
+  onDataChange?: () => void;
 }
 
 function getProfileStatus(sub: Subscription): "active" | "expiring" | "expired" | "suspended" {
@@ -312,6 +313,7 @@ export function AccountsTable({
   onSearchChange,
   filterPlataforma,
   onPlataformaChange,
+  onDataChange,
 }: AccountsTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelHidden, setPanelHidden] = useState(true);
@@ -319,8 +321,15 @@ export function AccountsTable({
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [optimisticAccounts, dispatchOptimistic] = useOptimistic(
+    accounts,
+    (state, action: { type: "delete"; id: string }) =>
+      action.type === "delete"
+        ? state.filter((a) => a.id !== action.id)
+        : state
+  );
 
-  const activeAccount = accounts.find((a) => a.id === selectedId) ?? null;
+  const activeAccount = optimisticAccounts.find((a) => a.id === selectedId) ?? null;
 
   const handleCopy = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
@@ -330,8 +339,9 @@ export function AccountsTable({
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta cuenta?")) {
+      dispatchOptimistic({ type: "delete", id });
       await deleteAccount(id);
-      window.location.reload();
+      onDataChange?.();
     }
   };
 
@@ -343,7 +353,7 @@ export function AccountsTable({
   const handleFormClose = () => {
     setEditingAccount(null);
     setFormOpen(false);
-    window.location.reload();
+    onDataChange?.();
   };
 
   const getCorreo = (account: Account) => {
@@ -412,7 +422,7 @@ export function AccountsTable({
       }
     : null;
 
-  if (accounts.length === 0) {
+  if (optimisticAccounts.length === 0) {
     return (
       <div className="rounded-xl p-10 text-center bg-card border border-border">
         <p className="text-muted-foreground">No hay cuentas registradas.</p>
@@ -450,8 +460,8 @@ export function AccountsTable({
                       <TableHead className="text-muted-foreground font-medium text-right py-1 text-xs">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {accounts.map((account) => {
+                  <TableBody className="stagger-children">
+                    {optimisticAccounts.map((account) => {
                       const plataforma = getPlataformaByValue(account.plataforma);
                       const correo = getCorreo(account);
                       const contrasena = account.contraseña || "";
@@ -580,8 +590,8 @@ export function AccountsTable({
             </div>
 
             {/* Mobile Cards */}
-            <div className="md:hidden space-y-1.5">
-              {accounts.map((account) => {
+            <div className="md:hidden space-y-1.5 stagger-children">
+              {optimisticAccounts.map((account) => {
                 const plataforma = getPlataformaByValue(account.plataforma);
                 const correo = getCorreo(account);
                 const contrasena = account.contraseña || "";

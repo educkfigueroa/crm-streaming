@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { SubscriptionsTable } from "@/components/suscripciones/SubscriptionsTable";
 import { SubscriptionForm } from "@/components/suscripciones/SubscriptionForm";
 import { SubscriptionsRefresh } from "@/components/suscripciones/SubscriptionsRefresh";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { getSubscriptions } from "@/lib/actions/subscriptions";
 import { getClients } from "@/lib/actions/clients";
 import type { SubscriptionWithDetails, Client } from "@/types";
@@ -21,11 +22,11 @@ function SuscripcionesContent() {
   const [filterEstado, setFilterEstado] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const loadSubscriptions = async () => {
-    setLoading(true);
+  const loadSubscriptions = async (background = false) => {
+    if (!background) setLoading(true);
     const data = await getSubscriptions();
     setSubscriptions(data);
-    setLoading(false);
+    if (!background) setLoading(false);
   };
 
   useEffect(() => {
@@ -100,9 +101,7 @@ function SuscripcionesContent() {
         </div>
 
       {loading ? (
-        <div className="rounded-2xl p-12 text-center bg-card border border-border">
-          <p className="text-muted-foreground">Cargando suscripciones...</p>
-        </div>
+        <TableSkeleton rows={5} />
       ) : (
         <SubscriptionsTable
           subscriptions={filteredSubscriptions}
@@ -110,6 +109,7 @@ function SuscripcionesContent() {
           onSearchChange={setSearchQuery}
           filterEstado={filterEstado}
           onEstadoChange={setFilterEstado}
+          onDataChange={() => loadSubscriptions(true)}
         />
       )}
 
@@ -117,7 +117,7 @@ function SuscripcionesContent() {
         open={formOpen}
         onOpenChange={(open) => {
           setFormOpen(open);
-          if (!open) loadSubscriptions();
+          if (!open) loadSubscriptions(true);
         }}
         defaultClienteId={clienteId || undefined}
       />
@@ -128,14 +128,7 @@ function SuscripcionesContent() {
 
 export default function SuscripcionesPage() {
   return (
-    <Suspense fallback={
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Suscripciones</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Cargando...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<TableSkeleton rows={5} />}>
       <SuscripcionesContent />
     </Suspense>
   );

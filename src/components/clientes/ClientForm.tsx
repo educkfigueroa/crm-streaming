@@ -97,7 +97,6 @@ export function ClientForm({ open, onOpenChange, client }: ClientFormProps) {
   useEffect(() => {
     if (state?.success) {
       onOpenChange(false);
-      window.location.reload();
     }
   }, [state?.success, onOpenChange]);
 

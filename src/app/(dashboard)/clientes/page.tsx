@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClientsTable } from "@/components/clientes/ClientsTable";
 import { ClientForm } from "@/components/clientes/ClientForm";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { getClients } from "@/lib/actions/clients";
 import type { Client } from "@/types";
 
@@ -13,11 +14,11 @@ export default function ClientesPage() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
 
-  const loadClients = async () => {
-    setLoading(true);
+  const loadClients = async (background = false) => {
+    if (!background) setLoading(true);
     const data = await getClients();
     setClients(data);
-    setLoading(false);
+    if (!background) setLoading(false);
   };
 
   useEffect(() => {
@@ -49,18 +50,16 @@ export default function ClientesPage() {
       </div>
 
       {loading ? (
-        <div className="rounded-2xl bg-card border border-border p-12 text-center">
-          <p className="text-muted-foreground">Cargando clientes...</p>
-        </div>
+        <TableSkeleton rows={5} />
       ) : (
-        <ClientsTable clients={clients} />
+        <ClientsTable clients={clients} onDataChange={() => loadClients(true)} />
       )}
 
       <ClientForm
         open={formOpen}
         onOpenChange={(open) => {
           setFormOpen(open);
-          if (!open) loadClients();
+          if (!open) loadClients(true);
         }}
       />
     </div>

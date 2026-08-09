@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic } from "react";
 import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle, Check, Copy, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +40,7 @@ interface SubscriptionsTableProps {
   onSearchChange: (q: string) => void;
   filterEstado: string;
   onEstadoChange: (v: string) => void;
+  onDataChange?: () => void;
 }
 
 function getStatusColor(estado: string) {
@@ -310,6 +311,7 @@ export function SubscriptionsTable({
   onSearchChange,
   filterEstado,
   onEstadoChange,
+  onDataChange,
 }: SubscriptionsTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelHidden, setPanelHidden] = useState(true);
@@ -318,12 +320,20 @@ export function SubscriptionsTable({
     useState<SubscriptionWithDetails | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [optimisticSubscriptions, dispatchOptimistic] = useOptimistic(
+    subscriptions,
+    (state, action: { type: "delete"; id: string }) =>
+      action.type === "delete"
+        ? state.filter((s) => s.id !== action.id)
+        : state
+  );
 
   const activeId =
-    selectedId && subscriptions.some((s) => s.id === selectedId)
+    selectedId && optimisticSubscriptions.some((s) => s.id === selectedId)
       ? selectedId
-      : (subscriptions[0]?.id ?? null);
-  const activeSub = subscriptions.find((s) => s.id === activeId) ?? null;
+      : (optimisticSubscriptions[0]?.id ?? null);
+  const activeSub =
+    optimisticSubscriptions.find((s) => s.id === activeId) ?? null;
 
   const handleCopy = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
@@ -333,8 +343,9 @@ export function SubscriptionsTable({
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta suscripción?")) {
+      dispatchOptimistic({ type: "delete", id });
       await deleteSubscription(id);
-      window.location.reload();
+      onDataChange?.();
     }
   };
 
@@ -345,7 +356,7 @@ export function SubscriptionsTable({
       )
     ) {
       await renewSubscription(id);
-      window.location.reload();
+      onDataChange?.();
     }
   };
 
@@ -357,7 +368,7 @@ export function SubscriptionsTable({
   const handleFormClose = () => {
     setEditingSubscription(null);
     setFormOpen(false);
-    window.location.reload();
+    onDataChange?.();
   };
 
   const openWhatsApp = (url: string) => {
@@ -386,7 +397,7 @@ export function SubscriptionsTable({
       }
     : null;
 
-  if (subscriptions.length === 0) {
+  if (optimisticSubscriptions.length === 0) {
     return (
       <div className="rounded-xl p-10 text-center bg-card border border-border">
         <p className="text-muted-foreground">No hay suscripciones registradas.</p>
@@ -421,8 +432,8 @@ export function SubscriptionsTable({
                     <TableHead className="text-muted-foreground font-medium py-1 text-xs">Estado</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {subscriptions.map((sub) => {
+                <TableBody className="stagger-children">
+                  {optimisticSubscriptions.map((sub) => {
                     const plataforma = sub.accounts
                       ? getPlataformaByValue(sub.accounts.plataforma)
                       : null;
@@ -502,7 +513,7 @@ export function SubscriptionsTable({
 
           {/* Mobile cards */}
           <div className="lg:hidden space-y-2">
-            {subscriptions.map((sub) => {
+            {optimisticSubscriptions.map((sub) => {
               const plataforma = sub.accounts
                 ? getPlataformaByValue(sub.accounts.plataforma)
                 : null;

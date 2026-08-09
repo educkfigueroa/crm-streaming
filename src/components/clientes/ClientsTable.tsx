@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useOptimistic } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Edit, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -81,17 +81,26 @@ function maskPhone(phone: string): string {
 
 interface ClientsTableProps {
   clients: Client[];
+  onDataChange?: () => void;
 }
 
-export function ClientsTable({ clients }: ClientsTableProps) {
+export function ClientsTable({ clients, onDataChange }: ClientsTableProps) {
   const router = useRouter();
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [optimisticClients, dispatchOptimistic] = useOptimistic(
+    clients,
+    (state, action: { type: "delete"; id: string }) =>
+      action.type === "delete"
+        ? state.filter((c) => c.id !== action.id)
+        : state
+  );
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar este cliente?")) {
+      dispatchOptimistic({ type: "delete", id });
       await deleteClient(id);
-      window.location.reload();
+      onDataChange?.();
     }
   };
 
@@ -103,7 +112,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
   const handleFormClose = () => {
     setEditingClient(null);
     setFormOpen(false);
-    window.location.reload();
+    onDataChange?.();
   };
 
   const getWhatsAppLink = (phone: string) => {
@@ -115,7 +124,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
     router.push(`/suscripciones?cliente=${clientId}`);
   };
 
-  if (clients.length === 0) {
+  if (optimisticClients.length === 0) {
     return (
       <div className="rounded-xl p-10 text-center bg-card border border-border">
         <p className="text-muted-foreground">No hay clientes registrados.</p>
@@ -129,8 +138,8 @@ export function ClientsTable({ clients }: ClientsTableProps) {
   return (
     <>
       {/* Mobile card layout */}
-      <div className="md:hidden space-y-2">
-        {clients.map((client) => {
+      <div className="md:hidden space-y-2 stagger-children">
+        {optimisticClients.map((client) => {
           const country = client.whatsapp ? getCountryInfo(client.whatsapp) : null;
           return (
             <div
@@ -208,8 +217,8 @@ export function ClientsTable({ clients }: ClientsTableProps) {
               <TableHead className="text-muted-foreground font-medium text-right py-1 text-xs">Acciones</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {clients.map((client) => {
+          <TableBody className="stagger-children">
+            {optimisticClients.map((client) => {
               const country = client.whatsapp ? getCountryInfo(client.whatsapp) : null;
               return (
                 <TableRow key={client.id} className="border-b border-border hover:bg-accent/30 transition-colors">

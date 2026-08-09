@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { AccountsTable } from "@/components/cuentas/AccountsTable";
 import { AccountForm } from "@/components/cuentas/AccountForm";
+import { TableSkeleton } from "@/components/ui/skeleton";
 import { getAccounts, createAccount, updateAccount, deleteAccount } from "@/lib/actions/accounts";
 import { getSubscriptions } from "@/lib/actions/subscriptions";
 import type { Account, Subscription } from "@/types";
@@ -35,15 +36,15 @@ export default function CuentasPage() {
   const [iptvUrlPanel, setIptvUrlPanel] = useState("");
   const [iptvLoading, setIptvLoading] = useState(false);
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (background = false) => {
+    if (!background) setLoading(true);
     const [accountsData, subsData] = await Promise.all([
       getAccounts(),
       getSubscriptions(),
     ]);
     setAccounts(accountsData);
     setSubscriptions(subsData);
-    setLoading(false);
+    if (!background) setLoading(false);
   };
 
   useEffect(() => {
@@ -124,13 +125,13 @@ export default function CuentasPage() {
     }
     handleIptvClose();
     setIptvLoading(false);
-    loadData();
+    loadData(true);
   };
 
   const handleIptvDelete = async (id: string) => {
     if (confirm("¿Eliminar este servidor IPTV?")) {
       await deleteAccount(id);
-      loadData();
+      loadData(true);
     }
   };
 
@@ -235,9 +236,7 @@ export default function CuentasPage() {
       </div>
 
       {loading ? (
-        <div className="rounded-2xl p-12 text-center bg-card border border-border">
-          <p className="text-muted-foreground">Cargando cuentas...</p>
-        </div>
+        <TableSkeleton rows={5} />
       ) : (
         <AccountsTable
           accounts={streamingAccounts}
@@ -246,6 +245,7 @@ export default function CuentasPage() {
           onSearchChange={setSearchQuery}
           filterPlataforma={filterPlataforma}
           onPlataformaChange={setFilterPlataforma}
+          onDataChange={() => loadData(true)}
         />
       )}
 
@@ -254,7 +254,7 @@ export default function CuentasPage() {
         open={formOpen}
         onOpenChange={(open) => {
           setFormOpen(open);
-          if (!open) loadData();
+          if (!open) loadData(true);
         }}
       />
 

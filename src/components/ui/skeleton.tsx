@@ -65,4 +65,29 @@ export function DashboardSkeleton() {
   );
 }
 
+export function TableSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="rounded-2xl bg-card border border-border overflow-hidden">
+      <div className="hidden md:block">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-4 px-4 py-3 border-b border-border animate-fade-in-up"
+            style={{ animationDelay: `${i * 0.05}s` }}
+          >
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4 w-1/6 ml-auto" />
+          </div>
+        ))}
+      </div>
+      <div className="md:hidden p-4 space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full animate-fade-in-up" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export { Skeleton };

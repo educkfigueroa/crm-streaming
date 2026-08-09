@@ -17,11 +17,11 @@ import { signOut } from "@/lib/actions/auth";
 import { useSidebar } from "./SidebarContext";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Cuentas", href: "/cuentas", icon: Tv },
-  { name: "Clientes", href: "/clientes", icon: Users },
-  { name: "Suscripciones", href: "/suscripciones", icon: FileText },
-  { name: "Configuración", href: "/configuracion", icon: Settings },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard, transitionTypes: ["nav-back"] },
+  { name: "Cuentas", href: "/cuentas", icon: Tv, transitionTypes: ["nav-forward"] },
+  { name: "Clientes", href: "/clientes", icon: Users, transitionTypes: ["nav-forward"] },
+  { name: "Suscripciones", href: "/suscripciones", icon: FileText, transitionTypes: ["nav-forward"] },
+  { name: "Configuración", href: "/configuracion", icon: Settings, transitionTypes: ["nav-forward"] },
 ];
 
 export function Sidebar() {
@@ -67,6 +67,7 @@ export function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                transitionTypes={item.transitionTypes}
                 onClick={() => setOpen(false)}
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-300",

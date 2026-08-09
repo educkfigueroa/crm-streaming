@@ -154,7 +154,6 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   useEffect(() => {
     if (state?.success) {
       onOpenChange(false);
-      window.location.reload();
     }
   }, [state?.success, onOpenChange]);
 
