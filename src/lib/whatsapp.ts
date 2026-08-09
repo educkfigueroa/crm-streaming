@@ -7,6 +7,7 @@ function getPlatformName(sub: SubscriptionWithDetails): string {
     : null;
   const label = plataforma?.label || sub.accounts?.plataforma || "el servicio";
   if (label.startsWith("HBO Max")) return "HBO Max";
+  if (label.startsWith("IPTV")) return "IPTV";
   return label;
 }
 
@@ -94,12 +95,17 @@ export function generatePasswordUpdateMessage(
 export function generateRenewalMessage(sub: SubscriptionWithDetails): string {
   const clientName = getClientName(sub);
   const platform = getPlatformName(sub);
-  const fecha = new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE");
+  const fecha = new Date(sub.fecha_vencimiento)
+    .toLocaleDateString("es-PE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    })
+    .replace(/,/g, "");
 
-  let message = `¡Hola ${clientName}! 👋\n\n`;
-  message += `📅 Tu suscripción a *${platform}* vence el *${fecha}*.\n\n`;
-  message += `💰 Para continuar disfrutando del servicio, por favor realiza el pago correspondiente.\n\n`;
-  message += `¿Deseas renovar? Responde a este mensaje y te atiendo. 😊`;
+  let message = `Hola ${clientName} 😊\n\n`;
+  message += `Tu suscripción a *${platform}* vence el día *${fecha}* ⏰\n\n`;
+  message += `¿Deseas renovar tu suscripción? 😊`;
 
   return message;
 }
@@ -107,11 +113,17 @@ export function generateRenewalMessage(sub: SubscriptionWithDetails): string {
 export function generateExpiryMessage(sub: SubscriptionWithDetails): string {
   const clientName = getClientName(sub);
   const platform = getPlatformName(sub);
+  const fecha = new Date(sub.fecha_vencimiento)
+    .toLocaleDateString("es-PE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    })
+    .replace(/,/g, "");
 
-  let message = `¡Hola ${clientName}! 👋\n\n`;
-  message += `⚠️ Tu suscripción a *${platform}* ha vencido.\n\n`;
-  message += `Si deseas reactivar el servicio, por favor contactame.\n\n`;
-  message += `¡Espero verte pronto! 🙂`;
+  let message = `Hola ${clientName} 😊\n\n`;
+  message += `Tu suscripción a *${platform}* ha vencido el día *${fecha}* ⏰\n\n`;
+  message += `¿Deseas renovar tu suscripción? 😊`;
 
   return message;
 }
