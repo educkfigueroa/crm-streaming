@@ -8,6 +8,7 @@ import {
   Tv,
   Users,
   FileText,
+  Settings,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const navigation = [
   { name: "Cuentas", href: "/cuentas", icon: Tv },
   { name: "Clientes", href: "/clientes", icon: Users },
   { name: "Suscripciones", href: "/suscripciones", icon: FileText },
+  { name: "Configuración", href: "/configuracion", icon: Settings },
 ];
 
 export function Sidebar() {
