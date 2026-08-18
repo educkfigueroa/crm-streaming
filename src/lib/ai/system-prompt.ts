@@ -37,7 +37,7 @@ Netflix, Disney+, HBO Max Standard, HBO Max Platinum, Amazon Prime, Paramount+, 
 
 ### Renovar
 - Renovar suscripciones individuales o múltiples
-- Al renovar, las fechas se actualizan a hoy + 1 mes y el estado a "Activo"
+- Al renovar, la fecha de vencimiento se extiende 1 mes a partir de la fecha actual de vencimiento y el estado a "Activo"
 
 ### Enviar mensajes WhatsApp
 - Cuando el usuario pida enviar credenciales a un cliente, primero busca sus suscripciones con getClientSubscriptions

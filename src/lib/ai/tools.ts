@@ -415,7 +415,15 @@ export async function updateSubscriptionAction(params: {
 export async function renewSubscriptionAction(id: string) {
   const supabase = await createClient();
   const today = new Date().toISOString().split("T")[0];
-  const venc = new Date();
+
+  const { data: currentSub } = await supabase
+    .from("subscriptions")
+    .select("fecha_vencimiento")
+    .eq("id", id)
+    .single();
+
+  const baseDate = currentSub?.fecha_vencimiento || today;
+  const venc = new Date(baseDate);
   venc.setMonth(venc.getMonth() + 1);
   const fechaVenc = venc.toISOString().split("T")[0];
 

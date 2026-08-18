@@ -186,7 +186,15 @@ export async function renewSubscription(
   const supabase = await createClient();
 
   const today = new Date().toISOString().split("T")[0];
-  const newExpiry = addOneMonth(today);
+
+  const { data: currentSub } = await supabase
+    .from("subscriptions")
+    .select("fecha_vencimiento")
+    .eq("id", id)
+    .single();
+
+  const baseDate = currentSub?.fecha_vencimiento || today;
+  const newExpiry = addOneMonth(baseDate);
 
   const { error } = await supabase
     .from("subscriptions")
