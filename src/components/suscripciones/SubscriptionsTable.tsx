@@ -17,6 +17,15 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { MONEDA, getPlataformaByValue, getPlatformColorClasses, isIptv } from "@/lib/constants";
 import {
@@ -40,6 +49,9 @@ interface SubscriptionsTableProps {
   onSearchChange: (q: string) => void;
   filterEstado: string;
   onEstadoChange: (v: string) => void;
+  filterPlataforma?: string;
+  onPlataformaChange?: (v: string) => void;
+  plataformas?: Array<{ value: string; label: string }>;
   onDataChange?: () => void;
 }
 
@@ -311,6 +323,9 @@ export function SubscriptionsTable({
   onSearchChange,
   filterEstado,
   onEstadoChange,
+  filterPlataforma = "all",
+  onPlataformaChange,
+  plataformas = [],
   onDataChange,
 }: SubscriptionsTableProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -320,6 +335,9 @@ export function SubscriptionsTable({
     useState<SubscriptionWithDetails | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+  const [renewTargetId, setRenewTargetId] = useState<string | null>(null);
+  const [renewMonths, setRenewMonths] = useState(1);
   const [optimisticSubscriptions, dispatchOptimistic] = useOptimistic(
     subscriptions,
     (state, action: { type: "delete"; id: string }) =>
@@ -344,20 +362,33 @@ export function SubscriptionsTable({
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta suscripción?")) {
       dispatchOptimistic({ type: "delete", id });
-      await deleteSubscription(id);
+      const result = await deleteSubscription(id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Suscripción eliminada");
+      }
       onDataChange?.();
     }
   };
 
-  const handleRenew = async (id: string) => {
-    if (
-      confirm(
-        "¿Renovar esta suscripción? Se establecerá una nueva fecha de vencimiento (hoy + 1 mes)."
-      )
-    ) {
-      await renewSubscription(id);
-      onDataChange?.();
+  const handleRenew = (id: string) => {
+    setRenewTargetId(id);
+    setRenewMonths(1);
+    setRenewDialogOpen(true);
+  };
+
+  const confirmRenew = async () => {
+    if (!renewTargetId) return;
+    const result = await renewSubscription(renewTargetId, renewMonths);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(`Suscripción renovada por ${renewMonths} ${renewMonths === 1 ? "mes" : "meses"}`);
     }
+    setRenewDialogOpen(false);
+    setRenewTargetId(null);
+    onDataChange?.();
   };
 
   const handleEdit = (subscription: SubscriptionWithDetails) => {
@@ -418,6 +449,9 @@ export function SubscriptionsTable({
               onSearchChange={onSearchChange}
               filterEstado={filterEstado}
               onEstadoChange={onEstadoChange}
+              filterPlataforma={filterPlataforma}
+              onPlataformaChange={onPlataformaChange}
+              plataformas={plataformas}
             />
 
             {/* Desktop table */}
@@ -608,6 +642,48 @@ export function SubscriptionsTable({
         onOpenChange={handleFormClose}
         subscription={editingSubscription}
       />
+
+      {/* Renewal period dialog */}
+      <Dialog open={renewDialogOpen} onOpenChange={setRenewDialogOpen}>
+        <DialogContent className="max-w-sm bg-popover border border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground text-lg font-semibold">Renovar Suscripción</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Selecciona el período de renovación
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            {[
+              { months: 1, label: "1 mes" },
+              { months: 3, label: "3 meses" },
+              { months: 6, label: "6 meses" },
+              { months: 12, label: "12 meses" },
+            ].map((opt) => (
+              <button
+                key={opt.months}
+                type="button"
+                onClick={() => setRenewMonths(opt.months)}
+                className={`rounded-xl p-3 text-center transition-all duration-200 border ${
+                  renewMonths === opt.months
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-foreground shadow-lg shadow-emerald-500/5"
+                    : "bg-background border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                <p className="font-medium text-sm">{opt.label}</p>
+              </button>
+            ))}
+          </div>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="outline" onClick={() => setRenewDialogOpen(false)} className="rounded-xl">
+              Cancelar
+            </Button>
+            <Button onClick={confirmRenew} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+              <RotateCw className="h-3.5 w-3.5 mr-1.5" />
+              Renovar {renewMonths} {renewMonths === 1 ? "mes" : "meses"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

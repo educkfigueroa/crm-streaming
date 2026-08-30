@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { scheduleExpirationNotifications } from "@/lib/actions/push";
 
-export async function GET() {
+const CRON_SECRET = process.env.CRON_SECRET;
+
+export async function GET(request: Request) {
   try {
+    const authHeader = request.headers.get("authorization");
+    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const result = await scheduleExpirationNotifications();
 
     return NextResponse.json({

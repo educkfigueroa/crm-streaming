@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 import { SubscriptionsTable } from "@/components/suscripciones/SubscriptionsTable";
 import { SubscriptionForm } from "@/components/suscripciones/SubscriptionForm";
 import { SubscriptionsRefresh } from "@/components/suscripciones/SubscriptionsRefresh";
@@ -20,6 +20,7 @@ function SuscripcionesContent() {
   const [formOpen, setFormOpen] = useState(false);
   const [filteredClient, setFilteredClient] = useState<Client | null>(null);
   const [filterEstado, setFilterEstado] = useState<string>("all");
+  const [filterPlataforma, setFilterPlataforma] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const loadSubscriptions = async (background = false) => {
@@ -75,6 +76,21 @@ function SuscripcionesContent() {
     );
   }
 
+  // Compute available platforms from subscriptions
+  const availablePlatforms = Array.from(
+    new Set(subscriptions.map((s) => s.accounts?.plataforma).filter(Boolean))
+  ).map((p) => ({
+    value: p!,
+    label: p === "iptv" ? "IPTV" : p!.charAt(0).toUpperCase() + p!.slice(1).replace(/_/g, " "),
+  }));
+
+  // Platform filter
+  if (filterPlataforma !== "all") {
+    filteredSubscriptions = filteredSubscriptions.filter(
+      (sub) => sub.accounts?.plataforma === filterPlataforma
+    );
+  }
+
   const displayClient = clienteId ? filteredClient : null;
 
   return (
@@ -109,6 +125,9 @@ function SuscripcionesContent() {
           onSearchChange={setSearchQuery}
           filterEstado={filterEstado}
           onEstadoChange={setFilterEstado}
+          filterPlataforma={filterPlataforma}
+          onPlataformaChange={setFilterPlataforma}
+          plataformas={availablePlatforms}
           onDataChange={() => loadSubscriptions(true)}
         />
       )}

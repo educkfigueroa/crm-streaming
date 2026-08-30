@@ -1,64 +1,14 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getPlataformaByValue, isIptv } from "@/lib/constants";
+import { calcularEstado } from "@/lib/utils";
+import { getPlataformaByValue } from "@/lib/constants";
+import { generateWelcomeMessage, generateRenewalMessage } from "@/lib/whatsapp";
 import type { SubscriptionWithDetails } from "@/types";
-
-function calcularEstado(fechaVencimiento: string): string {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const vencimiento = new Date(fechaVencimiento);
-  vencimiento.setHours(0, 0, 0, 0);
-  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays <= 0) return "Vencido";
-  if (diffDays <= 7) return "Por Vencer";
-  return "Activo";
-}
 
 function getPlatformLabel(sub: SubscriptionWithDetails): string {
   const p = sub.accounts ? getPlataformaByValue(sub.accounts.plataforma) : null;
   return p?.label || sub.accounts?.plataforma || "Desconocido";
-}
-
-function buildWelcomeMessage(sub: SubscriptionWithDetails): string {
-  const platform = getPlatformLabel(sub);
-  const isIptvSub = isIptv(sub.accounts?.plataforma || "");
-  const credential = isIptvSub
-    ? sub.accounts?.usuario_xtream || ""
-    : sub.accounts?.correo || "";
-  const password = sub.accounts?.contraseña || "";
-  const fecha = new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE");
-
-  if (isIptvSub) {
-    const url = sub.accounts?.url_server || sub.accounts?.servidor_xtream || "";
-    let msg = `📺 Datos de acceso a ${platform}:\n\n`;
-    if (url) msg += `🌐 URL: ${url}\n`;
-    msg += `👤 Usuario: ${credential}\n`;
-    msg += `🔑 Contraseña: ${password}\n`;
-    msg += `\n📅 Vence: ${fecha}`;
-    return msg;
-  }
-
-  let msg = `📺 Datos de acceso a ${platform}:\n\n`;
-  msg += `👤 Usuario: ${credential}\n`;
-  if (password) msg += `🔑 Contraseña: ${password}\n`;
-  msg += `🎭 Perfil: ${sub.nombre_perfil}\n`;
-  if (sub.pin_perfil) msg += `🔒 PIN: ${sub.pin_perfil}\n`;
-  msg += `\n📅 Vence: ${fecha}`;
-  return msg;
-}
-
-function buildRenewalMessage(sub: SubscriptionWithDetails): string {
-  const clientName =
-    (sub.clients as { nombre_completo?: string })?.nombre_completo || "";
-  const platform = getPlatformLabel(sub);
-  const fecha = new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE");
-  return (
-    `¡Hola ${clientName}! 👋\n\n` +
-    `📅 Tu suscripción a *${platform}* vence el *${fecha}*.\n\n` +
-    `💰 Para continuar disfrutando del servicio, por favor realiza el pago correspondiente.\n\n` +
-    `¿Deseas renovar? Responde a este mensaje y te atiendo. 😊`
-  );
 }
 
 export async function getDashboardStatsAction() {
@@ -426,11 +376,12 @@ export async function renewSubscriptionAction(id: string) {
   const venc = new Date(baseDate);
   venc.setMonth(venc.getMonth() + 1);
   const fechaVenc = venc.toISOString().split("T")[0];
+  const newStart = baseDate;
 
   const { error } = await supabase
     .from("subscriptions")
     .update({
-      fecha_inicio: today,
+      fecha_inicio: newStart,
       fecha_vencimiento: fechaVenc,
       estado: "Activo",
       updated_at: new Date().toISOString(),
@@ -466,8 +417,8 @@ export async function generateWhatsAppMessageAction(
 
   const messages =
     tipo === "renovacion"
-      ? allSubs.map(buildRenewalMessage)
-      : allSubs.map(buildWelcomeMessage);
+      ? allSubs.map(generateRenewalMessage)
+      : allSubs.map(generateWelcomeMessage);
 
   const combinedMessage =
     allSubs.length === 1

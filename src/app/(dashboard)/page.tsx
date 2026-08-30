@@ -1,4 +1,4 @@
-import { getDashboardStats, getExpiringSoon, getMonthlyRevenue, getFinancialSummary, getCalendarSubscriptions } from "@/lib/actions/dashboard";
+import { getDashboardStats, getExpiringSoon, getMonthlyRevenue, getFinancialSummary, getCalendarSubscriptions, getExpiredSubscriptions } from "@/lib/actions/dashboard";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { ExpiringSoon } from "@/components/dashboard/ExpiringSoon";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
@@ -6,15 +6,16 @@ import { StatusPieChart } from "@/components/dashboard/StatusPieChart";
 import { ExpirationCalendar } from "@/components/dashboard/ExpirationCalendar";
 import { CollapsibleSection } from "@/components/dashboard/CollapsibleSection";
 import { DashboardRefresh } from "@/components/dashboard/DashboardRefresh";
-import { Calendar, PieChart, ListOrdered } from "lucide-react";
+import { Calendar, PieChart, ListOrdered, AlertTriangle } from "lucide-react";
 
 export default async function DashboardPage() {
-  const [stats, expiringSoon, monthlyRevenue, financial, calendarSubs] = await Promise.all([
+  const [stats, expiringSoon, monthlyRevenue, financial, calendarSubs, expiredSubs] = await Promise.all([
     getDashboardStats(),
     getExpiringSoon(),
     getMonthlyRevenue(),
     getFinancialSummary(),
     getCalendarSubscriptions(),
+    getExpiredSubscriptions(),
   ]);
 
   const revenueSparkline = monthlyRevenue.map((d) => d.total);
@@ -62,6 +63,17 @@ export default async function DashboardPage() {
           <ExpiringSoon subscriptions={expiringSoon} />
         </CollapsibleSection>
       </div>
+
+      {expiredSubs.length > 0 && (
+        <CollapsibleSection
+          title="Vencidas"
+          subtitle={`${expiredSubs.length} suscripciones vencidas que requieren atención`}
+          icon={<AlertTriangle className="h-5 w-5 text-red-500 dark:text-red-400" />}
+          defaultOpen={false}
+        >
+          <ExpiringSoon subscriptions={expiredSubs} />
+        </CollapsibleSection>
+      )}
     </div>
     </DashboardRefresh>
   );

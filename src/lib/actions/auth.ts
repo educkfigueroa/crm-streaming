@@ -4,10 +4,17 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const SESSION_COOKIE = "crm_session";
-const PIN = (process.env.AUTH_PIN ?? "111872").trim();
+const PIN = process.env.AUTH_PIN?.trim();
+if (!PIN) {
+  console.error("[auth] AUTH_PIN environment variable is not set!");
+}
 
 export async function signIn(prevState: unknown, formData: FormData) {
   const pin = formData.get("pin") as string;
+
+  if (!PIN) {
+    return { error: "Servicio no configurado. Contacta al administrador." };
+  }
 
   if (!pin) {
     return { error: "Ingresa el PIN de acceso" };

@@ -7,6 +7,7 @@ import {
   isStepCount,
 } from "ai";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 import { SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
 import {
   getDashboardStatsAction,
@@ -27,6 +28,15 @@ import {
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "anonymous";
+    const { allowed, remaining } = rateLimit(`chat:${ip}`, { windowMs: 60000, maxRequests: 15 });
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "Demasiadas solicitudes. Intenta de nuevo en 1 minuto." }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "X-RateLimit-Remaining": "0" },
+      });
+    }
+
     const { messages } = await request.json();
 
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;

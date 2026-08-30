@@ -1,13 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { AccountSchema } from "@/lib/validations";
 import type { Account, AccountInput } from "@/types";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function isUUID(value: string): boolean {
-  return UUID_REGEX.test(value.trim());
-}
 
 export async function getAccounts(): Promise<Account[]> {
   const supabase = await createClient();
@@ -48,37 +43,24 @@ export async function createAccount(
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
 
-  const plataforma = formData.get("plataforma") as string;
-  const correo = formData.get("correo") as string || null;
-  const contraseña = formData.get("contraseña") as string || null;
-  const totalPerfiles = parseInt(formData.get("total_perfiles") as string) || 1;
-  const precioCosto = parseFloat(formData.get("precio_costo") as string) || null;
-  const fechaVencimiento = formData.get("fecha_vencimiento_proveedor") as string || null;
-  const servidorXtream = formData.get("servidor_xtream") as string || null;
-  const urlServer = formData.get("url_server") as string || null;
-  const urlPanelIptv = formData.get("url_panel_iptv") as string || null;
-  const usuarioXtream = formData.get("usuario_xtream") as string || null;
-
-  if (!plataforma) {
-    return { error: "La plataforma es requerida" };
-  }
-
-  if (correo && isUUID(correo)) {
-    return { error: "El correo no puede ser un ID" };
-  }
-
-  const { error } = await supabase.from("accounts").insert({
-    plataforma,
-    correo,
-    contraseña,
-    total_perfiles: totalPerfiles,
-    precio_costo: precioCosto,
-    fecha_vencimiento_proveedor: fechaVencimiento || null,
-    servidor_xtream: servidorXtream,
-    url_server: urlServer,
-    url_panel_iptv: urlPanelIptv,
-    usuario_xtream: usuarioXtream,
+  const parsed = AccountSchema.safeParse({
+    plataforma: formData.get("plataforma") as string,
+    correo: formData.get("correo") as string || null,
+    contraseña: formData.get("contraseña") as string || null,
+    total_perfiles: parseInt(formData.get("total_perfiles") as string) || 1,
+    precio_costo: parseFloat(formData.get("precio_costo") as string) || null,
+    fecha_vencimiento_proveedor: formData.get("fecha_vencimiento_proveedor") as string || null,
+    servidor_xtream: formData.get("servidor_xtream") as string || null,
+    url_server: formData.get("url_server") as string || null,
+    url_panel_iptv: formData.get("url_panel_iptv") as string || null,
+    usuario_xtream: formData.get("usuario_xtream") as string || null,
   });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const { error } = await supabase.from("accounts").insert(parsed.data);
 
   if (error) {
     console.error("Error creating account:", error);
@@ -95,38 +77,27 @@ export async function updateAccount(
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
 
-  const plataforma = formData.get("plataforma") as string;
-  const correo = formData.get("correo") as string || null;
-  const contraseña = formData.get("contraseña") as string || null;
-  const totalPerfiles = parseInt(formData.get("total_perfiles") as string) || 1;
-  const precioCosto = parseFloat(formData.get("precio_costo") as string) || null;
-  const fechaVencimiento = formData.get("fecha_vencimiento_proveedor") as string || null;
-  const servidorXtream = formData.get("servidor_xtream") as string || null;
-  const urlServer = formData.get("url_server") as string || null;
-  const urlPanelIptv = formData.get("url_panel_iptv") as string || null;
-  const usuarioXtream = formData.get("usuario_xtream") as string || null;
+  const parsed = AccountSchema.safeParse({
+    plataforma: formData.get("plataforma") as string,
+    correo: formData.get("correo") as string || null,
+    contraseña: formData.get("contraseña") as string || null,
+    total_perfiles: parseInt(formData.get("total_perfiles") as string) || 1,
+    precio_costo: parseFloat(formData.get("precio_costo") as string) || null,
+    fecha_vencimiento_proveedor: formData.get("fecha_vencimiento_proveedor") as string || null,
+    servidor_xtream: formData.get("servidor_xtream") as string || null,
+    url_server: formData.get("url_server") as string || null,
+    url_panel_iptv: formData.get("url_panel_iptv") as string || null,
+    usuario_xtream: formData.get("usuario_xtream") as string || null,
+  });
 
-  if (!plataforma) {
-    return { error: "La plataforma es requerida" };
-  }
-
-  if (correo && isUUID(correo)) {
-    return { error: "El correo no puede ser un ID" };
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
   }
 
   const { error } = await supabase
     .from("accounts")
     .update({
-      plataforma,
-      correo,
-      contraseña,
-      total_perfiles: totalPerfiles,
-      precio_costo: precioCosto,
-      fecha_vencimiento_proveedor: fechaVencimiento || null,
-      servidor_xtream: servidorXtream,
-      url_server: urlServer,
-      url_panel_iptv: urlPanelIptv,
-      usuario_xtream: usuarioXtream,
+      ...parsed.data,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);

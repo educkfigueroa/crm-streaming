@@ -1,13 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { ClientSchema } from "@/lib/validations";
 import type { Client } from "@/types";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function isUUID(value: string): boolean {
-  return UUID_REGEX.test(value.trim());
-}
 
 export async function getClients(): Promise<Client[]> {
   const supabase = await createClient();
@@ -48,25 +43,18 @@ export async function createClientAction(
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
 
-  const nombreCompleto = formData.get("nombre_completo") as string;
-  const alias = formData.get("alias") as string || null;
-  const whatsapp = formData.get("whatsapp") as string || null;
-  const notas = formData.get("notas") as string || null;
-
-  if (!nombreCompleto) {
-    return { error: "El nombre completo es requerido" };
-  }
-
-  if (isUUID(nombreCompleto)) {
-    return { error: "El nombre no puede ser un ID" };
-  }
-
-  const { error } = await supabase.from("clients").insert({
-    nombre_completo: nombreCompleto,
-    alias,
-    whatsapp,
-    notas,
+  const parsed = ClientSchema.safeParse({
+    nombre_completo: formData.get("nombre_completo") as string,
+    alias: formData.get("alias") as string || null,
+    whatsapp: formData.get("whatsapp") as string || null,
+    notas: formData.get("notas") as string || null,
   });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const { error } = await supabase.from("clients").insert(parsed.data);
 
   if (error) {
     console.error("Error creating client:", error);
@@ -83,26 +71,21 @@ export async function updateClient(
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
 
-  const nombreCompleto = formData.get("nombre_completo") as string;
-  const alias = formData.get("alias") as string || null;
-  const whatsapp = formData.get("whatsapp") as string || null;
-  const notas = formData.get("notas") as string || null;
+  const parsed = ClientSchema.safeParse({
+    nombre_completo: formData.get("nombre_completo") as string,
+    alias: formData.get("alias") as string || null,
+    whatsapp: formData.get("whatsapp") as string || null,
+    notas: formData.get("notas") as string || null,
+  });
 
-  if (!nombreCompleto) {
-    return { error: "El nombre completo es requerido" };
-  }
-
-  if (isUUID(nombreCompleto)) {
-    return { error: "El nombre no puede ser un ID" };
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
   }
 
   const { error } = await supabase
     .from("clients")
     .update({
-      nombre_completo: nombreCompleto,
-      alias,
-      whatsapp,
-      notas,
+      ...parsed.data,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);

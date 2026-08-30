@@ -3,22 +3,12 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Subscription, SubscriptionWithDetails } from "@/types";
 import { sendExpirationNotification } from "./push";
+import { calcularEstado, isUUID } from "@/lib/utils";
 
 function addOneMonth(dateStr: string): string {
   const date = new Date(dateStr);
   date.setMonth(date.getMonth() + 1);
   return date.toISOString().split("T")[0];
-}
-
-function calcularEstado(fechaVencimiento: string): string {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const vencimiento = new Date(fechaVencimiento);
-  vencimiento.setHours(0, 0, 0, 0);
-  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays <= 0) return "Vencido";
-  if (diffDays <= 7) return "Por Vencer";
-  return "Activo";
 }
 
 export async function getSubscriptions(): Promise<SubscriptionWithDetails[]> {
@@ -65,12 +55,6 @@ export async function getSubscription(id: string): Promise<SubscriptionWithDetai
   }
 
   return data as unknown as SubscriptionWithDetails;
-}
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function isUUID(value: string): boolean {
-  return UUID_REGEX.test(value.trim());
 }
 
 export async function createSubscription(
@@ -181,7 +165,8 @@ export async function updateSubscription(
 }
 
 export async function renewSubscription(
-  id: string
+  id: string,
+  months: number = 1
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
 
@@ -194,12 +179,15 @@ export async function renewSubscription(
     .single();
 
   const baseDate = currentSub?.fecha_vencimiento || today;
-  const newExpiry = addOneMonth(baseDate);
+  const newStart = baseDate;
+  const newDate = new Date(baseDate);
+  newDate.setMonth(newDate.getMonth() + months);
+  const newExpiry = newDate.toISOString().split("T")[0];
 
   const { error } = await supabase
     .from("subscriptions")
     .update({
-      fecha_inicio: today,
+      fecha_inicio: newStart,
       fecha_vencimiento: newExpiry,
       estado: "Activo",
       updated_at: new Date().toISOString(),

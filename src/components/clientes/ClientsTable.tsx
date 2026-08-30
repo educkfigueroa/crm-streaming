@@ -2,7 +2,7 @@
 
 import { useState, useOptimistic } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Edit, FileText } from "lucide-react";
+import { Trash2, Edit, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 import { ClientForm } from "./ClientForm";
 import { deleteClient } from "@/lib/actions/clients";
 import type { Client } from "@/types";
@@ -99,7 +100,12 @@ export function ClientsTable({ clients, onDataChange }: ClientsTableProps) {
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar este cliente?")) {
       dispatchOptimistic({ type: "delete", id });
-      await deleteClient(id);
+      const result = await deleteClient(id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Cliente eliminado");
+      }
       onDataChange?.();
     }
   };
@@ -122,6 +128,26 @@ export function ClientsTable({ clients, onDataChange }: ClientsTableProps) {
 
   const viewSubscriptions = (clientId: string) => {
     router.push(`/suscripciones?cliente=${clientId}`);
+  };
+
+  const exportCSV = () => {
+    const headers = ["Nombre", "Alias", "WhatsApp", "Notas"];
+    const rows = optimisticClients.map((c) => [
+      c.nombre_completo,
+      c.alias || "",
+      c.whatsapp || "",
+      c.notas || "",
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `clientes-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   if (optimisticClients.length === 0) {

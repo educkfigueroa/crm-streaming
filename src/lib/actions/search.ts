@@ -9,12 +9,12 @@ function escapeLike(value: string): string {
 
 export async function globalSearch(query: string): Promise<GlobalSearchResult> {
   const q = query.trim();
-  if (!q) return { clients: [], subscriptions: [] };
+  if (!q) return { clients: [], subscriptions: [], accounts: [] };
 
   const supabase = await createClient();
   const like = `%${escapeLike(q)}%`;
 
-  const [clientsRes, subsRes] = await Promise.all([
+  const [clientsRes, subsRes, accountsRes] = await Promise.all([
     supabase
       .from("clients")
       .select("id, nombre_completo, alias, whatsapp")
@@ -29,10 +29,16 @@ export async function globalSearch(query: string): Promise<GlobalSearchResult> {
       `)
       .or(`nombre_perfil.ilike.${like}`)
       .limit(5),
+    supabase
+      .from("accounts")
+      .select("id, plataforma, correo, usuario_xtream")
+      .or(`correo.ilike.${like},plataforma.ilike.${like},usuario_xtream.ilike.${like}`)
+      .limit(5),
   ]);
 
   return {
     clients: (clientsRes.data ?? []) as unknown as GlobalSearchResult["clients"],
     subscriptions: (subsRes.data ?? []) as unknown as GlobalSearchResult["subscriptions"],
+    accounts: (accountsRes.data ?? []) as unknown as GlobalSearchResult["accounts"],
   };
 }

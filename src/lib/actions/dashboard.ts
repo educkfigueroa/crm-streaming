@@ -1,18 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { calcularEstado } from "@/lib/utils";
 import type { DashboardStats, SubscriptionWithDetails } from "@/types";
-
-function calcularEstado(fechaVencimiento: string): string {
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const vencimiento = new Date(fechaVencimiento);
-  vencimiento.setHours(0, 0, 0, 0);
-  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays <= 0) return "Vencido";
-  if (diffDays <= 7) return "Por Vencer";
-  return "Activo";
-}
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const supabase = await createClient();
@@ -69,6 +59,32 @@ export async function getExpiringSoon(): Promise<SubscriptionWithDetails[]> {
 
   if (error) {
     console.error("Error fetching expiring subscriptions:", error);
+    return [];
+  }
+
+  return data as unknown as SubscriptionWithDetails[];
+}
+
+export async function getExpiredSubscriptions(): Promise<SubscriptionWithDetails[]> {
+  const supabase = await createClient();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("subscriptions")
+    .select(`
+      *,
+      clients (id, nombre_completo, whatsapp),
+      accounts (id, plataforma, correo)
+    `)
+    .lt("fecha_vencimiento", todayStr)
+    .order("fecha_vencimiento", { ascending: true })
+    .limit(10);
+
+  if (error) {
+    console.error("Error fetching expired subscriptions:", error);
     return [];
   }
 

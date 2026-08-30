@@ -18,6 +18,7 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getPlataformaByValue, getPlatformColorClasses, MONEDA, isIptv, getPlataformaUrl } from "@/lib/constants";
 import { AccountForm } from "./AccountForm";
@@ -340,7 +341,12 @@ export function AccountsTable({
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta cuenta?")) {
       dispatchOptimistic({ type: "delete", id });
-      await deleteAccount(id);
+      const result = await deleteAccount(id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Cuenta eliminada");
+      }
       onDataChange?.();
     }
   };

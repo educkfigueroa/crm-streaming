@@ -8,6 +8,9 @@ interface FilterBarProps {
   onSearchChange: (q: string) => void;
   filterEstado: string;
   onEstadoChange: (v: string) => void;
+  filterPlataforma?: string;
+  onPlataformaChange?: (v: string) => void;
+  plataformas?: Array<{ value: string; label: string }>;
 }
 
 const ESTADOS = [
@@ -36,8 +39,11 @@ export function FilterBar({
   onSearchChange,
   filterEstado,
   onEstadoChange,
+  filterPlataforma = "all",
+  onPlataformaChange,
+  plataformas = [],
 }: FilterBarProps) {
-  const hasActive = searchQuery.length > 0 || filterEstado !== "all";
+  const hasActive = searchQuery.length > 0 || filterEstado !== "all" || filterPlataforma !== "all";
 
   return (
     <div className="rounded-xl bg-card border border-border/50 overflow-hidden">
@@ -87,11 +93,30 @@ export function FilterBar({
             );
           })}
 
+          {plataformas.length > 0 && (
+            <>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mr-1 ml-2">
+                Plataforma
+              </span>
+              <select
+                value={filterPlataforma}
+                onChange={(e) => onPlataformaChange?.(e.target.value)}
+                className="h-7 px-2 rounded-lg text-xs font-medium bg-background border border-border/50 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                <option value="all">Todas</option>
+                {plataformas.map((p) => (
+                  <option key={p.value} value={p.value}>{p.label}</option>
+                ))}
+              </select>
+            </>
+          )}
+
           {hasActive && (
             <button
               onClick={() => {
                 onSearchChange("");
                 onEstadoChange("all");
+                onPlataformaChange?.("all");
               }}
               className="flex items-center gap-1 h-7 px-2.5 ml-auto rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             >

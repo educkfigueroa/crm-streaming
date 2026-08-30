@@ -84,7 +84,15 @@ export interface GlobalSearchSubscription {
   accounts?: { plataforma: string } | null;
 }
 
+export interface GlobalSearchAccount {
+  id: string;
+  plataforma: string;
+  correo: string | null;
+  usuario_xtream: string | null;
+}
+
 export interface GlobalSearchResult {
   clients: GlobalSearchClient[];
   subscriptions: GlobalSearchSubscription[];
+  accounts: GlobalSearchAccount[];
 }

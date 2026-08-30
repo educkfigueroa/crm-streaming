@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Users, FileText, Loader2 } from "lucide-react";
+import { Search, Users, FileText, Tv, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { globalSearch } from "@/lib/actions/search";
@@ -13,13 +13,13 @@ export function GlobalSearch() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<GlobalSearchResult>({ clients: [], subscriptions: [] });
+  const [results, setResults] = useState<GlobalSearchResult>({ clients: [], subscriptions: [], accounts: [] });
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const runSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
-      setResults({ clients: [], subscriptions: [] });
+      setResults({ clients: [], subscriptions: [], accounts: [] });
       setLoading(false);
       return;
     }
@@ -59,7 +59,7 @@ export function GlobalSearch() {
     setOpen(next);
     if (!next) {
       setQuery("");
-      setResults({ clients: [], subscriptions: [] });
+      setResults({ clients: [], subscriptions: [], accounts: [] });
     }
   };
 
@@ -72,7 +72,8 @@ export function GlobalSearch() {
     query.trim().length > 0 &&
     !loading &&
     results.clients.length === 0 &&
-    results.subscriptions.length === 0;
+    results.subscriptions.length === 0 &&
+    results.accounts.length === 0;
 
   return (
     <>
@@ -172,6 +173,36 @@ export function GlobalSearch() {
                         <span className="ml-auto text-[10px] text-muted-foreground shrink-0">
                           {sub.clients?.nombre_completo ?? "Sin cliente"}
                         </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {!loading && results.accounts.length > 0 && (
+              <div>
+                <p className="px-1.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                  Cuentas
+                </p>
+                <div className="space-y-0.5">
+                  {results.accounts.map((account) => {
+                    const plataforma = getPlataformaByValue(account.plataforma)?.label ?? account.plataforma;
+                    return (
+                      <button
+                        key={account.id}
+                        onClick={() => goTo(`/cuentas`)}
+                        className="w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-foreground hover:bg-accent transition-colors text-left"
+                      >
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-purple-500/10 text-purple-500 dark:text-purple-400 shrink-0">
+                          <Tv className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="font-medium truncate">{plataforma}</span>
+                        {(account.correo || account.usuario_xtream) && (
+                          <span className="text-xs text-muted-foreground truncate">
+                            {account.correo || account.usuario_xtream}
+                          </span>
+                        )}
                       </button>
                     );
                   })}

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY!;
+const CRON_SECRET = process.env.CRON_SECRET;
 
 if (vapidPublicKey && vapidPrivateKey) {
   webPush.setVapidDetails(
@@ -15,6 +16,11 @@ if (vapidPublicKey && vapidPrivateKey) {
 
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get("authorization");
+    if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { title, body, url, tag } = await request.json();
 
     if (!title || !body) {
