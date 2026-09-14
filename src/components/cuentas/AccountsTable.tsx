@@ -2,7 +2,7 @@
 
 import { useState, useOptimistic } from "react";
 import Link from "next/link";
-import { Trash2, Edit, Copy, Check, ExternalLink, Mail, KeyRound, X } from "lucide-react";
+import { Trash2, Edit, RotateCw, Copy, Check, ExternalLink, Mail, KeyRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,13 +18,26 @@ import {
   SheetContent,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getPlataformaByValue, getPlatformColorClasses, MONEDA, isIptv, getPlataformaUrl } from "@/lib/constants";
 import { AccountForm } from "./AccountForm";
 import { AccountsFilterBar } from "./AccountsFilterBar";
+import { SubscriptionForm } from "../suscripciones/SubscriptionForm";
 import { deleteAccount } from "@/lib/actions/accounts";
-import type { Account, Subscription } from "@/types";
+import {
+  deleteSubscription,
+  renewSubscription,
+} from "@/lib/actions/subscriptions";
+import type { Account, Subscription, SubscriptionWithDetails } from "@/types";
 
 interface AccountsTableProps {
   accounts: Account[];
@@ -100,6 +113,9 @@ interface AccountDetailsPanelProps {
   onCopy: (text: string, id: string) => void;
   onEdit: (account: Account) => void;
   onDelete: (id: string) => void;
+  onRenewSubscription: (sub: Subscription) => void;
+  onEditSubscription: (sub: Subscription) => void;
+  onDeleteSubscription: (sub: Subscription) => void;
   onClose: () => void;
 }
 
@@ -164,6 +180,9 @@ function AccountDetailsPanel({
   onCopy,
   onEdit,
   onDelete,
+  onRenewSubscription,
+  onEditSubscription,
+  onDeleteSubscription,
   onClose,
 }: AccountDetailsPanelProps) {
   const plataforma = getPlataformaByValue(account.plataforma);
@@ -261,9 +280,38 @@ function AccountDetailsPanel({
                     <p className="truncate text-xs font-medium text-foreground">{sub.nombre_perfil}</p>
                     <p className="text-[10px] text-muted-foreground">{formatDate(sub.fecha_vencimiento)}</p>
                   </div>
-                  <Badge variant="outline" className={`${PROFILE_BADGE[status]} text-[10px] shrink-0`}>
-                    {getProfileLabel(status)}
-                  </Badge>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <Badge variant="outline" className={`${PROFILE_BADGE[status]} text-[10px] shrink-0`}>
+                      {getProfileLabel(status)}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                      title="Renovar"
+                      onClick={() => onRenewSubscription(sub)}
+                    >
+                      <RotateCw className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                      title="Editar"
+                      onClick={() => onEditSubscription(sub)}
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-red-500 hover:text-red-500 hover:bg-red-500/10"
+                      title="Eliminar"
+                      onClick={() => onDeleteSubscription(sub)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
@@ -322,6 +370,11 @@ export function AccountsTable({
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+  const [renewTarget, setRenewTarget] = useState<Subscription | null>(null);
+  const [renewMonths, setRenewMonths] = useState(1);
+  const [editingSubscription, setEditingSubscription] = useState<SubscriptionWithDetails | null>(null);
+  const [subFormOpen, setSubFormOpen] = useState(false);
   const [optimisticAccounts, dispatchOptimistic] = useOptimistic(
     accounts,
     (state, action: { type: "delete"; id: string }) =>
@@ -360,6 +413,52 @@ export function AccountsTable({
     setEditingAccount(null);
     setFormOpen(false);
     onDataChange?.();
+  };
+
+  const handleSubRenew = (sub: Subscription) => {
+    setRenewTarget(sub);
+    setRenewMonths(1);
+    setRenewDialogOpen(true);
+  };
+
+  const confirmSubRenew = async () => {
+    if (!renewTarget) return;
+    const result = await renewSubscription(renewTarget.id, renewMonths);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(`Suscripción renovada por ${renewMonths} ${renewMonths === 1 ? "mes" : "meses"}`);
+    }
+    setRenewDialogOpen(false);
+    setRenewTarget(null);
+    onDataChange?.();
+  };
+
+  const handleSubEdit = (sub: Subscription) => {
+    const withDetails: SubscriptionWithDetails = {
+      ...sub,
+      accounts: optimisticAccounts.find((a) => a.id === sub.cuenta_id) ?? undefined,
+    };
+    setEditingSubscription(withDetails);
+    setSubFormOpen(true);
+  };
+
+  const handleSubFormClose = () => {
+    setEditingSubscription(null);
+    setSubFormOpen(false);
+    onDataChange?.();
+  };
+
+  const handleSubDelete = async (sub: Subscription) => {
+    if (confirm(`¿Estás seguro de eliminar la suscripción "${sub.nombre_perfil}"?`)) {
+      const result = await deleteSubscription(sub.id);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Suscripción eliminada");
+      }
+      onDataChange?.();
+    }
   };
 
   const getCorreo = (account: Account) => {
@@ -424,6 +523,9 @@ export function AccountsTable({
         onCopy: handleCopy,
         onEdit: handleEdit,
         onDelete: handleDelete,
+        onRenewSubscription: handleSubRenew,
+        onEditSubscription: handleSubEdit,
+        onDeleteSubscription: handleSubDelete,
         onClose: () => setMobileOpen(false),
       }
     : null;
@@ -744,6 +846,55 @@ export function AccountsTable({
       </Sheet>
 
       <AccountForm open={formOpen} onOpenChange={handleFormClose} account={editingAccount} />
+
+      <SubscriptionForm
+        open={subFormOpen}
+        onOpenChange={handleSubFormClose}
+        subscription={editingSubscription}
+      />
+
+      <Dialog open={renewDialogOpen} onOpenChange={setRenewDialogOpen}>
+        <DialogContent className="max-w-sm bg-popover border border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground text-lg font-semibold">
+              Renovar {renewTarget ? renewTarget.nombre_perfil : "Suscripción"}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Selecciona el período de renovación
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            {[
+              { months: 1, label: "1 mes" },
+              { months: 3, label: "3 meses" },
+              { months: 6, label: "6 meses" },
+              { months: 12, label: "12 meses" },
+            ].map((opt) => (
+              <button
+                key={opt.months}
+                type="button"
+                onClick={() => setRenewMonths(opt.months)}
+                className={`rounded-xl p-3 text-center transition-all duration-200 border ${
+                  renewMonths === opt.months
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-foreground shadow-lg shadow-emerald-500/5"
+                    : "bg-background border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                <p className="font-medium text-sm">{opt.label}</p>
+              </button>
+            ))}
+          </div>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="outline" onClick={() => setRenewDialogOpen(false)} className="rounded-xl">
+              Cancelar
+            </Button>
+            <Button onClick={confirmSubRenew} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+              <RotateCw className="h-3.5 w-3.5 mr-1.5" />
+              Renovar {renewMonths} {renewMonths === 1 ? "mes" : "meses"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
