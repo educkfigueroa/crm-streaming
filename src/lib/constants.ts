@@ -1,18 +1,22 @@
 export const PLATAFORMAS = [
-  { value: "netflix", label: "Netflix", icon: "Tv", maxPerfiles: 5, color: "red" },
-  { value: "disney", label: "Disney+", icon: "Tv", maxPerfiles: 6, color: "blue" },
-  { value: "hbo_standard", label: "HBO Max Standard", icon: "Tv", maxPerfiles: 3, color: "purple" },
-  { value: "hbo_platinum", label: "HBO Max Platinum", icon: "Tv", maxPerfiles: 5, color: "purple" },
-  { value: "amazon", label: "Amazon Prime", icon: "Tv", maxPerfiles: 5, color: "cyan" },
-  { value: "paramount", label: "Paramount+", icon: "Tv", maxPerfiles: 5, color: "sky" },
-  { value: "vix", label: "Vix", icon: "Tv", maxPerfiles: 4, color: "pink" },
-  { value: "crunchyroll", label: "Crunchyroll", icon: "Tv", maxPerfiles: 5, color: "orange" },
-  { value: "spotify", label: "Spotify Familiar", icon: "Music", maxPerfiles: 6, color: "green" },
-  { value: "apple_music", label: "Apple Music", icon: "Music", maxPerfiles: 5, color: "rose" },
+  { value: "netflix", label: "Netflix", icon: "Tv", maxPerfiles: 5, color: "red", logo: "/logos/netflix.svg" },
+  { value: "disney", label: "Disney+", icon: "Tv", maxPerfiles: 6, color: "blue", logo: "/logos/disney.svg" },
+  { value: "hbo_standard", label: "HBO Max Standard", icon: "Tv", maxPerfiles: 3, color: "purple", logo: "/logos/hbo-max.svg" },
+  { value: "hbo_platinum", label: "HBO Max Platinum", icon: "Tv", maxPerfiles: 5, color: "purple", logo: "/logos/hbo-max.svg" },
+  { value: "amazon", label: "Amazon Prime", icon: "Tv", maxPerfiles: 5, color: "cyan", logo: "/logos/amazon.svg" },
+  { value: "paramount", label: "Paramount+", icon: "Tv", maxPerfiles: 5, color: "sky", logo: "/logos/paramount.svg" },
+  { value: "vix", label: "Vix", icon: "Tv", maxPerfiles: 4, color: "pink", logo: "/logos/vix.png" },
+  { value: "crunchyroll", label: "Crunchyroll", icon: "Tv", maxPerfiles: 5, color: "orange", logo: "/logos/crunchyroll.svg" },
+  { value: "spotify", label: "Spotify Familiar", icon: "Music", maxPerfiles: 6, color: "green", logo: "/logos/spotify.svg" },
+  { value: "apple_music", label: "Apple Music", icon: "Music", maxPerfiles: 5, color: "rose", logo: "/logos/apple-music.svg" },
   { value: "otro", label: "Otro", icon: "MoreHorizontal", maxPerfiles: null, color: "slate" },
 ] as const;
 
 export const PLATAFORMA_IPTV = { value: "iptv", label: "IPTV (Xtream Code)", icon: "Radio", maxPerfiles: 3, color: "teal" } as const;
+
+export function getPlataformaLogo(value: string): string | null {
+  return (getPlataformaByValue(value) as { logo?: string } | undefined)?.logo ?? null;
+}
 
 export type PlataformaValue = (typeof PLATAFORMAS)[number]["value"];
 

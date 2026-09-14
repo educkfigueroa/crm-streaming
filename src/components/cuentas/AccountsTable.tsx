@@ -2,6 +2,7 @@
 
 import { useState, useOptimistic } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Trash2, Edit, RotateCw, Copy, Check, ExternalLink, Mail, KeyRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { getPlataformaByValue, getPlatformColorClasses, MONEDA, isIptv, getPlataformaUrl } from "@/lib/constants";
+import { getPlataformaByValue, getPlataformaLogo, getPlatformColorClasses, MONEDA, isIptv, getPlataformaUrl } from "@/lib/constants";
 import { AccountForm } from "./AccountForm";
 import { AccountsFilterBar } from "./AccountsFilterBar";
 import { SubscriptionForm } from "../suscripciones/SubscriptionForm";
@@ -188,6 +189,7 @@ function AccountDetailsPanel({
   const plataforma = getPlataformaByValue(account.plataforma);
   const colorKey = plataforma?.color ?? "slate";
   const isIptvAccount = isIptv(account.plataforma);
+  const logo = getPlataformaLogo(account.plataforma);
   const correo = isIptvAccount ? account.usuario_xtream || "" : account.correo || "";
   const contrasena = account.contraseña || "";
   const plataformaUrl = getPlataformaUrl(account.plataforma);
@@ -209,9 +211,15 @@ function AccountDetailsPanel({
       </div>
 
       <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-background/50 p-3.5">
-        <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold", getPlatformColorClasses(colorKey).badge)}>
-          {initials}
-        </div>
+        {logo ? (
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border/40 bg-white p-1">
+            <Image src={logo} alt={plataforma?.label ?? ""} fill className="object-contain p-1" />
+          </div>
+        ) : (
+          <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold", getPlatformColorClasses(colorKey).badge)}>
+            {initials}
+          </div>
+        )}
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">{plataforma?.label ?? account.plataforma}</p>
           <p className="truncate text-xs text-muted-foreground">

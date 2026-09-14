@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useOptimistic } from "react";
+import Image from "next/image";
 import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle, Check, Copy, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { MONEDA, getPlataformaByValue, getPlatformColorClasses, isIptv } from "@/lib/constants";
+import { MONEDA, getPlataformaByValue, getPlataformaLogo, getPlatformColorClasses, isIptv } from "@/lib/constants";
 import {
   generateWelcomeMessage,
   generatePasswordUpdateMessage,
@@ -192,6 +193,7 @@ function DetailsPanel({
   const phone = getWhatsAppPhone(sub);
   const clientName = getClientName(sub);
   const initials = (plataforma?.label ?? "N/A").split(" ")[0].slice(0, 3).toUpperCase();
+  const logo = sub.accounts ? getPlataformaLogo(sub.accounts.plataforma) : null;
   const days = getDaysUntilExpiry(sub.fecha_vencimiento);
 
   return (
@@ -204,9 +206,15 @@ function DetailsPanel({
       </div>
 
       <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-background/50 p-3.5">
-        <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold", getPlatformColorClasses(colorKey).badge)}>
-          {initials}
-        </div>
+        {logo ? (
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border/40 bg-white p-1">
+            <Image src={logo} alt={plataforma?.label ?? ""} fill className="object-contain p-1" />
+          </div>
+        ) : (
+          <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold", getPlatformColorClasses(colorKey).badge)}>
+            {initials}
+          </div>
+        )}
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">{sub.nombre_perfil}</p>
           <p className="truncate text-xs text-muted-foreground">
