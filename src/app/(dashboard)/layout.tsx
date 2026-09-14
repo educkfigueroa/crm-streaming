@@ -2,7 +2,6 @@ import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { SidebarProvider } from "@/components/shared/SidebarContext";
 import { SwipeSidebar } from "@/components/shared/SwipeSidebar";
-import { LazyChatAssistant } from "@/components/ai/LazyChatAssistant";
 import { ViewTransition } from "react";
 import { ServiceWorkerRegistrar } from "@/components/notifications/ServiceWorkerRegistrar";
 import { PushPermissionDialog } from "@/components/notifications/PushPermissionDialog";
@@ -42,7 +41,6 @@ export default function DashboardLayout({
           </div>
         </div>
       </SwipeSidebar>
-      <LazyChatAssistant />
       <Toaster position="bottom-right" richColors />
     </SidebarProvider>
   );
