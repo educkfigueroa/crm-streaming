@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useOptimistic } from "react";
+import { Fragment, useMemo, useState, useOptimistic } from "react";
 import Image from "next/image";
 import { Trash2, Edit, RotateCw, Send, Key, Bell, AlertTriangle, Check, Copy, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatDateOnly, parseDateOnly } from "@/lib/utils";
 import { MONEDA, getPlataformaByValue, getPlataformaLogo, getPlatformColorClasses, isIptv } from "@/lib/constants";
 import {
   generateWelcomeMessage,
@@ -74,9 +74,8 @@ function getStatusColor(estado: string) {
 function getDaysUntilExpiry(fechaVencimiento: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const expiry = new Date(fechaVencimiento);
-  expiry.setHours(0, 0, 0, 0);
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const expiry = parseDateOnly(fechaVencimiento);
+  return Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function getCalculatedEstado(fechaVencimiento: string): string {
@@ -99,7 +98,7 @@ function getCredenciales(sub: SubscriptionWithDetails): { correo: string; contra
 }
 
 function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString("es-PE");
+  return formatDateOnly(value);
 }
 
 function getClientName(sub: SubscriptionWithDetails): string {
@@ -354,6 +353,78 @@ export function SubscriptionsTable({
         : state
   );
 
+  const groups = useMemo(() => {
+    const order: string[] = [];
+    const map = new Map<string, SubscriptionWithDetails[]>();
+    for (const sub of optimisticSubscriptions) {
+      const name = sub.nombre_perfil || "Sin perfil";
+      if (!map.has(name)) {
+        map.set(name, []);
+        order.push(name);
+      }
+      map.get(name)!.push(sub);
+    }
+
+    const result: Array<{
+      name: string;
+      items: SubscriptionWithDetails[];
+      minDays: number;
+      minDate: string;
+      worstEstado: string;
+      plataformas: Array<{ label: string; color?: string }>;
+    }> = [];
+
+    for (const name of order) {
+      const items = map.get(name)!;
+      let minDays = Infinity;
+      let minDate = items[0]?.fecha_vencimiento || "";
+      for (const sub of items) {
+        const days = getDaysUntilExpiry(sub.fecha_vencimiento);
+        if (days < minDays) {
+          minDays = days;
+          minDate = sub.fecha_vencimiento;
+        }
+      }
+      const plataformas = Array.from(
+        new Map(
+          items.map((sub) => {
+            const value = sub.accounts?.plataforma || "N/A";
+            const pf = getPlataformaByValue(sub.accounts?.plataforma || "");
+            return [value, pf] as const;
+          })
+        ).values()
+      ).flatMap((pf) => (pf ? [{ label: pf.label, color: pf.color }] : []));
+
+      result.push({
+        name,
+        items,
+        minDays,
+        minDate,
+        worstEstado: getCalculatedEstado(minDate),
+        plataformas,
+      });
+    }
+
+    return result.sort((a, b) => a.minDays - b.minDays || a.name.localeCompare(b.name));
+  }, [optimisticSubscriptions]);
+
+  const [collapsedProfiles, setCollapsedProfiles] = useState<Set<string>>(new Set());
+
+  const toggleProfile = (name: string) => {
+    setCollapsedProfiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+
+  const expandAll = () => setCollapsedProfiles(new Set());
+
+  const collapseAll = () => {
+    setCollapsedProfiles(new Set(groups.map((g) => g.name)));
+  };
+
   const activeId =
     selectedId && optimisticSubscriptions.some((s) => s.id === selectedId)
       ? selectedId
@@ -462,6 +533,30 @@ export function SubscriptionsTable({
               plataformas={plataformas}
             />
 
+            {/* Group toolbar */}
+            <div className="flex items-center justify-between gap-2 px-1">
+              <p className="text-xs text-muted-foreground">
+                {groups.length} {groups.length === 1 ? "grupo" : "grupos"} · {optimisticSubscriptions.length}{" "}
+                {optimisticSubscriptions.length === 1 ? "suscripción" : "suscripciones"}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={expandAll}
+                  className="h-7 px-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  Expandir todo
+                </button>
+                <button
+                  type="button"
+                  onClick={collapseAll}
+                  className="h-7 px-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  Colapsar todo
+                </button>
+              </div>
+            </div>
+
             {/* Desktop table */}
           <div className="hidden lg:block rounded-xl overflow-hidden bg-card border border-border">
             <div className="overflow-x-auto">
@@ -475,42 +570,196 @@ export function SubscriptionsTable({
                   </TableRow>
                 </TableHeader>
                 <TableBody className="stagger-children">
-                  {optimisticSubscriptions.map((sub) => {
-                    const plataforma = sub.accounts
-                      ? getPlataformaByValue(sub.accounts.plataforma)
-                      : null;
-                    const days = getDaysUntilExpiry(sub.fecha_vencimiento);
-                    const isActive = activeSub?.id === sub.id;
-
+                  {groups.map((group) => {
+                    const expanded = !collapsedProfiles.has(group.name);
                     return (
-                      <TableRow
-                        key={sub.id}
-                        onClick={() => openDetails(sub, false)}
-                        className={cn(
-                          "border-b border-border transition-all duration-200 cursor-pointer",
-                          isActive
-                            ? "bg-emerald-500/5 hover:bg-emerald-500/10"
-                            : "hover:bg-accent/30"
-                        )}
-                      >
-                        <TableCell className="py-1">
+                      <Fragment key={group.name}>
+                        <TableRow
+                          onClick={() => toggleProfile(group.name)}
+                          className="border-b border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                        >
+                          <TableCell colSpan={4} className="py-1.5 px-3">
+                            <div className="flex items-center gap-2">
+                              <ChevronRight
+                                className={cn(
+                                  "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                                  expanded && "rotate-90"
+                                )}
+                              />
+                              <span className="font-semibold text-sm text-foreground">{group.name}</span>
+                              <Badge variant="secondary" className="text-[10px] shrink-0">
+                                {group.items.length} {group.items.length === 1 ? "perfil" : "perfiles"}
+                              </Badge>
+                              <div className="hidden md:flex items-center gap-1 min-w-0">
+                                {group.plataformas.map((p) => (
+                                  <Badge
+                                    key={p.label}
+                                    variant="secondary"
+                                    className={`${getPlatformColorClasses(p.color ?? "slate").badge} font-medium text-[10px] shrink-0`}
+                                  >
+                                    {p.label}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="ml-auto flex items-center gap-2 shrink-0">
+                                <span className="text-[11px] text-muted-foreground hidden md:inline">
+                                  Vence {formatDate(group.minDate)}
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className={`${getStatusColor(group.worstEstado)} text-[10px] shrink-0`}
+                                >
+                                  {group.worstEstado}
+                                </Badge>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                        {expanded &&
+                          group.items.map((sub) => {
+                            const plataforma = sub.accounts
+                              ? getPlataformaByValue(sub.accounts.plataforma)
+                              : null;
+                            const days = getDaysUntilExpiry(sub.fecha_vencimiento);
+                            const isActive = activeSub?.id === sub.id;
+
+                            return (
+                              <TableRow
+                                key={sub.id}
+                                onClick={() => openDetails(sub, false)}
+                                className={cn(
+                                  "border-b border-border transition-all duration-200 cursor-pointer",
+                                  isActive
+                                    ? "bg-emerald-500/5 hover:bg-emerald-500/10"
+                                    : "hover:bg-accent/30"
+                                )}
+                              >
+                                <TableCell className="py-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <Badge
+                                      variant="secondary"
+                                      className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px] shrink-0`}
+                                    >
+                                      {plataforma?.label || sub.accounts?.plataforma || "N/A"}
+                                    </Badge>
+                                    <span className="font-medium text-foreground text-xs">
+                                      {sub.nombre_perfil}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-1">
+                                  <span className="text-foreground text-xs">{getClientName(sub)}</span>
+                                </TableCell>
+                                <TableCell className="py-1">
+                                  <div>
+                                    <span
+                                      className={cn(
+                                        "text-xs font-medium",
+                                        days <= 0
+                                          ? "text-red-500 dark:text-red-400"
+                                          : days <= 5
+                                            ? "text-amber-500 dark:text-amber-400"
+                                            : "text-foreground"
+                                      )}
+                                    >
+                                      {formatDate(sub.fecha_vencimiento)}
+                                    </span>
+                                    <p
+                                      className={cn(
+                                        "text-[10px]",
+                                        days <= 0
+                                          ? "text-red-500 dark:text-red-400"
+                                          : days <= 5
+                                            ? "text-amber-500 dark:text-amber-400"
+                                            : "text-muted-foreground"
+                                      )}
+                                    >
+                                      {days <= 0 ? "Vencido" : `${days} días`}
+                                    </p>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-1">
+                                  <Badge
+                                    variant="outline"
+                                    className={`${getStatusColor(sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento))} text-[10px]`}
+                                  >
+                                    {sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento)}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </Fragment>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="lg:hidden space-y-2">
+            {groups.map((group) => {
+              const expanded = !collapsedProfiles.has(group.name);
+              return (
+                <Fragment key={group.name}>
+                  <button
+                    type="button"
+                    onClick={() => toggleProfile(group.name)}
+                    className="w-full flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-muted/40 text-left transition-colors"
+                  >
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                        expanded && "rotate-90"
+                      )}
+                    />
+                    <span className="font-semibold text-foreground text-xs truncate">{group.name}</span>
+                    <Badge variant="secondary" className="text-[10px] shrink-0">
+                      {group.items.length}
+                    </Badge>
+                    <span className="ml-auto flex items-center gap-1.5 shrink-0">
+                      <span className="text-[11px] text-muted-foreground">{formatDate(group.minDate)}</span>
+                      <Badge variant="outline" className={`${getStatusColor(group.worstEstado)} text-[10px]`}>
+                        {group.worstEstado}
+                      </Badge>
+                    </span>
+                  </button>
+                  {expanded &&
+                    group.items.map((sub) => {
+                      const plataforma = sub.accounts
+                        ? getPlataformaByValue(sub.accounts.plataforma)
+                        : null;
+                      const colorKey = plataforma?.color ?? "slate";
+                      const days = getDaysUntilExpiry(sub.fecha_vencimiento);
+
+                      return (
+                        <div
+                          key={sub.id}
+                          onClick={() => openDetails(sub, true)}
+                          className="rounded-xl p-3 bg-card border border-border/50 active:scale-[0.99] transition-all duration-150 cursor-pointer"
+                        >
                           <div className="flex items-center gap-1.5">
                             <Badge
                               variant="secondary"
-                              className={`${getPlatformColorClasses(plataforma?.color ?? "slate").badge} font-medium text-[10px] shrink-0`}
+                              className={`${getPlatformColorClasses(colorKey).badge} font-medium text-[10px] shrink-0`}
                             >
                               {plataforma?.label || sub.accounts?.plataforma || "N/A"}
                             </Badge>
-                            <span className="font-medium text-foreground text-xs">
+                            <span className="font-medium text-foreground text-xs truncate">
                               {sub.nombre_perfil}
                             </span>
+                            <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           </div>
-                        </TableCell>
-                        <TableCell className="py-1">
-                          <span className="text-foreground text-xs">{getClientName(sub)}</span>
-                        </TableCell>
-                        <TableCell className="py-1">
-                          <div>
+                          <div className="flex items-center justify-between gap-2 mt-1.5">
+                            <span className="text-[11px] text-muted-foreground truncate">
+                              {getClientName(sub)}
+                            </span>
+                            <span className="text-[11px] font-semibold text-foreground shrink-0">
+                              {sub.precio_cobrado ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}` : "-"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-2 mt-1">
                             <span
                               className={cn(
                                 "text-xs font-medium",
@@ -522,96 +771,21 @@ export function SubscriptionsTable({
                               )}
                             >
                               {formatDate(sub.fecha_vencimiento)}
+                              <span className="text-[10px] text-muted-foreground ml-1">
+                                {days <= 0 ? "· Vencido" : `· ${days} días`}
+                              </span>
                             </span>
-                            <p
-                              className={cn(
-                                "text-[10px]",
-                                days <= 0
-                                  ? "text-red-500 dark:text-red-400"
-                                  : days <= 5
-                                    ? "text-amber-500 dark:text-amber-400"
-                                    : "text-muted-foreground"
-                              )}
+                            <Badge
+                              variant="outline"
+                              className={`${getStatusColor(sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento))} text-[10px] shrink-0`}
                             >
-                              {days <= 0 ? "Vencido" : `${days} días`}
-                            </p>
+                              {sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento)}
+                            </Badge>
                           </div>
-                        </TableCell>
-                        <TableCell className="py-1">
-                          <Badge
-                            variant="outline"
-                            className={`${getStatusColor(sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento))} text-[10px]`}
-                          >
-                            {sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento)}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="lg:hidden space-y-2">
-            {optimisticSubscriptions.map((sub) => {
-              const plataforma = sub.accounts
-                ? getPlataformaByValue(sub.accounts.plataforma)
-                : null;
-              const colorKey = plataforma?.color ?? "slate";
-              const days = getDaysUntilExpiry(sub.fecha_vencimiento);
-
-              return (
-                <div
-                  key={sub.id}
-                  onClick={() => openDetails(sub, true)}
-                  className="rounded-xl p-3 bg-card border border-border/50 active:scale-[0.99] transition-all duration-150 cursor-pointer"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <Badge
-                      variant="secondary"
-                      className={`${getPlatformColorClasses(colorKey).badge} font-medium text-[10px] shrink-0`}
-                    >
-                      {plataforma?.label || sub.accounts?.plataforma || "N/A"}
-                    </Badge>
-                    <span className="font-medium text-foreground text-xs truncate">
-                      {sub.nombre_perfil}
-                    </span>
-                    <ChevronRight className="ml-auto h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  </div>
-                  <div className="flex items-center justify-between gap-2 mt-1.5">
-                    <span className="text-[11px] text-muted-foreground truncate">
-                      {getClientName(sub)}
-                    </span>
-                    <span className="text-[11px] font-semibold text-foreground shrink-0">
-                      {sub.precio_cobrado ? `${MONEDA} ${sub.precio_cobrado.toFixed(2)}` : "-"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2 mt-1">
-                    <span
-                      className={cn(
-                        "text-xs font-medium",
-                        days <= 0
-                          ? "text-red-500 dark:text-red-400"
-                          : days <= 5
-                            ? "text-amber-500 dark:text-amber-400"
-                            : "text-foreground"
-                      )}
-                    >
-                      {formatDate(sub.fecha_vencimiento)}
-                      <span className="text-[10px] text-muted-foreground ml-1">
-                        {days <= 0 ? "· Vencido" : `· ${days} días`}
-                      </span>
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={`${getStatusColor(sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento))} text-[10px] shrink-0`}
-                    >
-                      {sub.estadoCalculado || getCalculatedEstado(sub.fecha_vencimiento)}
-                    </Badge>
-                  </div>
-                </div>
+                        </div>
+                      );
+                    })}
+                </Fragment>
               );
             })}
           </div>
