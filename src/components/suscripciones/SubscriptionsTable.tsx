@@ -126,13 +126,37 @@ function GroupActionButtons({
   onWhatsApp,
 }: {
   group: SubscriptionGroup;
-  onRenew: (id: string) => void;
+  onRenew: (ids: string[]) => void;
   onWhatsApp: (url: string) => void;
 }) {
-  const target = group.target;
-  const phone = getWhatsAppPhone(target);
+  const withPhone = group.items.filter((sub) => getWhatsAppPhone(sub));
+  const hasPhone = withPhone.length > 0;
   const cls =
     "h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors shrink-0";
+
+  const sendCredentials = () => {
+    withPhone.forEach((sub) =>
+      onWhatsApp(getWhatsAppUrl(getWhatsAppPhone(sub), generateWelcomeMessage(sub)))
+    );
+  };
+
+  const renewAll = () => {
+    onRenew(group.items.map((sub) => sub.id));
+  };
+
+  const sendExpiryNotice = () => {
+    const byPhone = new Map<string, SubscriptionWithDetails[]>();
+    for (const sub of group.items) {
+      const phone = getWhatsAppPhone(sub);
+      if (!phone) continue;
+      if (!byPhone.has(phone)) byPhone.set(phone, []);
+      byPhone.get(phone)!.push(sub);
+    }
+    byPhone.forEach((subs, phone) =>
+      onWhatsApp(getWhatsAppUrl(phone, generateExpiryNoticeMessage(subs)))
+    );
+  };
+
   return (
     <div
       className="flex items-center gap-0.5 shrink-0"
@@ -141,22 +165,16 @@ function GroupActionButtons({
       <button
         type="button"
         title="Enviar credenciales"
-        disabled={!phone}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (phone) onWhatsApp(getWhatsAppUrl(phone, generateWelcomeMessage(target)));
-        }}
-        className={cn(cls, !phone && "opacity-40 pointer-events-none")}
+        disabled={!hasPhone}
+        onClick={sendCredentials}
+        className={cn(cls, !hasPhone && "opacity-40 pointer-events-none")}
       >
         <Send className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
       </button>
       <button
         type="button"
         title="Renovar"
-        onClick={(e) => {
-          e.stopPropagation();
-          onRenew(target.id);
-        }}
+        onClick={renewAll}
         className={cls}
       >
         <RotateCw className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
@@ -164,12 +182,9 @@ function GroupActionButtons({
       <button
         type="button"
         title="Aviso de vencimiento"
-        disabled={!phone}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (phone) onWhatsApp(getWhatsAppUrl(phone, generateExpiryNoticeMessage(group.items)));
-        }}
-        className={cn(cls, !phone && "opacity-40 pointer-events-none")}
+        disabled={!hasPhone}
+        onClick={sendExpiryNotice}
+        className={cn(cls, !hasPhone && "opacity-40 pointer-events-none")}
       >
         <AlertTriangle className="h-3.5 w-3.5 text-orange-500 dark:text-orange-400" />
       </button>
@@ -411,7 +426,7 @@ export function SubscriptionsTable({
   const [formOpen, setFormOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [renewDialogOpen, setRenewDialogOpen] = useState(false);
-  const [renewTargetId, setRenewTargetId] = useState<string | null>(null);
+  const [renewTargetIds, setRenewTargetIds] = useState<string[]>([]);
   const [renewMonths, setRenewMonths] = useState(1);
   const [optimisticSubscriptions, dispatchOptimistic] = useOptimistic(
     subscriptions,
@@ -515,26 +530,49 @@ export function SubscriptionsTable({
     }
   };
 
-  const handleRenew = (id: string) => {
-    setRenewTargetId(id);
+  const handleRenew = (id: string | string[]) => {
+    setRenewTargetIds(Array.isArray(id) ? id : [id]);
     setRenewMonths(1);
     setRenewDialogOpen(true);
   };
 
   const confirmRenew = async () => {
-    if (!renewTargetId) return;
-    const result = await renewSubscription(renewTargetId, renewMonths);
-    if (result.error) {
-      toast.error(result.error);
-    } else {
+    if (renewTargetIds.length === 0) return;
+    const results: { error?: string; success?: boolean; newExpiry?: string }[] = [];
+    for (const id of renewTargetIds) {
+      results.push(await renewSubscription(id, renewMonths));
+    }
+    const ok = results.filter((r) => r.success && !r.error);
+    const errors = results.filter((r) => r.error);
+    if (results.length === 1) {
+      const r = results[0];
+      if (r.error) {
+        toast.error(r.error);
+      } else {
+        toast.success(
+          r.newExpiry
+            ? `Suscripción renovada con éxito 🎉 Nueva fecha de vencimiento: ${formatDate(r.newExpiry)} ✅`
+            : `Suscripción renovada por ${renewMonths} ${renewMonths === 1 ? "mes" : "meses"} ✅`
+        );
+      }
+    } else if (ok.length > 0) {
+      const nexts = ok.map((r) => r.newExpiry || "").filter(Boolean);
+      const nearest = nexts.length
+        ? nexts.reduce((a, b) => (a < b ? a : b))
+        : null;
       toast.success(
-        result.newExpiry
-          ? `Suscripción renovada con éxito 🎉 Nueva fecha de vencimiento: ${formatDate(result.newExpiry)} ✅`
-          : `Suscripción renovada por ${renewMonths} ${renewMonths === 1 ? "mes" : "meses"} ✅`
+        nearest
+          ? `${ok.length} suscripciones renovadas con éxito 🎉 Próximo vencimiento: ${formatDate(nearest)} ✅`
+          : `${ok.length} suscripciones renovadas con éxito 🎉`
       );
+      if (errors.length > 0) {
+        toast.error(`${errors.length} no pudieron renovarse`);
+      }
+    } else {
+      toast.error(errors[0]?.error || "Error al renovar las suscripciones");
     }
     setRenewDialogOpen(false);
-    setRenewTargetId(null);
+    setRenewTargetIds([]);
     onDataChange?.();
   };
 
@@ -907,7 +945,9 @@ export function SubscriptionsTable({
       <Dialog open={renewDialogOpen} onOpenChange={setRenewDialogOpen}>
         <DialogContent className="max-w-sm bg-popover border border-border">
           <DialogHeader>
-            <DialogTitle className="text-foreground text-lg font-semibold">Renovar Suscripción</DialogTitle>
+            <DialogTitle className="text-foreground text-lg font-semibold">
+              {renewTargetIds.length > 1 ? `Renovar ${renewTargetIds.length} suscripciones` : "Renovar Suscripción"}
+            </DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Selecciona el período de renovación
             </DialogDescription>
