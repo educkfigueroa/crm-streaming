@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Subscription, SubscriptionWithDetails } from "@/types";
 import { sendExpirationNotification } from "./push";
-import { calcularEstado, formatDateOnly, isUUID, parseDateOnly, todayDateOnly } from "@/lib/utils";
+import { calcularEstado, isUUID, parseDateOnly, todayDateOnly } from "@/lib/utils";
 
 function addOneMonth(dateStr: string): string {
   const date = parseDateOnly(dateStr);
@@ -185,7 +185,7 @@ export async function renewSubscription(
   const newStart = baseDate;
   const newDate = parseDateOnly(baseDate);
   newDate.setMonth(newDate.getMonth() + months);
-  const newExpiry = formatDateOnly(`${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}-${String(newDate.getDate()).padStart(2, "0")}`);
+  const newExpiry = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}-${String(newDate.getDate()).padStart(2, "0")}`;
 
   const { error } = await supabase
     .from("subscriptions")
