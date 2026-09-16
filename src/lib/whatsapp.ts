@@ -125,6 +125,22 @@ export function generateExpiryMessage(sub: SubscriptionWithDetails): string {
   return message;
 }
 
+export function generateExpiryNoticeMessage(subs: SubscriptionWithDetails[]): string {
+  const clientName = getClientName(subs[0]);
+  const lines = subs
+    .map((sub) => {
+      const platform = getPlatformName(sub);
+      const date = formatDateOnly(sub.fecha_vencimiento, "es-PE", {
+        day: "numeric",
+        month: "long",
+      });
+      return `• ${platform} (${sub.nombre_perfil}): ${date}`;
+    })
+    .join("\n");
+
+  return `Hola ${clientName} 😊\n\n🔔 Te recordamos que vencieron las suscripciones de:\n\n${lines}\n\nSi deseas renovarlas, escríbenos. ✅`;
+}
+
 export function getWhatsAppUrl(phone: string, message: string): string {
   const cleaned = phone.replace(/\D/g, "");
   const encodedMessage = encodeURIComponent(message);

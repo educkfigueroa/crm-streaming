@@ -34,6 +34,7 @@ import {
   generatePasswordUpdateMessage,
   generateRenewalMessage,
   generateExpiryMessage,
+  generateExpiryNoticeMessage,
   getWhatsAppUrl,
 } from "@/lib/whatsapp";
 import { SubscriptionForm } from "./SubscriptionForm";
@@ -107,6 +108,73 @@ function getClientName(sub: SubscriptionWithDetails): string {
 
 function getWhatsAppPhone(sub: SubscriptionWithDetails): string {
   return (sub.clients as { whatsapp?: string })?.whatsapp || "";
+}
+
+interface SubscriptionGroup {
+  name: string;
+  items: SubscriptionWithDetails[];
+  target: SubscriptionWithDetails;
+  minDays: number;
+  minDate: string;
+  worstEstado: string;
+  plataformas: Array<{ label: string; color?: string }>;
+}
+
+function GroupActionButtons({
+  group,
+  onRenew,
+  onWhatsApp,
+}: {
+  group: SubscriptionGroup;
+  onRenew: (id: string) => void;
+  onWhatsApp: (url: string) => void;
+}) {
+  const target = group.target;
+  const phone = getWhatsAppPhone(target);
+  const cls =
+    "h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors shrink-0";
+  return (
+    <div
+      className="flex items-center gap-0.5 shrink-0"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        title="Enviar credenciales"
+        disabled={!phone}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (phone) onWhatsApp(getWhatsAppUrl(phone, generateWelcomeMessage(target)));
+        }}
+        className={cn(cls, !phone && "opacity-40 pointer-events-none")}
+      >
+        <Send className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
+      </button>
+      <button
+        type="button"
+        title="Renovar"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRenew(target.id);
+        }}
+        className={cls}
+      >
+        <RotateCw className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
+      </button>
+      <button
+        type="button"
+        title="Aviso de vencimiento"
+        disabled={!phone}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (phone) onWhatsApp(getWhatsAppUrl(phone, generateExpiryNoticeMessage(group.items)));
+        }}
+        className={cn(cls, !phone && "opacity-40 pointer-events-none")}
+      >
+        <AlertTriangle className="h-3.5 w-3.5 text-orange-500 dark:text-orange-400" />
+      </button>
+    </div>
+  );
 }
 
 /* ---------- Detalles (panel desktop y sheet mobile) ---------- */
@@ -365,24 +433,19 @@ export function SubscriptionsTable({
       map.get(name)!.push(sub);
     }
 
-    const result: Array<{
-      name: string;
-      items: SubscriptionWithDetails[];
-      minDays: number;
-      minDate: string;
-      worstEstado: string;
-      plataformas: Array<{ label: string; color?: string }>;
-    }> = [];
+    const result: SubscriptionGroup[] = [];
 
     for (const name of order) {
       const items = map.get(name)!;
       let minDays = Infinity;
       let minDate = items[0]?.fecha_vencimiento || "";
+      let target = items[0];
       for (const sub of items) {
         const days = getDaysUntilExpiry(sub.fecha_vencimiento);
         if (days < minDays) {
           minDays = days;
           minDate = sub.fecha_vencimiento;
+          target = sub;
         }
       }
       const plataformas = Array.from(
@@ -398,6 +461,7 @@ export function SubscriptionsTable({
       result.push({
         name,
         items,
+        target,
         minDays,
         minDate,
         worstEstado: getCalculatedEstado(minDate),
@@ -463,7 +527,11 @@ export function SubscriptionsTable({
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success(`Suscripción renovada por ${renewMonths} ${renewMonths === 1 ? "mes" : "meses"}`);
+      toast.success(
+        result.newExpiry
+          ? `Suscripción renovada con éxito 🎉 Nueva fecha de vencimiento: ${formatDate(result.newExpiry)} ✅`
+          : `Suscripción renovada por ${renewMonths} ${renewMonths === 1 ? "mes" : "meses"} ✅`
+      );
     }
     setRenewDialogOpen(false);
     setRenewTargetId(null);
@@ -572,50 +640,54 @@ export function SubscriptionsTable({
                 <TableBody className="stagger-children">
                   {groups.map((group) => {
                     const expanded = !collapsedProfiles.has(group.name);
+                    const single = group.items.length === 1;
                     return (
                       <Fragment key={group.name}>
-                        <TableRow
-                          onClick={() => toggleProfile(group.name)}
-                          className="border-b border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
-                        >
-                          <TableCell colSpan={4} className="py-1.5 px-3">
-                            <div className="flex items-center gap-2">
-                              <ChevronRight
-                                className={cn(
-                                  "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
-                                  expanded && "rotate-90"
-                                )}
-                              />
-                              <span className="font-semibold text-sm text-foreground">{group.name}</span>
-                              <Badge variant="secondary" className="text-[10px] shrink-0">
-                                {group.items.length} {group.items.length === 1 ? "perfil" : "perfiles"}
-                              </Badge>
-                              <div className="hidden md:flex items-center gap-1 min-w-0">
-                                {group.plataformas.map((p) => (
-                                  <Badge
-                                    key={p.label}
-                                    variant="secondary"
-                                    className={`${getPlatformColorClasses(p.color ?? "slate").badge} font-medium text-[10px] shrink-0`}
-                                  >
-                                    {p.label}
-                                  </Badge>
-                                ))}
-                              </div>
-                              <div className="ml-auto flex items-center gap-2 shrink-0">
-                                <span className="text-[11px] text-muted-foreground hidden md:inline">
-                                  Vence {formatDate(group.minDate)}
-                                </span>
-                                <Badge
-                                  variant="outline"
-                                  className={`${getStatusColor(group.worstEstado)} text-[10px] shrink-0`}
-                                >
-                                  {group.worstEstado}
+                        {!single && (
+                          <TableRow
+                            onClick={() => toggleProfile(group.name)}
+                            className="border-b border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                          >
+                            <TableCell colSpan={4} className="py-1.5 px-3">
+                              <div className="flex items-center gap-2">
+                                <ChevronRight
+                                  className={cn(
+                                    "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                                    expanded && "rotate-90"
+                                  )}
+                                />
+                                <span className="font-semibold text-sm text-foreground">{group.name}</span>
+                                <Badge variant="secondary" className="text-[10px] shrink-0">
+                                  {group.items.length} {group.items.length === 1 ? "perfil" : "perfiles"}
                                 </Badge>
+                                <div className="hidden md:flex items-center gap-1 min-w-0">
+                                  {group.plataformas.map((p) => (
+                                    <Badge
+                                      key={p.label}
+                                      variant="secondary"
+                                      className={`${getPlatformColorClasses(p.color ?? "slate").badge} font-medium text-[10px] shrink-0`}
+                                    >
+                                      {p.label}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <GroupActionButtons group={group} onRenew={handleRenew} onWhatsApp={openWhatsApp} />
+                                <div className="ml-auto flex items-center gap-2 shrink-0">
+                                  <span className="text-[11px] text-muted-foreground hidden md:inline">
+                                    Vence {formatDate(group.minDate)}
+                                  </span>
+                                  <Badge
+                                    variant="outline"
+                                    className={`${getStatusColor(group.worstEstado)} text-[10px] shrink-0`}
+                                  >
+                                    {group.worstEstado}
+                                  </Badge>
+                                </div>
                               </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                        {expanded &&
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {(single || expanded) &&
                           group.items.map((sub) => {
                             const plataforma = sub.accounts
                               ? getPlataformaByValue(sub.accounts.plataforma)
@@ -701,31 +773,37 @@ export function SubscriptionsTable({
           <div className="lg:hidden space-y-2">
             {groups.map((group) => {
               const expanded = !collapsedProfiles.has(group.name);
+              const single = group.items.length === 1;
               return (
                 <Fragment key={group.name}>
-                  <button
-                    type="button"
-                    onClick={() => toggleProfile(group.name)}
-                    className="w-full flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-muted/40 text-left transition-colors"
-                  >
-                    <ChevronRight
-                      className={cn(
-                        "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
-                        expanded && "rotate-90"
-                      )}
-                    />
-                    <span className="font-semibold text-foreground text-xs truncate">{group.name}</span>
-                    <Badge variant="secondary" className="text-[10px] shrink-0">
-                      {group.items.length}
-                    </Badge>
-                    <span className="ml-auto flex items-center gap-1.5 shrink-0">
-                      <span className="text-[11px] text-muted-foreground">{formatDate(group.minDate)}</span>
-                      <Badge variant="outline" className={`${getStatusColor(group.worstEstado)} text-[10px]`}>
-                        {group.worstEstado}
-                      </Badge>
-                    </span>
-                  </button>
-                  {expanded &&
+                  {!single && (
+                    <div className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-muted/40">
+                      <button
+                        type="button"
+                        onClick={() => toggleProfile(group.name)}
+                        className="flex items-center gap-1.5 min-w-0"
+                      >
+                        <ChevronRight
+                          className={cn(
+                            "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                            expanded && "rotate-90"
+                          )}
+                        />
+                        <span className="font-semibold text-foreground text-xs truncate">{group.name}</span>
+                        <Badge variant="secondary" className="text-[10px] shrink-0">
+                          {group.items.length}
+                        </Badge>
+                      </button>
+                      <div className="ml-auto flex items-center gap-1.5 shrink-0">
+                        <span className="text-[11px] text-muted-foreground">{formatDate(group.minDate)}</span>
+                        <Badge variant="outline" className={`${getStatusColor(group.worstEstado)} text-[10px]`}>
+                          {group.worstEstado}
+                        </Badge>
+                        <GroupActionButtons group={group} onRenew={handleRenew} onWhatsApp={openWhatsApp} />
+                      </div>
+                    </div>
+                  )}
+                  {(single || expanded) &&
                     group.items.map((sub) => {
                       const plataforma = sub.accounts
                         ? getPlataformaByValue(sub.accounts.plataforma)

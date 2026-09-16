@@ -15,6 +15,43 @@ if (vapidPublicKey && vapidPrivateKey) {
   );
 }
 
+async function broadcastPush(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  payload: string
+): Promise<{ success: boolean; sent?: number; error?: string }> {
+  const { data: subscriptions, error } = await supabase
+    .from("push_subscriptions")
+    .select("*");
+
+  if (error || !subscriptions?.length) {
+    return { success: false, error: "No hay suscripciones push registradas" };
+  }
+
+  let sent = 0;
+  for (const sub of subscriptions) {
+    try {
+      await webPush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        },
+        payload
+      );
+      sent++;
+    } catch (err: unknown) {
+      const statusCode = (err as { statusCode?: number }).statusCode;
+      if (statusCode === 410 || statusCode === 404) {
+        await supabase
+          .from("push_subscriptions")
+          .delete()
+          .eq("endpoint", sub.endpoint);
+      }
+    }
+  }
+
+  return { success: true, sent };
+}
+
 export async function sendExpirationNotification(
   clienteNombre: string,
   plataforma: string,
@@ -23,14 +60,6 @@ export async function sendExpirationNotification(
 ): Promise<{ success: boolean; sent?: number; error?: string }> {
   try {
     const supabase = await createClient();
-
-    const { data: subscriptions, error } = await supabase
-      .from("push_subscriptions")
-      .select("*");
-
-    if (error || !subscriptions?.length) {
-      return { success: false, error: "No hay suscripciones push registradas" };
-    }
 
     const diaStr = formatDateOnly(fechaVencimiento, "es-PE", {
       day: "numeric",
@@ -45,31 +74,38 @@ export async function sendExpirationNotification(
       icon: "/gstreaming.png",
     });
 
-    let sent = 0;
-    for (const sub of subscriptions) {
-      try {
-        await webPush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, auth: sub.auth },
-          },
-          payload
-        );
-        sent++;
-      } catch (err: unknown) {
-        const statusCode = (err as { statusCode?: number }).statusCode;
-        if (statusCode === 410 || statusCode === 404) {
-          await supabase
-            .from("push_subscriptions")
-            .delete()
-            .eq("endpoint", sub.endpoint);
-        }
-      }
-    }
-
-    return { success: true, sent };
+    return await broadcastPush(supabase, payload);
   } catch (error) {
     console.error("Error sending expiration notification:", error);
+    return { success: false, error: "Error al enviar notificación" };
+  }
+}
+
+export async function sendRenewalNotification(
+  clienteNombre: string,
+  plataforma: string,
+  fechaVencimiento: string
+): Promise<{ success: boolean; sent?: number; error?: string }> {
+  try {
+    const supabase = await createClient();
+
+    const fechaStr = formatDateOnly(fechaVencimiento, "es-PE", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }).replace(/,/g, "");
+
+    const payload = JSON.stringify({
+      title: "✅ Suscripción renovada",
+      body: `🎉 ¡La suscripción de ${clienteNombre} en ${plataforma} fue renovada con éxito!\n📅 Nueva fecha de vencimiento: ${fechaStr}.`,
+      url: "/",
+      tag: "renewal-success",
+      icon: "/gstreaming.png",
+    });
+
+    return await broadcastPush(supabase, payload);
+  } catch (error) {
+    console.error("Error sending renewal notification:", error);
     return { success: false, error: "Error al enviar notificación" };
   }
 }

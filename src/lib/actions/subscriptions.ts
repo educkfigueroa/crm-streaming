@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { Subscription, SubscriptionWithDetails } from "@/types";
-import { sendExpirationNotification } from "./push";
+import { sendExpirationNotification, sendRenewalNotification } from "./push";
 import { calcularEstado, isUUID, parseDateOnly, todayDateOnly } from "@/lib/utils";
 
 function addOneMonth(dateStr: string): string {
@@ -170,7 +170,7 @@ export async function updateSubscription(
 export async function renewSubscription(
   id: string,
   months: number = 1
-): Promise<{ error?: string; success?: boolean }> {
+): Promise<{ error?: string; success?: boolean; newExpiry?: string }> {
   const supabase = await createClient();
 
   const today = todayDateOnly();
@@ -208,10 +208,10 @@ export async function renewSubscription(
     const accountData = sub.accounts as unknown as { plataforma: string } | null;
     const clientName = clientData?.alias || clientData?.nombre_completo || "Cliente";
     const platform = accountData?.plataforma || "N/A";
-    sendExpirationNotification(clientName, platform, newExpiry);
+    sendRenewalNotification(clientName, platform, newExpiry);
   }
 
-  return { success: true };
+  return { success: true, newExpiry };
 }
 
 export async function deleteSubscription(
