@@ -2,6 +2,7 @@
 
 import webPush from "web-push";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateOnly, todayDateOnly } from "@/lib/utils";
 
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY!;
@@ -31,8 +32,7 @@ export async function sendExpirationNotification(
       return { success: false, error: "No hay suscripciones push registradas" };
     }
 
-    const fecha = new Date(fechaVencimiento);
-    const diaStr = fecha.toLocaleDateString("es-PE", {
+    const diaStr = formatDateOnly(fechaVencimiento, "es-PE", {
       day: "numeric",
       month: "long",
     });
@@ -82,12 +82,10 @@ export async function scheduleExpirationNotifications(): Promise<{
   try {
     const supabase = await createClient();
 
-    const hoy = new Date();
+    const hoyStr = todayDateOnly();
     const limite = new Date();
-    limite.setDate(hoy.getDate() + 2);
-
-    const hoyStr = hoy.toISOString().split("T")[0];
-    const limiteStr = limite.toISOString().split("T")[0];
+    limite.setDate(limite.getDate() + 2);
+    const limiteStr = `${limite.getFullYear()}-${String(limite.getMonth() + 1).padStart(2, "0")}-${String(limite.getDate()).padStart(2, "0")}`;
 
     const { data: subscriptions, error } = await supabase
       .from("subscriptions")

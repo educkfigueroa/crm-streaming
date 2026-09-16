@@ -5,6 +5,7 @@ import { createSubscription, updateSubscription } from "@/lib/actions/subscripti
 import { getClients } from "@/lib/actions/clients";
 import { getAccounts } from "@/lib/actions/accounts";
 import { ESTADOS_SUSCRIPCION, MONEDA, getPlataformaByValue, hasPin } from "@/lib/constants";
+import { parseDateOnly, todayDateOnly } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,9 +43,12 @@ interface ProfileEntry {
 }
 
 function addOneMonth(dateStr: string): string {
-  const date = new Date(dateStr);
+  const date = parseDateOnly(dateStr);
   date.setMonth(date.getMonth() + 1);
-  return date.toISOString().split("T")[0];
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 export function SubscriptionForm({ open, onOpenChange, subscription, defaultClienteId }: SubscriptionFormProps) {
@@ -58,7 +62,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   const [selectedIptvUrl, setSelectedIptvUrl] = useState(subscription?.cuenta_id || "");
   const [estado, setEstado] = useState(subscription?.estado || "Activo");
   const [fechaInicio, setFechaInicio] = useState(
-    subscription?.fecha_inicio || new Date().toISOString().split("T")[0]
+    subscription?.fecha_inicio || todayDateOnly()
   );
   const [fechaVencimiento, setFechaVencimiento] = useState(
     subscription?.fecha_vencimiento || ""
@@ -134,7 +138,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
   if (open !== prevOpen) {
     setPrevOpen(open);
     if (open) {
-      const today = new Date().toISOString().split("T")[0];
+      const today = todayDateOnly();
       setClienteId(subscription?.cliente_id || defaultClienteId || "");
       setPlatformType(isIptvEditing ? "iptv" : "streaming");
       setSelectedIptvUrl(subscription?.cuenta_id || "");
@@ -163,7 +167,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription, defaultClie
       setPlatformType(isIptvEditing ? "iptv" : "streaming");
       setSelectedIptvUrl("");
       setEstado("Activo");
-      const today = new Date().toISOString().split("T")[0];
+      const today = todayDateOnly();
       setFechaInicio(today);
       setFechaVencimiento(addOneMonth(today));
       setProfiles(isEditing

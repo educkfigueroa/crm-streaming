@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { SubscriptionWithDetails } from "@/types";
 import { getPlataformaByValue, getPlatformColorClasses } from "@/lib/constants";
+import { parseDateOnly } from "@/lib/utils";
 
 interface ExpirationCalendarProps {
   subscriptions: SubscriptionWithDetails[];
@@ -65,10 +66,10 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
   const expirationsByDay = useMemo(() => {
     const map = new Map<number, DayData>();
     for (const sub of subscriptions) {
-      const fecha = new Date(sub.fecha_vencimiento);
+      const fecha = parseDateOnly(sub.fecha_vencimiento);
       if (fecha.getMonth() === currentMonth && fecha.getFullYear() === currentYear) {
         const day = fecha.getDate();
-        const days = Math.ceil((fecha.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const days = Math.round((fecha.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         const clientName = getClientName(sub);
 
         if (!map.has(day)) {
@@ -193,7 +194,7 @@ export function ExpirationCalendar({ subscriptions }: ExpirationCalendarProps) {
           ) : (
             <div className="space-y-1.5">
               {selectedData.subs.map((sub) => {
-                const days = Math.ceil((new Date(sub.fecha_vencimiento).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                const days = Math.round((parseDateOnly(sub.fecha_vencimiento).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                 const plataforma = sub.accounts ? getPlataformaByValue(sub.accounts.plataforma) : null;
                 const colorKey = plataforma?.color ?? "slate";
 

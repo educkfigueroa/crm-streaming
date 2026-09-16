@@ -28,7 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatDateOnly, parseDateOnly } from "@/lib/utils";
 import { getPlataformaByValue, getPlataformaLogo, getPlatformColorClasses, MONEDA, isIptv, getPlataformaUrl } from "@/lib/constants";
 import { AccountForm } from "./AccountForm";
 import { AccountsFilterBar } from "./AccountsFilterBar";
@@ -57,9 +57,7 @@ function getProfileStatus(sub: Subscription): "active" | "expiring" | "expired" 
   if (sub.estado === "Activo") {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const vencimiento = new Date(sub.fecha_vencimiento);
-    vencimiento.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((vencimiento.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = getDaysUntilExpiry(sub.fecha_vencimiento);
     if (diffDays <= 0) return "expired";
     if (diffDays <= 7) return "expiring";
     return "active";
@@ -96,13 +94,12 @@ const PROFILE_BADGE: Record<string, string> = {
 function getDaysUntilExpiry(fechaVencimiento: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const expiry = new Date(fechaVencimiento);
-  expiry.setHours(0, 0, 0, 0);
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const expiry = parseDateOnly(fechaVencimiento);
+  return Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString("es-PE");
+function formatDate(value: string, options?: Intl.DateTimeFormatOptions): string {
+  return formatDateOnly(value, "es-PE", options);
 }
 
 /* ---------- Detalles (panel desktop y sheet mobile) ---------- */
@@ -486,11 +483,7 @@ export function AccountsTable({
 
   const getVencimientoColor = (fecha: string | null) => {
     if (!fecha) return "text-muted-foreground";
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const vencimiento = new Date(fecha);
-    vencimiento.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((vencimiento.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = getDaysUntilExpiry(fecha);
     if (diffDays <= 0) return "text-red-500 dark:text-red-400";
     if (diffDays <= 5) return "text-amber-500 dark:text-amber-400";
     return "text-emerald-500 dark:text-emerald-400";
@@ -663,7 +656,7 @@ export function AccountsTable({
                           </TableCell>
                           <TableCell className="py-1">
                             <span className={`font-medium text-sm ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
-                              {account.fecha_vencimiento_proveedor ? new Date(account.fecha_vencimiento_proveedor).toLocaleDateString("es-PE") : "-"}
+                              {account.fecha_vencimiento_proveedor ? formatDate(account.fecha_vencimiento_proveedor) : "-"}
                             </span>
                           </TableCell>
                           <TableCell className="text-right py-1">
@@ -815,7 +808,7 @@ export function AccountsTable({
                           {account.precio_costo ? `${MONEDA} ${account.precio_costo.toFixed(0)}` : ""}
                         </span>
                         <span className={`font-medium ${getVencimientoColor(account.fecha_vencimiento_proveedor)}`}>
-                          {account.fecha_vencimiento_proveedor ? new Date(account.fecha_vencimiento_proveedor).toLocaleDateString("es-PE", { day: "2-digit", month: "short" }) : ""}
+                          {account.fecha_vencimiento_proveedor ? formatDate(account.fecha_vencimiento_proveedor, { day: "2-digit", month: "short" }) : ""}
                         </span>
                       </div>
                     </div>

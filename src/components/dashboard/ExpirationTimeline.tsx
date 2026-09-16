@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Clock } from "lucide-react";
 import type { SubscriptionWithDetails } from "@/types";
 import { getPlataformaByValue, getPlatformColorClasses } from "@/lib/constants";
+import { formatDateOnly, parseDateOnly } from "@/lib/utils";
 
 interface ExpirationTimelineProps {
   subscriptions: SubscriptionWithDetails[];
@@ -10,9 +11,8 @@ interface ExpirationTimelineProps {
 function getDaysUntilExpiry(fechaVencimiento: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const expiry = new Date(fechaVencimiento);
-  expiry.setHours(0, 0, 0, 0);
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const expiry = parseDateOnly(fechaVencimiento);
+  return Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function getDotColor(days: number): string {
@@ -86,7 +86,7 @@ export function ExpirationTimeline({ subscriptions }: ExpirationTimelineProps) {
                     {days <= 0 ? "Hoy" : `${days}d`}
                   </p>
                   <p className="text-[10px] text-muted-foreground tabular-nums">
-                    {new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE", { day: "2-digit", month: "short" })}
+                    {formatDateOnly(sub.fecha_vencimiento, "es-PE", { day: "2-digit", month: "short" })}
                   </p>
                 </div>
               </div>

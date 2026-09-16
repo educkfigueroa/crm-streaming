@@ -1,4 +1,5 @@
 import { getPlataformaByValue, isIptv } from "./constants";
+import { formatDateOnly } from "./utils";
 import type { SubscriptionWithDetails } from "@/types";
 
 function getPlatformName(sub: SubscriptionWithDetails): string {
@@ -37,7 +38,7 @@ export function generateWelcomeMessage(sub: SubscriptionWithDetails): string {
   const platform = getPlatformName(sub);
   const credential = getCredential(sub);
   const password = getPassword(sub);
-  const fecha = new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE");
+  const fecha = formatDateOnly(sub.fecha_vencimiento);
 
   if (isIptvSub(sub)) {
     const serverUrl = getServerUrl(sub);
@@ -95,13 +96,11 @@ export function generatePasswordUpdateMessage(
 export function generateRenewalMessage(sub: SubscriptionWithDetails): string {
   const clientName = getClientName(sub);
   const platform = getPlatformName(sub);
-  const fecha = new Date(sub.fecha_vencimiento)
-    .toLocaleDateString("es-PE", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    })
-    .replace(/,/g, "");
+  const fecha = formatDateOnly(sub.fecha_vencimiento, "es-PE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).replace(/,/g, "");
 
   let message = `Hola ${clientName} 😊\n\n`;
   message += `Tu suscripción a *${platform}* vence el día *${fecha}* ⏰\n\n`;
@@ -113,13 +112,11 @@ export function generateRenewalMessage(sub: SubscriptionWithDetails): string {
 export function generateExpiryMessage(sub: SubscriptionWithDetails): string {
   const clientName = getClientName(sub);
   const platform = getPlatformName(sub);
-  const fecha = new Date(sub.fecha_vencimiento)
-    .toLocaleDateString("es-PE", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    })
-    .replace(/,/g, "");
+  const fecha = formatDateOnly(sub.fecha_vencimiento, "es-PE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).replace(/,/g, "");
 
   let message = `Hola ${clientName} 😊\n\n`;
   message += `Tu suscripción a *${platform}* ha vencido el día *${fecha}* ⏰\n\n`;

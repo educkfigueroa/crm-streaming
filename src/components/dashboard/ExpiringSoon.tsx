@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SubscriptionWithDetails } from "@/types";
 import { getPlataformaByValue, getPlatformColorClasses } from "@/lib/constants";
+import { formatDateOnly, parseDateOnly } from "@/lib/utils";
 
 interface ExpiringSoonProps {
   subscriptions: SubscriptionWithDetails[];
@@ -9,9 +10,8 @@ interface ExpiringSoonProps {
 function getDaysUntilExpiry(fechaVencimiento: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const expiry = new Date(fechaVencimiento);
-  expiry.setHours(0, 0, 0, 0);
-  return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const expiry = parseDateOnly(fechaVencimiento);
+  return Math.round((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function getExpiryColor(days: number): string {
@@ -68,7 +68,7 @@ export function ExpiringSoon({ subscriptions }: ExpiringSoonProps) {
                 {days <= 0 ? "Vencido" : days === 1 ? "1 día" : `${days} días`}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {new Date(sub.fecha_vencimiento).toLocaleDateString("es-PE", { day: "2-digit", month: "short" })}
+                {formatDateOnly(sub.fecha_vencimiento, "es-PE", { day: "2-digit", month: "short" })}
               </p>
             </div>
           </Link>

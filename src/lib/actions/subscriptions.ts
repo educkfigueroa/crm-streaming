@@ -3,12 +3,15 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Subscription, SubscriptionWithDetails } from "@/types";
 import { sendExpirationNotification } from "./push";
-import { calcularEstado, isUUID } from "@/lib/utils";
+import { calcularEstado, formatDateOnly, isUUID, parseDateOnly, todayDateOnly } from "@/lib/utils";
 
 function addOneMonth(dateStr: string): string {
-  const date = new Date(dateStr);
+  const date = parseDateOnly(dateStr);
   date.setMonth(date.getMonth() + 1);
-  return date.toISOString().split("T")[0];
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 export async function getSubscriptions(): Promise<SubscriptionWithDetails[]> {
@@ -67,7 +70,7 @@ export async function createSubscription(
   const cuentaId = formData.get("cuenta_id") as string;
   const nombrePerfil = formData.get("nombre_perfil") as string;
   const pinPerfil = formData.get("pin_perfil") as string || null;
-  const fechaInicio = formData.get("fecha_inicio") as string || new Date().toISOString().split("T")[0];
+  const fechaInicio = formData.get("fecha_inicio") as string || todayDateOnly();
   const fechaVencimiento = formData.get("fecha_vencimiento") as string || addOneMonth(fechaInicio);
   const precioCobrado = parseFloat(formData.get("precio_cobrado") as string) || null;
   const estado = calcularEstado(fechaVencimiento);
@@ -96,9 +99,9 @@ export async function createSubscription(
     return { error: "Error al crear la suscripción" };
   }
 
-  const vencimiento = new Date(fechaVencimiento);
+  const vencimiento = parseDateOnly(fechaVencimiento);
   const hoy = new Date();
-  const diffDays = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
   if (diffDays <= 2) {
     const { data: client } = await supabase
       .from("clients").select("nombre_completo, alias").eq("id", clienteId).single();
@@ -170,7 +173,7 @@ export async function renewSubscription(
 ): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayDateOnly();
 
   const { data: currentSub } = await supabase
     .from("subscriptions")
@@ -180,9 +183,9 @@ export async function renewSubscription(
 
   const baseDate = currentSub?.fecha_vencimiento || today;
   const newStart = baseDate;
-  const newDate = new Date(baseDate);
+  const newDate = parseDateOnly(baseDate);
   newDate.setMonth(newDate.getMonth() + months);
-  const newExpiry = newDate.toISOString().split("T")[0];
+  const newExpiry = formatDateOnly(`${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, "0")}-${String(newDate.getDate()).padStart(2, "0")}`);
 
   const { error } = await supabase
     .from("subscriptions")

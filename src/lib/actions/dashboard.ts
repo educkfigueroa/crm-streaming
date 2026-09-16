@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { calcularEstado } from "@/lib/utils";
+import { calcularEstado, parseDateOnly } from "@/lib/utils";
 import type { DashboardStats, SubscriptionWithDetails } from "@/types";
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -123,7 +123,7 @@ export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
 
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const startDate = sixMonthsAgo.toISOString().split("T")[0];
+  const startDate = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, "0")}-${String(sixMonthsAgo.getDate()).padStart(2, "0")}`;
 
   const [subsResult, cuentasResult] = await Promise.all([
     supabase
@@ -148,7 +148,7 @@ export async function getMonthlyRevenue(): Promise<MonthlyRevenue[]> {
 
   for (const sub of subsResult.data || []) {
     if (!sub.fecha_inicio || !sub.precio_cobrado) continue;
-    const date = new Date(sub.fecha_inicio);
+    const date = parseDateOnly(sub.fecha_inicio);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     const entry = monthlyMap.get(key);
     if (entry) entry.total += sub.precio_cobrado;
