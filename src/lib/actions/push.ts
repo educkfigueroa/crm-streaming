@@ -81,32 +81,48 @@ export async function sendExpirationNotification(
   }
 }
 
-export async function sendRenewalNotification(
-  clienteNombre: string,
-  plataforma: string,
-  fechaVencimiento: string
-): Promise<{ success: boolean; sent?: number; error?: string }> {
+export async function scheduleExpiredReminder(): Promise<{
+  success: boolean;
+  reminders?: number;
+  expired?: number;
+  error?: string;
+}> {
   try {
     const supabase = await createClient();
 
-    const fechaStr = formatDateOnly(fechaVencimiento, "es-PE", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    }).replace(/,/g, "");
+    const { count, error } = await supabase
+      .from("subscriptions")
+      .select("id", { count: "exact", head: true })
+      .lt("fecha_vencimiento", todayDateOnly());
+
+    if (error) {
+      console.error("Error counting expired subscriptions:", error);
+      return { success: false, error: "Error al contar suscripciones vencidas" };
+    }
+
+    const expired = count ?? 0;
+    if (expired === 0) {
+      return { success: true, reminders: 0, expired };
+    }
 
     const payload = JSON.stringify({
-      title: "✅ Suscripción renovada",
-      body: `🎉 ¡La suscripción de ${clienteNombre} en ${plataforma} fue renovada con éxito!\n📅 Nueva fecha de vencimiento: ${fechaStr}.`,
+      title: "🔴 Recordatorio de vencimientos",
+      body: `Tienes ${expired} ${expired === 1 ? "suscripción vencida" : "suscripciones vencidas"} 📅😱 ¡Revísalas y renueva hoy!`,
       url: "/",
-      tag: "renewal-success",
+      tag: "expired-reminder",
       icon: "/gstreaming.png",
     });
 
-    return await broadcastPush(supabase, payload);
+    const result = await broadcastPush(supabase, payload);
+    return {
+      success: result.success,
+      reminders: result.sent ?? 0,
+      expired,
+      error: result.error,
+    };
   } catch (error) {
-    console.error("Error sending renewal notification:", error);
-    return { success: false, error: "Error al enviar notificación" };
+    console.error("Error sending expired reminder:", error);
+    return { success: false, error: "Error al enviar recordatorio" };
   }
 }
 

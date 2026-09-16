@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { Subscription, SubscriptionWithDetails } from "@/types";
-import { sendExpirationNotification, sendRenewalNotification } from "./push";
+import { sendExpirationNotification } from "./push";
 import { calcularEstado, isUUID, parseDateOnly, todayDateOnly } from "@/lib/utils";
 
 function addOneMonth(dateStr: string): string {
@@ -200,15 +200,6 @@ export async function renewSubscription(
   if (error) {
     console.error("Error renewing subscription:", error);
     return { error: "Error al renovar la suscripción" };
-  }
-
-  const sub = await getSubscription(id);
-  if (sub) {
-    const clientData = sub.clients as unknown as { alias?: string; nombre_completo: string } | null;
-    const accountData = sub.accounts as unknown as { plataforma: string } | null;
-    const clientName = clientData?.alias || clientData?.nombre_completo || "Cliente";
-    const platform = accountData?.plataforma || "N/A";
-    sendRenewalNotification(clientName, platform, newExpiry);
   }
 
   return { success: true, newExpiry };
